@@ -41,19 +41,25 @@ public class InteractionZone : MonoBehaviour
         }
     }
 
-    private void TriggerAction()
+   [SerializeField] private GameObject quizPanelInstance;
+
+private void TriggerAction()
+{
+    switch (zoneType)
     {
-        switch (zoneType)
-        {
-            case ZoneType.StudentDesk:
-                Debug.Log(">> [Zone A]: Mở giao diện Chọn bài / Trắc nghiệm.");
-                break;
-            case ZoneType.TeacherPodium:
-                Debug.Log(">> [Zone B]: Mở giao diện Gia sư AI (Thầy Minh).");
-                break;
-            case ZoneType.NoticeBoard:
-                Debug.Log(">> [Zone C]: Mở Bảng tin Tiến độ & Huy hiệu.");
-                break;
-        }
+        case ZoneType.StudentDesk:
+            if (quizPanelInstance != null)
+            {
+                quizPanelInstance.SetActive(true);
+                quizPanelInstance.GetComponent<Math6Companion.UI.QuizUIController>()?.LoadQuizData("Integers", "6");
+            }
+            break;
+        case ZoneType.TeacherPodium:
+            Debug.Log(">> Mở AI Tutor (U-05)");
+            break;
+        case ZoneType.NoticeBoard:
+            Debug.Log(">> Mở Bảng tin (U-07)");
+            break;
     }
+}
 }

@@ -342,6 +342,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1024812013}
+  - {fileID: 1311738259}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -507,6 +508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractionZone
   zoneType: 1
   promptMessage: "Nh\u1EA5n [E] G\u1EB7p Th\u1EA7y Minh (AI)"
+  quizPanelInstance: {fileID: 0}
 --- !u!65 &747131957
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -653,6 +655,50 @@ Transform:
   - {fileID: 196859667}
   - {fileID: 1312203773}
   - {fileID: 839131530}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &816634099
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 816634101}
+  - component: {fileID: 816634100}
+  m_Layer: 0
+  m_Name: '[NetworkBootstrap]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &816634100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816634099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37ef9afecfd4e084b9e7012e295416a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Math6Companion.Core.Mock.MockNetworkService
+--- !u!4 &816634101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816634099}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &823921222
@@ -1170,6 +1216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractionZone
   zoneType: 2
   promptMessage: "Nh\u1EA5n [E] Xem Ti\u1EBFn \u0111\u1ED9 & Huy hi\u1EC7u"
+  quizPanelInstance: {fileID: 0}
 --- !u!65 &1292398337
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1248,6 +1295,16 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1292398334}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1311738255 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1365429343149695764, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+  m_PrefabInstance: {fileID: 2727547087491421693}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1311738259 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+  m_PrefabInstance: {fileID: 2727547087491421693}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1312203772
 GameObject:
   m_ObjectHideFlags: 0
@@ -1409,6 +1466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractionZone
   zoneType: 0
   promptMessage: "Nh\u1EA5n [E] \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c"
+  quizPanelInstance: {fileID: 1311738255}
 --- !u!65 &1375428996
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1869,6 +1927,103 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2034601035}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &2727547087491421693
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 326590267}
+    m_Modifications:
+    - target: {fileID: 1365429343149695764, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_Name
+      value: QuizPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 650
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375550707528835862, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 63465610e4dcaae4c87875c0962eee9b, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1880,3 +2035,4 @@ SceneRoots:
   - {fileID: 326590267}
   - {fileID: 1088256292}
   - {fileID: 793808335}
+  - {fileID: 816634101}
