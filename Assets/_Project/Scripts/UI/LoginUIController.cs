@@ -79,17 +79,26 @@ namespace Math6Companion.UI
                 {
                     ShowStatus("Đăng nhập thành công!", Color.green);
 
-                    // Lưu session học sinh/giáo viên vào PlayerPrefs
-                    PlayerPrefs.SetString("User_ID", userData.userId);
-                    PlayerPrefs.SetString("User_Username", userData.username);
-                    PlayerPrefs.SetString("User_FullName", userData.fullName);
-                    PlayerPrefs.SetString("User_Role", userData.role);
-                    PlayerPrefs.SetInt("User_Grade", userData.grade);
-                    PlayerPrefs.SetString("User_ClassId", userData.classId);
-                    PlayerPrefs.Save();
+                    // Đồng bộ phiên làm việc vào SessionManager
+                    if (Math6Companion.Core.SessionManager.Instance != null)
+                    {
+                        Math6Companion.Core.SessionManager.Instance.SetUserSession(userData);
+                    }
+                    else
+                    {
+                        // Dự phòng nếu mở trực tiếp Scene 01_Login mà không qua 00_Bootstrapper
+                        PlayerPrefs.SetString("User_ID", userData.userId);
+                        PlayerPrefs.SetString("User_Username", userData.username);
+                        PlayerPrefs.SetString("User_FullName", userData.fullName);
+                        PlayerPrefs.SetString("User_Role", userData.role);
+                        PlayerPrefs.SetInt("User_Grade", userData.grade);
+                        PlayerPrefs.SetString("User_ClassId", userData.classId);
+                        PlayerPrefs.SetString("User_Nickname", userData.nickname ?? userData.fullName ?? "Học sinh");
+                        PlayerPrefs.Save();
+                    }
 
-                    // Chuyển Scene sau khi đăng nhập
-                    SceneManager.LoadScene("02_Classroom");
+                    // Chuyển sang Main Menu theo kiến trúc mới
+                    SceneManager.LoadScene("02_MainMenu");
                 }
                 else
                 {

@@ -31,7 +31,8 @@ namespace Math6Companion.Core.Mock
                         fullName = "Co Mai",
                         role = "TEACHER",
                         grade = 6,
-                        classId = "6A1"
+                        classId = "6A1",
+                        nickname = "Cô Mai Toán"
                     }, "Success");
                 }
                 else
@@ -43,9 +44,60 @@ namespace Math6Companion.Core.Mock
                         fullName = "Em An",
                         role = "STUDENT",
                         grade = 6,
-                        classId = "6A1"
+                        classId = "6A1",
+                        nickname = "AnThầnĐồng"
                     }, "Success");
                 }
+            }));
+        }
+
+        public void GetLessons(string topic, Action<bool, List<LessonData>, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                var lessons = new List<LessonData>
+                {
+                    new LessonData
+                    {
+                        lessonId = "LES_INT_01",
+                        topic = "Integers",
+                        title = "Bài 1: Phép cộng và trừ số nguyên",
+                        description = "Quy tắc cộng trừ số nguyên cùng dấu và khác dấu",
+                        grade = 6,
+                        summaryText = "1. Cộng hai số nguyên cùng dấu:\n- Cộng hai phần tự nhiên rồi đặt dấu chung trước kết quả.\n\n2. Cộng hai số nguyên khác dấu:\n- Lấy số có phần tự nhiên lớn hơn trừ số có phần tự nhiên bé hơn, đặt dấu của số có phần tự nhiên lớn hơn trước hiệu tìm được.",
+                        videoUrl = "https://www.youtube.com/watch?v=mock_lesson_01",
+                        userHighestScore = 10,
+                        topStudentNickname = "BìnhToánHọc",
+                        topStudentAttempts = 16
+                    },
+                    new LessonData
+                    {
+                        lessonId = "LES_INT_02",
+                        topic = "Integers",
+                        title = "Bài 2: Phép nhân và chia hai số nguyên",
+                        description = "Quy tắc nhân chia số nguyên, nhân khác dấu và cùng dấu",
+                        grade = 6,
+                        summaryText = "1. Nhân hai số nguyên cùng dấu: Kết quả luôn là số nguyên DƯƠNG (+).\n2. Nhân hai số nguyên khác dấu: Kết quả luôn là số nguyên ÂM (-).\nQuy tắc dấu: (+) * (+) = (+), (-) * (-) = (+), (+) * (-) = (-), (-) * (+) = (-).",
+                        videoUrl = "https://www.youtube.com/watch?v=mock_lesson_02",
+                        userHighestScore = 8,
+                        topStudentNickname = "ChiThầnĐồng",
+                        topStudentAttempts = 12
+                    },
+                    new LessonData
+                    {
+                        lessonId = "LES_FRAC_01",
+                        topic = "Fractions",
+                        title = "Bài 3: Khái niệm phân số & Rút gọn phân số",
+                        description = "Định nghĩa phân số, tử và mẫu, quy tắc rút gọn tối giản",
+                        grade = 6,
+                        summaryText = "Phân số có dạng a/b với a, b thuộc Z, b khác 0. a là tử số, b là mẫu số.\nRút gọn phân số: Chia cả tử và mẫu cho ước chung lớn hơn 1 để được phân số tối giản.",
+                        videoUrl = "https://www.youtube.com/watch?v=mock_lesson_03",
+                        userHighestScore = 9,
+                        topStudentNickname = "AnThầnĐồng",
+                        topStudentAttempts = 14
+                    }
+                };
+                callback(true, lessons, "Success");
             }));
         }
 
