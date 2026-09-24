@@ -5,15 +5,42 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/00_Bootstrapper.unity
+    guid: f1fac43d185e4bd40b484216a7dd142e
   - enabled: 1
     path: Assets/Scenes/01_Login.unity
     guid: 1fd8db3e9b77e9c4fba8fcc799bfb7f4
   - enabled: 1
-    path: Assets/Scenes/02_Classroom.unity
-    guid: a15dc5e6e4fbf7146a42717c87e19135
+    path: Assets/Scenes/02_MainMenu.unity
+    guid: fce9ea388e3df9141b529aa6ed1e6245
+  - enabled: 1
+    path: Assets/Scenes/03_LessonList.unity
+    guid: 289abaabcbc20d449b505fe0d4f1213c
+  - enabled: 1
+    path: Assets/Scenes/04_LessonContent.unity
+    guid: a95e5bae3e9c82948a1341ccced93344
+  - enabled: 1
+    path: Assets/Scenes/05_MCQPractice.unity
+    guid: f2f83d1b76140e8418063abf39ee0377
+  - enabled: 1
+    path: Assets/Scenes/06_EssayPractice.unity
+    guid: c9b3939ee4616634298c7bec50f70f2e
+  - enabled: 1
+    path: Assets/Scenes/07_Score.unity
+    guid: e8141fb04f57f5247b61f677fc7e02bc
+  - enabled: 1
+    path: Assets/Scenes/08_AIFeedback.unity
+    guid: 30645314612d38a4a822f6384b0165e4
+  - enabled: 1
+    path: Assets/Scenes/09_VersusLobby.unity
+    guid: 3cad03b14b495bf40a807ec71b4bc717
+  - enabled: 1
+    path: Assets/Scenes/10_PracticeLog.unity
+    guid: 98935f5eb55307d43a08f4021c9fc5be
+  - enabled: 1
+    path: Assets/Scenes/11_Settings.unity
+    guid: 71b0b3f294f1d714d962aee79107d31c
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
