@@ -1388,13 +1388,15 @@ namespace Math6Companion.EditorTools
         #endregion
 
         #region Build Settings Auto-Register
-        private static void RegisterScenesInBuildSettings()
+        [MenuItem("Math6 / 📋 ĐỒNG BỘ TẤT CẢ SCENE VÀO BUILD SETTINGS", priority = 2)]
+        public static void RegisterScenesInBuildSettings()
         {
-            string[] sceneNames = new[]
+            var orderedScenes = new List<string>
             {
                 "00_Bootstrapper",
                 "01_Login",
                 "02_MainMenu",
+                "02_VillageWorld",
                 "03_LessonList",
                 "04_LessonContent",
                 "05_MCQPractice",
@@ -1407,20 +1409,38 @@ namespace Math6Companion.EditorTools
             };
 
             var editorBuildScenes = new List<EditorBuildSettingsScene>();
-            for (int i = 0; i < sceneNames.Length; i++)
+            var addedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var name in orderedScenes)
             {
-                string path = $"{SCENES_DIR}/{sceneNames[i]}.unity";
-                if (File.Exists(path))
+                string path = $"{SCENES_DIR}/{name}.unity";
+                if (File.Exists(path) && !addedPaths.Contains(path))
                 {
                     editorBuildScenes.Add(new EditorBuildSettingsScene(path, true));
+                    addedPaths.Add(path);
+                }
+            }
+
+            // Quét bất kỳ scene nào khác trong Assets/Scenes/ nếu chưa có
+            if (Directory.Exists(SCENES_DIR))
+            {
+                foreach (var file in Directory.GetFiles(SCENES_DIR, "*.unity"))
+                {
+                    string norm = file.Replace('\\', '/');
+                    if (!addedPaths.Contains(norm))
+                    {
+                        editorBuildScenes.Add(new EditorBuildSettingsScene(norm, true));
+                        addedPaths.Add(norm);
+                    }
                 }
             }
 
             // Thêm các Scene 3D gameplay nếu có
             string forestPath = "Assets/VertexRageStudio/LowPolyNature/Scenes/ForestPath.unity";
-            if (File.Exists(forestPath))
+            if (File.Exists(forestPath) && !addedPaths.Contains(forestPath))
             {
                 editorBuildScenes.Add(new EditorBuildSettingsScene(forestPath, true));
+                addedPaths.Add(forestPath);
             }
 
             EditorBuildSettings.scenes = editorBuildScenes.ToArray();
