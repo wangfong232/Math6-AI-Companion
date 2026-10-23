@@ -26,7 +26,7 @@ namespace Math6Companion.EditorTools
         {
             EditorApplication.delayCall += () =>
             {
-                string flagPath = "Temp/Math6_ScenesBuilt_V8.flag";
+                string flagPath = "Temp/Math6_ScenesBuilt_V9.flag";
                 if (File.Exists(flagPath)) return;
 
                 try
@@ -47,6 +47,11 @@ namespace Math6Companion.EditorTools
         public static void GenerateAllScenes()
         {
             ExecuteBuildAllScenesDirect(true);
+        }
+
+        public static void GenerateAllScenesBatch()
+        {
+            ExecuteBuildAllScenesDirect(false);
         }
 
         [MenuItem("Math6 / 🧹 DỌN DẸP SCRIPT MISSING TRONG TẤT CẢ SCENE", priority = 10)]
@@ -188,6 +193,7 @@ namespace Math6Companion.EditorTools
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
@@ -210,11 +216,23 @@ namespace Math6Companion.EditorTools
             rt.anchoredPosition = Vector2.zero;
         }
 
-        private static TextMeshProUGUI CreateText(GameObject parent, string name, string content, float fontSize, Vector2 pos, Vector2 size, Color color, TextAlignmentOptions align = TextAlignmentOptions.Center)
+        private static void SetRect(RectTransform rt, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 pos, Vector2 size)
+        {
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.pivot = pivot;
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+        }
+
+        private static TextMeshProUGUI CreateText(GameObject parent, string name, string content, float fontSize, Vector2 pos, Vector2 size, Color color, TextAlignmentOptions align = TextAlignmentOptions.Center, Vector2? anchorMin = null, Vector2? anchorMax = null, Vector2? pivot = null)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
             go.transform.SetParent(parent.transform, false);
             var rt = go.GetComponent<RectTransform>();
+            if (anchorMin.HasValue) rt.anchorMin = anchorMin.Value;
+            if (anchorMax.HasValue) rt.anchorMax = anchorMax.Value;
+            if (pivot.HasValue) rt.pivot = pivot.Value;
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
 
@@ -226,11 +244,14 @@ namespace Math6Companion.EditorTools
             return tmp;
         }
 
-        private static Button CreateButton(GameObject parent, string name, string label, Vector2 pos, Vector2 size, Color btnColor)
+        private static Button CreateButton(GameObject parent, string name, string label, Vector2 pos, Vector2 size, Color btnColor, Vector2? anchorMin = null, Vector2? anchorMax = null, Vector2? pivot = null)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             go.transform.SetParent(parent.transform, false);
             var rt = go.GetComponent<RectTransform>();
+            if (anchorMin.HasValue) rt.anchorMin = anchorMin.Value;
+            if (anchorMax.HasValue) rt.anchorMax = anchorMax.Value;
+            if (pivot.HasValue) rt.pivot = pivot.Value;
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
 
@@ -238,7 +259,6 @@ namespace Math6Companion.EditorTools
             img.color = btnColor;
 
             var btn = go.GetComponent<Button>();
-            // Tắt Navigation tự động để tránh việc EventSystem tự chọn làm trắng nút
             var nav = btn.navigation;
             nav.mode = Navigation.Mode.None;
             btn.navigation = nav;
@@ -256,6 +276,30 @@ namespace Math6Companion.EditorTools
             tmp.alignment = TextAlignmentOptions.Center;
 
             return btn;
+        }
+
+        private static Button CreateTopLeftButton(GameObject parent, string name, string label, Vector2 size, Color btnColor, float offsetX = 35f, float offsetY = 30f)
+        {
+            return CreateButton(parent, name, label, new Vector2(offsetX, -offsetY), size, btnColor,
+                new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        }
+
+        private static Button CreateTopRightButton(GameObject parent, string name, string label, Vector2 size, Color btnColor, float offsetX = 35f, float offsetY = 30f)
+        {
+            return CreateButton(parent, name, label, new Vector2(-offsetX, -offsetY), size, btnColor,
+                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+        }
+
+        private static TextMeshProUGUI CreateTopCenterText(GameObject parent, string name, string content, float fontSize, Vector2 size, Color color, float offsetY = 25f, TextAlignmentOptions align = TextAlignmentOptions.Center)
+        {
+            return CreateText(parent, name, content, fontSize, new Vector2(0f, -offsetY), size, color, align,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+        }
+
+        private static Button CreateBottomCenterButton(GameObject parent, string name, string label, Vector2 size, Color btnColor, float offsetY = 35f)
+        {
+            return CreateButton(parent, name, label, new Vector2(0f, offsetY), size, btnColor,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
         }
 
         private static Slider CreateSlider(GameObject parent, string name, Vector2 pos, Vector2 size)
@@ -552,11 +596,13 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("00_Bootstrapper", out GameObject canvas);
 
-            CreateText(canvas, "Title", "MATH 6 - AI COMPANION", 44, new Vector2(0, 100), new Vector2(800, 80), new Color(0.95f, 0.75f, 0.2f));
-            CreateText(canvas, "SubTitle", "Hệ Thống Học Toán Lớp 6 Tích Hợp Gia Sư AI & Đối Kháng", 22, new Vector2(0, 40), new Vector2(800, 50), Color.white);
+            CreateText(canvas, "Title", "MATH 6 - AI COMPANION", 44, new Vector2(0, 80), new Vector2(800, 80), new Color(0.95f, 0.75f, 0.2f));
+            CreateText(canvas, "SubTitle", "Hệ Thống Học Toán Lớp 6 Tích Hợp Gia Sư AI & Đối Kháng", 22, new Vector2(0, 15), new Vector2(800, 50), Color.white);
 
-            var slider = CreateSlider(canvas, "LoadingSlider", new Vector2(0, -100), new Vector2(600, 24));
-            var statusText = CreateText(canvas, "StatusText", "Đang khởi tạo hệ thống...", 20, new Vector2(0, -150), new Vector2(600, 40), new Color(0.8f, 0.8f, 0.8f));
+            var slider = CreateSlider(canvas, "LoadingSlider", new Vector2(0, 140), new Vector2(600, 24));
+            SetRect(slider.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 140), new Vector2(600, 24));
+
+            var statusText = CreateText(canvas, "StatusText", "Đang khởi tạo hệ thống...", 20, new Vector2(0, 80), new Vector2(600, 40), new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
 
             var manager = new GameObject("_BootstrapperManager").AddComponent<AppBootstrapper>();
             SetField(manager, "progressBar", slider);
@@ -599,7 +645,6 @@ namespace Math6Companion.EditorTools
             SetField(manager, "statusText", status);
             SetField(manager, "loadingIndicator", loading);
 
-            // Gán sự kiện cho 2 nút đăng nhập nhanh
             btnStudent.onClick.AddListener(() => manager.QuickFillAccount("student_01", "123"));
             btnTeacher.onClick.AddListener(() => manager.QuickFillAccount("teacher_01", "123"));
 
@@ -611,38 +656,34 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("02_MainMenu", out GameObject canvas);
 
-            // Header
+            // Header (Anchor: Top Stretch)
             var header = new GameObject("ProfileHeader", typeof(RectTransform));
             header.transform.SetParent(canvas.transform, false);
             var hRt = header.GetComponent<RectTransform>();
-            hRt.anchorMin = new Vector2(0, 1);
-            hRt.anchorMax = new Vector2(1, 1);
-            hRt.sizeDelta = new Vector2(0, 100);
-            hRt.anchoredPosition = new Vector2(0, -50);
+            SetRect(hRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 90));
 
             var avatar = new GameObject("Avatar", typeof(RectTransform), typeof(Image));
             avatar.transform.SetParent(header.transform, false);
-            avatar.GetComponent<RectTransform>().anchoredPosition = new Vector2(-400, 0);
-            avatar.GetComponent<RectTransform>().sizeDelta = new Vector2(65, 65);
+            SetRect(avatar.GetComponent<RectTransform>(), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(35, 0), new Vector2(60, 60));
             avatar.GetComponent<Image>().color = new Color(0.95f, 0.75f, 0.2f);
 
-            var nickText = CreateText(header, "NicknameText", "AnThầnĐồng", 26, new Vector2(-220, 12), new Vector2(280, 35), Color.white, TextAlignmentOptions.MidlineLeft);
-            var subText = CreateText(header, "UserSubInfoText", "Lớp 6A1 | Nguyễn Văn An", 18, new Vector2(-220, -16), new Vector2(280, 30), new Color(0.7f, 0.8f, 0.9f), TextAlignmentOptions.MidlineLeft);
+            var nickText = CreateText(header, "NicknameText", "AnThầnĐồng", 24, new Vector2(110, 10), new Vector2(300, 32), Color.white, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
+            var subText = CreateText(header, "UserSubInfoText", "Lớp 6A1 | Nguyễn Văn An", 16, new Vector2(110, -16), new Vector2(300, 26), new Color(0.7f, 0.8f, 0.9f), TextAlignmentOptions.MidlineLeft, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
 
-            var logoutBtn = CreateButton(header, "Btn_Logout", "Đăng xuất", new Vector2(800, 0), new Vector2(150, 45), new Color(0.8f, 0.25f, 0.25f));
+            var logoutBtn = CreateButton(header, "Btn_Logout", "Đăng xuất", new Vector2(-35, 0), new Vector2(140, 44), new Color(0.8f, 0.25f, 0.25f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
 
-            CreateText(canvas, "MenuTitle", "TRUNG TÂM HỌC TẬP TOÁN 6", 36, new Vector2(0, 330), new Vector2(800, 60), new Color(0.95f, 0.75f, 0.2f));
+            CreateTopCenterText(canvas, "MenuTitle", "TRUNG TÂM HỌC TẬP TOÁN 6", 36, new Vector2(800, 55), new Color(0.95f, 0.75f, 0.2f), 125);
 
             // Grid buttons
-            var btnLesson = CreateButton(canvas, "Btn_LessonList", "1. BÀI HỌC TOÁN 6", new Vector2(-360, 160), new Vector2(330, 130), new Color(0.2f, 0.45f, 0.75f));
-            var btnMCQ = CreateButton(canvas, "Btn_MCQPractice", "2. LUYỆN TRẮC NGHIỆM", new Vector2(0, 160), new Vector2(330, 130), new Color(0.18f, 0.6f, 0.45f));
-            var btnEssay = CreateButton(canvas, "Btn_EssayPractice", "3. LUYỆN TỰ LUẬN", new Vector2(360, 160), new Vector2(330, 130), new Color(0.65f, 0.4f, 0.75f));
-            var btnVersus = CreateButton(canvas, "Btn_VersusLobby", "4. ĐẤU ĐỐI KHÁNG (3P)", new Vector2(-360, 0), new Vector2(330, 130), new Color(0.85f, 0.45f, 0.15f));
-            var btnLog = CreateButton(canvas, "Btn_PracticeLog", "5. NHẬT KÝ HỌC TẬP", new Vector2(0, 0), new Vector2(330, 130), new Color(0.25f, 0.6f, 0.75f));
-            var btnSettings = CreateButton(canvas, "Btn_Settings", "6. CÀI ĐẶT HỆ THỐNG", new Vector2(360, 0), new Vector2(330, 130), new Color(0.45f, 0.5f, 0.6f));
+            var btnLesson = CreateButton(canvas, "Btn_LessonList", "1. BÀI HỌC TOÁN 6", new Vector2(-360, 130), new Vector2(330, 125), new Color(0.2f, 0.45f, 0.75f));
+            var btnMCQ = CreateButton(canvas, "Btn_MCQPractice", "2. LUYỆN TRẮC NGHIỆM", new Vector2(0, 130), new Vector2(330, 125), new Color(0.18f, 0.6f, 0.45f));
+            var btnEssay = CreateButton(canvas, "Btn_EssayPractice", "3. LUYỆN TỰ LUẬN", new Vector2(360, 130), new Vector2(330, 125), new Color(0.65f, 0.4f, 0.75f));
+            var btnVersus = CreateButton(canvas, "Btn_VersusLobby", "4. ĐẤU ĐỐI KHÁNG (3P)", new Vector2(-360, -20), new Vector2(330, 125), new Color(0.85f, 0.45f, 0.15f));
+            var btnLog = CreateButton(canvas, "Btn_PracticeLog", "5. NHẬT KÝ HỌC TẬP", new Vector2(0, -20), new Vector2(330, 125), new Color(0.25f, 0.6f, 0.75f));
+            var btnSettings = CreateButton(canvas, "Btn_Settings", "6. CÀI ĐẶT HỆ THỐNG", new Vector2(360, -20), new Vector2(330, 125), new Color(0.45f, 0.5f, 0.6f));
 
-            // Nút nổi bật dẫn vào Thế giới 3D Làng Sen
-            var btnVillage3D = CreateButton(canvas, "Btn_Village3D", ">> BƯỚC VÀO THẾ GIỚI 3D LÀNG SEN TRI THỨC <<", new Vector2(0, -110), new Vector2(700, 65), new Color(0.18f, 0.75f, 0.38f));
+            // Nút nổi bật dẫn vào Thế giới 3D Làng Sen (Anchor: Bottom-Center)
+            var btnVillage3D = CreateBottomCenterButton(canvas, "Btn_Village3D", ">> BƯỚC VÀO THẾ GIỚI 3D LÀNG SEN TRI THỨC <<", new Vector2(720, 65), new Color(0.18f, 0.75f, 0.38f), 35);
 
             var manager = new GameObject("_MainMenuManager").AddComponent<MainMenuUIController>();
             SetField(manager, "nicknameText", nickText);
@@ -665,15 +706,14 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("03_LessonList", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_Back", "< Menu", new Vector2(-800, 480), new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f));
-            CreateText(canvas, "Title", "CHUYÊN ĐỀ TOÁN LỚP 6", 36, new Vector2(0, 480), new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "< Menu", new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            CreateTopCenterText(canvas, "Title", "CHUYÊN ĐỀ TOÁN LỚP 6", 36, new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f), 25);
 
-            // Scroll View
+            // Scroll View - Responsive Stretch: 5% margin each side, fits all screens
             var scrollGo = new GameObject("ScrollView_Lessons", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
             scrollGo.transform.SetParent(canvas.transform, false);
             var scrollRt = scrollGo.GetComponent<RectTransform>();
-            scrollRt.anchoredPosition = new Vector2(0, -20);
-            scrollRt.sizeDelta = new Vector2(1200, 750);
+            SetRect(scrollRt, new Vector2(0.05f, 0.04f), new Vector2(0.95f, 0.88f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             scrollGo.GetComponent<Image>().color = new Color(0.12f, 0.16f, 0.22f);
 
             var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
@@ -748,33 +788,33 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("04_LessonContent", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_BackToList", "< Danh Sách Bài", new Vector2(-780, 480), new Vector2(180, 50), new Color(0.3f, 0.35f, 0.45f));
-            var title = CreateText(canvas, "LessonTitleText", "Bài 1: Phép cộng và trừ số nguyên", 32, new Vector2(0, 480), new Vector2(800, 60), new Color(0.95f, 0.75f, 0.2f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_BackToList", "< Danh Sách Bài", new Vector2(180, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            var title = CreateTopCenterText(canvas, "LessonTitleText", "Bài 1: Phép cộng và trừ số nguyên", 32, new Vector2(800, 55), new Color(0.95f, 0.75f, 0.2f), 25);
 
-            var btnTabTxt = CreateButton(canvas, "TabBtn_Text", "[Text] Lý Thuyết Tóm Tắt", new Vector2(-220, 390), new Vector2(300, 55), new Color(0.2f, 0.45f, 0.75f));
-            var btnTabVid = CreateButton(canvas, "TabBtn_Video", "[Video] Video Minh Họa", new Vector2(220, 390), new Vector2(300, 55), new Color(0.25f, 0.3f, 0.4f));
+            var btnTabTxt = CreateButton(canvas, "TabBtn_Text", "[Text] Lý Thuyết Tóm Tắt", new Vector2(-165, -95), new Vector2(300, 52), new Color(0.2f, 0.45f, 0.75f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var btnTabVid = CreateButton(canvas, "TabBtn_Video", "[Video] Video Minh Họa", new Vector2(165, -95), new Vector2(300, 52), new Color(0.25f, 0.3f, 0.4f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
-            // Panels
+            // Panels - Responsive stretch between tabs and bottom buttons
             var txtPanel = new GameObject("TextContentPanel", typeof(RectTransform), typeof(Image));
             txtPanel.transform.SetParent(canvas.transform, false);
-            txtPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
-            txtPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(1200, 600);
+            var txtRt = txtPanel.GetComponent<RectTransform>();
+            SetRect(txtRt, new Vector2(0.06f, 0.15f), new Vector2(0.94f, 0.83f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             txtPanel.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
 
-            var theoryText = CreateText(txtPanel, "TheoryBodyText", "Nội dung lý thuyết Toán 6...", 22, Vector2.zero, new Vector2(1100, 540), Color.white, TextAlignmentOptions.TopLeft);
+            var theoryText = CreateText(txtPanel, "TheoryBodyText", "Nội dung lý thuyết Toán 6...", 22, Vector2.zero, new Vector2(-60, -40), Color.white, TextAlignmentOptions.TopLeft, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f));
 
             var vidPanel = new GameObject("VideoContentPanel", typeof(RectTransform), typeof(Image));
             vidPanel.transform.SetParent(canvas.transform, false);
-            vidPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
-            vidPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(1200, 600);
+            var vidRt = vidPanel.GetComponent<RectTransform>();
+            SetRect(vidRt, new Vector2(0.06f, 0.15f), new Vector2(0.94f, 0.83f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             vidPanel.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
             vidPanel.SetActive(false);
 
-            var vidInfo = CreateText(vidPanel, "VideoInfoText", "Video bài giảng minh họa chuẩn Bộ GD&ĐT", 24, new Vector2(0, 80), new Vector2(900, 80), Color.white);
+            var vidInfo = CreateText(vidPanel, "VideoInfoText", "Video bài giảng minh họa chuẩn Bộ GD&ĐT", 24, new Vector2(0, 60), new Vector2(900, 80), Color.white);
             var playVidBtn = CreateButton(vidPanel, "Btn_PlayExternalVideo", "> Mở Xem Video Bài Giảng Đầy Đủ", new Vector2(0, -60), new Vector2(380, 65), new Color(0.85f, 0.3f, 0.3f));
 
-            var btnStartMCQ = CreateButton(canvas, "Btn_StartMCQ", "[Trắc Nghiệm] Làm Bài Này", new Vector2(-220, -420), new Vector2(340, 60), new Color(0.18f, 0.6f, 0.4f));
-            var btnStartEssay = CreateButton(canvas, "Btn_StartEssay", "[Tự Luận] Làm Bài Này", new Vector2(220, -420), new Vector2(340, 60), new Color(0.6f, 0.35f, 0.7f));
+            var btnStartMCQ = CreateButton(canvas, "Btn_StartMCQ", "[Trắc Nghiệm] Làm Bài Này", new Vector2(-185, 35), new Vector2(340, 58), new Color(0.18f, 0.6f, 0.4f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var btnStartEssay = CreateButton(canvas, "Btn_StartEssay", "[Tự Luận] Làm Bài Này", new Vector2(185, 35), new Vector2(340, 58), new Color(0.6f, 0.35f, 0.7f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
 
             var manager = new GameObject("_LessonContentManager").AddComponent<LessonContentUIController>();
             SetField(manager, "lessonTitleText", title);
@@ -797,29 +837,28 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("05_MCQPractice", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_BackToMenu", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            var topicTitle = CreateText(canvas, "TopicTitleText", "Chủ đề: Số nguyên (DỄ)", 26, new Vector2(-320, 480), new Vector2(500, 50), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
-            var progress = CreateText(canvas, "ProgressText", "Câu 1/10", 26, new Vector2(0, 480), new Vector2(200, 50), Color.white);
-            var timer = CreateText(canvas, "TimerText", "00:30", 28, new Vector2(400, 480), new Vector2(200, 50), Color.yellow, TextAlignmentOptions.MidlineRight);
+            var backBtn = CreateTopLeftButton(canvas, "Btn_BackToMenu", "< Menu", new Vector2(140, 48), new Color(0.3f, 0.35f, 0.45f), 35, 25);
+            var topicTitle = CreateText(canvas, "TopicTitleText", "Chủ đề: Số nguyên (DỄ)", 24, new Vector2(195, -25), new Vector2(400, 48), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            var progress = CreateTopCenterText(canvas, "ProgressText", "Câu 1/10", 26, new Vector2(200, 48), Color.white, 25);
+            var timer = CreateText(canvas, "TimerText", "00:30", 26, new Vector2(-195, -25), new Vector2(150, 48), Color.yellow, TextAlignmentOptions.MidlineRight, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            var closeBtn = CreateTopRightButton(canvas, "CloseQuizButton", "Nộp bài sớm [X]", new Vector2(150, 46), new Color(0.8f, 0.3f, 0.3f), 35, 25);
 
             var card = new GameObject("QuestionCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 240);
-            card.GetComponent<RectTransform>().sizeDelta = new Vector2(1100, 220);
+            var qCardRt = card.GetComponent<RectTransform>();
+            SetRect(qCardRt, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -90), new Vector2(1100, 200));
             card.GetComponent<Image>().color = new Color(0.15f, 0.2f, 0.28f);
 
-            var prompt = CreateText(card, "PromptText", "Tính giá trị của biểu thức: (-15) + 7", 28, Vector2.zero, new Vector2(1000, 180), Color.white);
+            var prompt = CreateText(card, "PromptText", "Tính giá trị của biểu thức: (-15) + 7", 28, Vector2.zero, new Vector2(1000, 160), Color.white);
 
-            var btnA = CreateButton(canvas, "Btn_OptA", "A. 8", new Vector2(-280, 50), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
-            var btnB = CreateButton(canvas, "Btn_OptB", "B. -8", new Vector2(280, 50), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
-            var btnC = CreateButton(canvas, "Btn_OptC", "C. 22", new Vector2(-280, -60), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
-            var btnD = CreateButton(canvas, "Btn_OptD", "D. -22", new Vector2(280, -60), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
+            var btnA = CreateButton(canvas, "Btn_OptA", "A. 8", new Vector2(-280, 45), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
+            var btnB = CreateButton(canvas, "Btn_OptB", "B. -8", new Vector2(280, 45), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
+            var btnC = CreateButton(canvas, "Btn_OptC", "C. 22", new Vector2(-280, -65), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
+            var btnD = CreateButton(canvas, "Btn_OptD", "D. -22", new Vector2(280, -65), new Vector2(520, 90), new Color(0.2f, 0.25f, 0.35f));
 
-            var feedback = CreateText(canvas, "FeedbackText", "", 24, new Vector2(0, -180), new Vector2(1000, 60), Color.green);
-            var nextBtn = CreateButton(canvas, "NextButton", "Câu Tiếp Theo >", new Vector2(0, -280), new Vector2(300, 60), new Color(0.18f, 0.6f, 0.45f));
+            var feedback = CreateText(canvas, "FeedbackText", "", 24, new Vector2(0, 115), new Vector2(1000, 55), Color.green, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var nextBtn = CreateBottomCenterButton(canvas, "NextButton", "Câu Tiếp Theo >", new Vector2(300, 60), new Color(0.18f, 0.6f, 0.45f), 35);
             nextBtn.gameObject.SetActive(false);
-
-            var closeBtn = CreateButton(canvas, "CloseQuizButton", "Nộp bài sớm [X]", new Vector2(780, 480), new Vector2(160, 45), new Color(0.8f, 0.3f, 0.3f));
 
             var manager = new GameObject("_QuizManager").AddComponent<QuizUIController>();
             SetField(manager, "topicTitleText", topicTitle);
@@ -831,7 +870,6 @@ namespace Math6Companion.EditorTools
             SetField(manager, "closeQuizButton", closeBtn);
             SetField(manager, "backToMenuButton", backBtn);
 
-            // Mảng Button
             var so = new SerializedObject(manager);
             var optArray = so.FindProperty("optionButtons");
             if (optArray != null)
@@ -862,33 +900,33 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("06_EssayPractice", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_Back", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            var title = CreateText(canvas, "ProblemTitleText", "Bài Tự Luận: Thứ Tự Thực Hiện Phép Tính", 32, new Vector2(0, 480), new Vector2(800, 60), new Color(0.95f, 0.75f, 0.2f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "< Menu", new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            var title = CreateTopCenterText(canvas, "ProblemTitleText", "Bài Tự Luận: Thứ Tự Thực Hiện Phép Tính", 32, new Vector2(800, 55), new Color(0.95f, 0.75f, 0.2f), 25);
 
             var card = new GameObject("ProblemCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 330);
-            card.GetComponent<RectTransform>().sizeDelta = new Vector2(1200, 150);
+            var pCardRt = card.GetComponent<RectTransform>();
+            SetRect(pCardRt, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -95), new Vector2(1150, 140));
             card.GetComponent<Image>().color = new Color(0.15f, 0.2f, 0.28f);
 
-            var prompt = CreateText(card, "ProblemPromptText", "Thực hiện phép tính theo từng bước: A = 15 - (3 + 2) × 2", 26, Vector2.zero, new Vector2(1100, 120), Color.white);
+            var prompt = CreateText(card, "ProblemPromptText", "Thực hiện phép tính theo từng bước: A = 15 - (3 + 2) × 2", 26, Vector2.zero, new Vector2(1050, 110), Color.white);
 
-            var btnCapture = CreateButton(canvas, "Btn_CapturePhoto", "1. CHỤP ẢNH BÀI LÀM", new Vector2(-320, 180), new Vector2(300, 60), new Color(0.2f, 0.5f, 0.8f));
-            var btnPick = CreateButton(canvas, "Btn_PickImage", "2. CHỌN ẢNH TỪ MÁY", new Vector2(0, 180), new Vector2(300, 60), new Color(0.6f, 0.35f, 0.7f));
-            var btnSample = CreateButton(canvas, "Btn_SamplePhoto", "3. VỞ MẪU TOÁN 6", new Vector2(320, 180), new Vector2(300, 60), new Color(0.18f, 0.65f, 0.4f));
+            var btnCapture = CreateButton(canvas, "Btn_CapturePhoto", "1. CHỤP ẢNH BÀI LÀM", new Vector2(-320, -255), new Vector2(300, 55), new Color(0.2f, 0.5f, 0.8f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var btnPick = CreateButton(canvas, "Btn_PickImage", "2. CHỌN ẢNH TỪ MÁY", new Vector2(0, -255), new Vector2(300, 55), new Color(0.6f, 0.35f, 0.7f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var btnSample = CreateButton(canvas, "Btn_SamplePhoto", "3. VỞ MẪU TOÁN 6", new Vector2(320, -255), new Vector2(300, 55), new Color(0.18f, 0.65f, 0.4f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
             var prevContainer = new GameObject("PreviewContainer", typeof(RectTransform), typeof(Image));
             prevContainer.transform.SetParent(canvas.transform, false);
-            prevContainer.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -50);
-            prevContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(480, 320);
+            var prevRt = prevContainer.GetComponent<RectTransform>();
+            SetRect(prevRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -40), new Vector2(480, 290));
             prevContainer.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f);
 
             var preview = new GameObject("ImagePreview", typeof(RectTransform), typeof(RawImage));
             preview.transform.SetParent(prevContainer.transform, false);
             SetFullStretch(preview.GetComponent<RectTransform>());
 
-            var photoStatus = CreateText(canvas, "PhotoStatusText", "Hãy chụp ảnh, chọn ảnh từ máy hoặc bấm xem vở mẫu để AI chấm", 22, new Vector2(0, -250), new Vector2(900, 45), Color.yellow);
-            var submitBtn = CreateButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ AI CHẤM >", new Vector2(0, -340), new Vector2(380, 70), new Color(0.18f, 0.65f, 0.4f));
+            var photoStatus = CreateText(canvas, "PhotoStatusText", "Hãy chụp ảnh, chọn ảnh từ máy hoặc bấm xem vở mẫu để AI chấm", 22, new Vector2(0, 115), new Vector2(900, 45), Color.yellow, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var submitBtn = CreateBottomCenterButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ AI CHẤM >", new Vector2(380, 65), new Color(0.18f, 0.65f, 0.4f), 35);
 
             var manager = new GameObject("_EssayManager").AddComponent<EssayUIController>();
             SetField(manager, "problemTitleText", title);
@@ -912,7 +950,7 @@ namespace Math6Companion.EditorTools
 
             var card = new GameObject("ResultCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().sizeDelta = new Vector2(750, 720);
+            card.GetComponent<RectTransform>().sizeDelta = new Vector2(750, 700);
             card.GetComponent<Image>().color = new Color(0.13f, 0.18f, 0.25f);
 
             var scoreBig = CreateText(card, "ScoreBigText", "8/10", 72, new Vector2(0, 220), new Vector2(400, 100), new Color(0.95f, 0.75f, 0.2f));
@@ -952,25 +990,25 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("08_AIFeedback", out GameObject canvas);
 
-            var backScore = CreateButton(canvas, "Btn_BackToScore", "< Bảng Điểm", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            var backMenu = CreateButton(canvas, "Btn_BackToMenu", "Về Menu <", new Vector2(780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
+            var backScore = CreateTopLeftButton(canvas, "Btn_BackToScore", "< Bảng Điểm", new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            var backMenu = CreateTopRightButton(canvas, "Btn_BackToMenu", "Về Menu <", new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
 
-            var greeting = CreateText(canvas, "TutorGreetingText", "Chào em! Thầy Minh ở đây để cùng em phân tích câu làm sai nhé:", 26, new Vector2(0, 400), new Vector2(1000, 50), new Color(0.95f, 0.75f, 0.2f));
+            var greeting = CreateTopCenterText(canvas, "TutorGreetingText", "Chào em! Thầy Minh ở đây để cùng em phân tích câu làm sai nhé:", 26, new Vector2(1000, 50), new Color(0.95f, 0.75f, 0.2f), 28);
 
             var card = new GameObject("DialogueCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 90);
-            card.GetComponent<RectTransform>().sizeDelta = new Vector2(1100, 500);
+            var dRt = card.GetComponent<RectTransform>();
+            SetRect(dRt, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -95), new Vector2(1100, 480));
             card.GetComponent<Image>().color = new Color(0.13f, 0.18f, 0.25f);
 
-            var qTitle = CreateText(card, "QuestionTitleText", "Câu hỏi: Tính (-15) + 7", 26, new Vector2(0, 190), new Vector2(1000, 55), Color.white);
-            var diag = CreateText(card, "DiagnosisBodyText", "Nguyên nhân: Em đã quên đặt dấu trừ của số có giá trị tuyệt đối lớn hơn.", 22, new Vector2(0, 90), new Vector2(1000, 110), new Color(0.9f, 0.7f, 0.7f), TextAlignmentOptions.TopLeft);
-            var rule = CreateText(card, "RuleReminderText", "Quy tắc cốt lõi: Muốn cộng hai số nguyên khác dấu, ta lấy số lớn trừ số bé và đặt dấu của số lớn hơn trước kết quả.", 22, new Vector2(0, -30), new Vector2(1000, 100), new Color(0.7f, 0.9f, 0.7f), TextAlignmentOptions.TopLeft);
-            var analog = CreateText(card, "AnalogousProblemText", "Bài tập tương tự: Hãy tính giá trị biểu thức: (-20) + 12 = ?", 24, new Vector2(0, -150), new Vector2(1000, 80), new Color(0.95f, 0.85f, 0.4f), TextAlignmentOptions.TopLeft);
+            var qTitle = CreateText(card, "QuestionTitleText", "Câu hỏi: Tính (-15) + 7", 26, new Vector2(0, 185), new Vector2(1000, 55), Color.white);
+            var diag = CreateText(card, "DiagnosisBodyText", "Nguyên nhân: Em đã quên đặt dấu trừ của số có giá trị tuyệt đối lớn hơn.", 22, new Vector2(0, 90), new Vector2(1000, 105), new Color(0.9f, 0.7f, 0.7f), TextAlignmentOptions.TopLeft);
+            var rule = CreateText(card, "RuleReminderText", "Quy tắc cốt lõi: Muốn cộng hai số nguyên khác dấu, ta lấy số lớn trừ số bé và đặt dấu của số lớn hơn trước kết quả.", 22, new Vector2(0, -25), new Vector2(1000, 95), new Color(0.7f, 0.9f, 0.7f), TextAlignmentOptions.TopLeft);
+            var analog = CreateText(card, "AnalogousProblemText", "Bài tập tương tự: Hãy tính giá trị biểu thức: (-20) + 12 = ?", 24, new Vector2(0, -140), new Vector2(1000, 75), new Color(0.95f, 0.85f, 0.4f), TextAlignmentOptions.TopLeft);
 
-            var btnPrev = CreateButton(canvas, "Btn_Prev", "< Câu Trước", new Vector2(-250, -250), new Vector2(200, 55), new Color(0.2f, 0.45f, 0.75f));
-            var page = CreateText(canvas, "PageIndicatorText", "Câu 1/3", 22, new Vector2(0, -250), new Vector2(150, 45), Color.white);
-            var btnNext = CreateButton(canvas, "Btn_Next", "Câu Tiếp Theo >", new Vector2(250, -250), new Vector2(200, 55), new Color(0.2f, 0.45f, 0.75f));
+            var btnPrev = CreateButton(canvas, "Btn_Prev", "< Câu Trước", new Vector2(-250, 45), new Vector2(200, 55), new Color(0.2f, 0.45f, 0.75f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var page = CreateText(canvas, "PageIndicatorText", "Câu 1/3", 22, new Vector2(0, 45), new Vector2(150, 45), Color.white, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var btnNext = CreateButton(canvas, "Btn_Next", "Câu Tiếp Theo >", new Vector2(250, 45), new Vector2(200, 55), new Color(0.2f, 0.45f, 0.75f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
 
             var manager = new GameObject("_AIFeedbackManager").AddComponent<AIFeedbackUIController>();
             SetField(manager, "tutorGreetingText", greeting);
@@ -992,19 +1030,19 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("09_VersusLobby", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_Back", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            CreateText(canvas, "Title", "SẢNH THI ĐẤU ĐỐI KHÁNG TOÁN 6", 36, new Vector2(0, 480), new Vector2(700, 60), new Color(0.95f, 0.75f, 0.2f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "< Menu", new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            CreateTopCenterText(canvas, "Title", "SẢNH THI ĐẤU ĐỐI KHÁNG TOÁN 6", 36, new Vector2(700, 60), new Color(0.95f, 0.75f, 0.2f), 25);
 
             var card = new GameObject("ScanningCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 100);
+            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 60);
             card.GetComponent<RectTransform>().sizeDelta = new Vector2(800, 350);
             card.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
 
             var scanningText = CreateText(card, "ScanningIndicatorText", "[...] Đang quét danh sách học sinh trực tuyến...", 24, new Vector2(0, 60), new Vector2(700, 60), Color.white);
             var matchBtn = CreateButton(card, "Btn_RandomMatch", "BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN >", new Vector2(0, -60), new Vector2(450, 75), new Color(0.9f, 0.45f, 0.15f));
 
-            var status = CreateText(canvas, "StatusText", "Thời gian thi đấu: 3 phút (180 giây)", 22, new Vector2(0, -180), new Vector2(700, 45), new Color(0.7f, 0.8f, 0.9f));
+            var status = CreateText(canvas, "StatusText", "Thời gian thi đấu: 3 phút (180 giây)", 22, new Vector2(0, 45), new Vector2(700, 45), new Color(0.7f, 0.8f, 0.9f), TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
 
             // Match Modal
             var matchModal = new GameObject("MatchModal", typeof(RectTransform), typeof(Image));
@@ -1061,16 +1099,15 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("10_PracticeLog", out GameObject canvas);
 
-            var backBtn = CreateButton(canvas, "Btn_Back", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            CreateText(canvas, "Title", "NHẬT KÝ LUYỆN TẬP TOÁN 6", 36, new Vector2(0, 480), new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f));
-
-            var toggleBtn = CreateButton(canvas, "Btn_ToggleMode", "Xem Chi Tiết Theo Bài >", new Vector2(720, 480), new Vector2(280, 50), new Color(0.55f, 0.35f, 0.75f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "< Menu", new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            CreateTopCenterText(canvas, "Title", "NHẬT KÝ LUYỆN TẬP TOÁN 6", 36, new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f), 25);
+            var toggleBtn = CreateTopRightButton(canvas, "Btn_ToggleMode", "Xem Chi Tiết Theo Bài >", new Vector2(260, 50), new Color(0.55f, 0.35f, 0.75f), 35, 30);
             var toggleText = toggleBtn.GetComponentInChildren<TextMeshProUGUI>();
 
             // Mode 1: Summary
             var sumPanel = new GameObject("Mode1_SummaryPanel", typeof(RectTransform), typeof(Image));
             sumPanel.transform.SetParent(canvas.transform, false);
-            sumPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+            sumPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -20);
             sumPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(900, 600);
             sumPanel.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
 
@@ -1083,7 +1120,7 @@ namespace Math6Companion.EditorTools
             // Mode 2: Detail
             var detPanel = new GameObject("Mode2_DetailPanel", typeof(RectTransform), typeof(Image));
             detPanel.transform.SetParent(canvas.transform, false);
-            detPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+            detPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -20);
             detPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(900, 600);
             detPanel.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
             detPanel.SetActive(false);
@@ -1128,29 +1165,30 @@ namespace Math6Companion.EditorTools
             CreateBaseScene("11_Settings", out GameObject canvas);
 
             var bgImg = canvas.transform.Find("Background")?.GetComponent<Image>();
-            var backBtn = CreateButton(canvas, "Btn_Back", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
-            var title = CreateText(canvas, "Title", "CÀI ĐẶT HỆ THỐNG", 36, new Vector2(0, 480), new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f));
+            var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "< Menu", new Vector2(140, 50), new Color(0.3f, 0.35f, 0.45f), 35, 30);
+            var title = CreateTopCenterText(canvas, "Title", "CÀI ĐẶT HỆ THỐNG", 36, new Vector2(600, 60), new Color(0.95f, 0.75f, 0.2f), 25);
 
             var card = new GameObject("SettingsCard", typeof(RectTransform), typeof(Image));
             card.transform.SetParent(canvas.transform, false);
-            card.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 780);
+            card.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -25);
+            card.GetComponent<RectTransform>().sizeDelta = new Vector2(850, 750);
             var cardImg = card.GetComponent<Image>();
             cardImg.color = new Color(0.12f, 0.17f, 0.24f);
 
             // Âm lượng
-            CreateText(card, "AudioHeader", "CÀI ĐẶT ÂM THANH", 24, new Vector2(-220, 300), new Vector2(350, 40), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
+            CreateText(card, "AudioHeader", "CÀI ĐẶT ÂM THANH", 24, new Vector2(-220, 280), new Vector2(350, 40), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
             
-            CreateText(card, "LblMaster", "Âm lượng tổng:", 20, new Vector2(-220, 240), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
-            var slMaster = CreateSlider(card, "MasterSlider", new Vector2(70, 240), new Vector2(300, 24));
-            var txtMasterVal = CreateText(card, "MasterValText", "100%", 18, new Vector2(275, 240), new Vector2(80, 35), Color.yellow);
+            CreateText(card, "LblMaster", "Âm lượng tổng:", 20, new Vector2(-220, 225), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
+            var slMaster = CreateSlider(card, "MasterSlider", new Vector2(70, 225), new Vector2(300, 24));
+            var txtMasterVal = CreateText(card, "MasterValText", "100%", 18, new Vector2(275, 225), new Vector2(80, 35), Color.yellow);
 
-            CreateText(card, "LblBgm", "Nhạc nền (BGM):", 20, new Vector2(-220, 180), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
-            var slBgm = CreateSlider(card, "BgmSlider", new Vector2(70, 180), new Vector2(300, 24));
-            var txtBgmVal = CreateText(card, "BgmValText", "80%", 18, new Vector2(275, 180), new Vector2(80, 35), Color.yellow);
+            CreateText(card, "LblBgm", "Nhạc nền (BGM):", 20, new Vector2(-220, 170), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
+            var slBgm = CreateSlider(card, "BgmSlider", new Vector2(70, 170), new Vector2(300, 24));
+            var txtBgmVal = CreateText(card, "BgmValText", "80%", 18, new Vector2(275, 170), new Vector2(80, 35), Color.yellow);
 
-            CreateText(card, "LblSfx", "Hiệu ứng (SFX):", 20, new Vector2(-220, 120), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
-            var slSfx = CreateSlider(card, "SfxSlider", new Vector2(70, 120), new Vector2(300, 24));
-            var txtSfxVal = CreateText(card, "SfxValText", "100%", 18, new Vector2(275, 120), new Vector2(80, 35), Color.yellow);
+            CreateText(card, "LblSfx", "Hiệu ứng (SFX):", 20, new Vector2(-220, 115), new Vector2(250, 35), Color.white, TextAlignmentOptions.MidlineLeft);
+            var slSfx = CreateSlider(card, "SfxSlider", new Vector2(70, 115), new Vector2(300, 24));
+            var txtSfxVal = CreateText(card, "SfxValText", "100%", 18, new Vector2(275, 115), new Vector2(80, 35), Color.yellow);
 
             // Hiển thị
             CreateText(card, "DispHeader", "CÀI ĐẶT HIỂN THỊ", 24, new Vector2(-220, 40), new Vector2(350, 40), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
