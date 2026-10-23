@@ -162,7 +162,8 @@ namespace Math6Companion.UI
         private void OnBackToMenuClicked()
         {
             PlayClick();
-            SceneManager.LoadScene("02_MainMenu");
+            string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
+            SceneManager.LoadScene(target);
         }
 
         private void PlayClick()

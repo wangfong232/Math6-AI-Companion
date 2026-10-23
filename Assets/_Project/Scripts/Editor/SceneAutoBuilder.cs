@@ -26,7 +26,7 @@ namespace Math6Companion.EditorTools
         {
             EditorApplication.delayCall += () =>
             {
-                string flagPath = "Temp/Math6_ScenesBuilt_V6.flag";
+                string flagPath = "Temp/Math6_ScenesBuilt_V8.flag";
                 if (File.Exists(flagPath)) return;
 
                 try
@@ -47,6 +47,29 @@ namespace Math6Companion.EditorTools
         public static void GenerateAllScenes()
         {
             ExecuteBuildAllScenesDirect(true);
+        }
+
+        [MenuItem("Math6 / 🧹 DỌN DẸP SCRIPT MISSING TRONG TẤT CẢ SCENE", priority = 10)]
+        public static void CleanMissingScriptsInAllScenes()
+        {
+            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { SCENES_DIR });
+            int totalRemoved = 0;
+            foreach (var guid in sceneGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+                var roots = scene.GetRootGameObjects();
+                foreach (var root in roots)
+                {
+                    var all = root.GetComponentsInChildren<Transform>(true);
+                    foreach (var t in all)
+                    {
+                        totalRemoved += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(t.gameObject);
+                    }
+                }
+                EditorSceneManager.SaveScene(scene);
+            }
+            Debug.Log($"[Math6] ✅ Đã dọn dẹp sạch {totalRemoved} script missing trong toàn bộ Scene!");
         }
 
         public static void ExecuteBuildAllScenesDirect(bool showDialog)
@@ -360,24 +383,29 @@ namespace Math6Companion.EditorTools
             rt.sizeDelta = size;
             go.GetComponent<Image>().color = new Color(0.15f, 0.2f, 0.25f);
 
+            var textArea = new GameObject("Text Area", typeof(RectTransform), typeof(RectMask2D));
+            textArea.transform.SetParent(go.transform, false);
+            var areaRt = textArea.GetComponent<RectTransform>();
+            SetFullStretch(areaRt);
+            areaRt.offsetMin = new Vector2(15, 5);
+            areaRt.offsetMax = new Vector2(-15, -5);
+
             var textGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            textGo.transform.SetParent(go.transform, false);
+            textGo.transform.SetParent(textArea.transform, false);
             var textRt = textGo.GetComponent<RectTransform>();
             SetFullStretch(textRt);
-            textRt.offsetMin = new Vector2(15, 5);
-            textRt.offsetMax = new Vector2(-15, -5);
 
             var textTmp = textGo.GetComponent<TextMeshProUGUI>();
             textTmp.fontSize = 20;
             textTmp.color = Color.white;
             textTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            textTmp.richText = false;
+            textTmp.raycastTarget = false;
 
             var phGo = new GameObject("Placeholder", typeof(RectTransform), typeof(TextMeshProUGUI));
-            phGo.transform.SetParent(go.transform, false);
+            phGo.transform.SetParent(textArea.transform, false);
             var phRt = phGo.GetComponent<RectTransform>();
             SetFullStretch(phRt);
-            phRt.offsetMin = new Vector2(15, 5);
-            phRt.offsetMax = new Vector2(-15, -5);
 
             var phTmp = phGo.GetComponent<TextMeshProUGUI>();
             phTmp.text = placeholderText;
@@ -385,10 +413,14 @@ namespace Math6Companion.EditorTools
             phTmp.fontStyle = FontStyles.Italic;
             phTmp.color = new Color(0.7f, 0.7f, 0.7f, 0.5f);
             phTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            phTmp.richText = false;
+            phTmp.raycastTarget = false;
 
             var input = go.GetComponent<TMP_InputField>();
+            input.textViewport = areaRt;
             input.textComponent = textTmp;
             input.placeholder = phTmp;
+            input.richText = false;
 
             return input;
         }
@@ -542,16 +574,19 @@ namespace Math6Companion.EditorTools
 
             var panel = new GameObject("LoginCard", typeof(RectTransform), typeof(Image));
             panel.transform.SetParent(canvas.transform, false);
-            panel.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 520);
+            panel.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 580);
             panel.GetComponent<Image>().color = new Color(0.12f, 0.17f, 0.24f);
 
-            CreateText(panel, "CardTitle", "ĐĂNG NHẬP", 32, new Vector2(0, 190), new Vector2(400, 60), new Color(0.95f, 0.75f, 0.2f));
-            var userInput = CreateInputField(panel, "UsernameInput", "Nhập tên đăng nhập...", new Vector2(0, 90), new Vector2(400, 55));
-            var passInput = CreateInputField(panel, "PasswordInput", "Nhập mật khẩu...", new Vector2(0, 15), new Vector2(400, 55));
+            CreateText(panel, "CardTitle", "ĐĂNG NHẬP", 32, new Vector2(0, 220), new Vector2(400, 60), new Color(0.95f, 0.75f, 0.2f));
+            var userInput = CreateInputField(panel, "UsernameInput", "Nhập tên đăng nhập...", new Vector2(0, 130), new Vector2(400, 55));
+            var passInput = CreateInputField(panel, "PasswordInput", "Nhập mật khẩu...", new Vector2(0, 55), new Vector2(400, 55));
             passInput.contentType = TMP_InputField.ContentType.Password;
 
-            var loginBtn = CreateButton(panel, "LoginButton", "ĐĂNG NHẬP >", new Vector2(0, -70), new Vector2(400, 55), new Color(0.2f, 0.6f, 0.9f));
-            var status = CreateText(panel, "StatusText", "", 18, new Vector2(0, -140), new Vector2(400, 40), Color.yellow);
+            var loginBtn = CreateButton(panel, "LoginButton", "ĐĂNG NHẬP >", new Vector2(0, -25), new Vector2(400, 55), new Color(0.2f, 0.6f, 0.9f));
+            var status = CreateText(panel, "StatusText", "", 18, new Vector2(0, -90), new Vector2(400, 35), Color.yellow);
+
+            var btnStudent = CreateButton(panel, "Btn_QuickStudent", "Nhanh: Học Sinh (student_01)", new Vector2(0, -145), new Vector2(400, 42), new Color(0.2f, 0.5f, 0.4f));
+            var btnTeacher = CreateButton(panel, "Btn_QuickTeacher", "Nhanh: Giáo Viên (teacher_01)", new Vector2(0, -195), new Vector2(400, 42), new Color(0.5f, 0.35f, 0.2f));
 
             var loading = new GameObject("LoadingIndicator", typeof(RectTransform));
             loading.transform.SetParent(panel.transform, false);
@@ -563,6 +598,10 @@ namespace Math6Companion.EditorTools
             SetField(manager, "loginButton", loginBtn);
             SetField(manager, "statusText", status);
             SetField(manager, "loadingIndicator", loading);
+
+            // Gán sự kiện cho 2 nút đăng nhập nhanh
+            btnStudent.onClick.AddListener(() => manager.QuickFillAccount("student_01", "123"));
+            btnTeacher.onClick.AddListener(() => manager.QuickFillAccount("teacher_01", "123"));
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), $"{SCENES_DIR}/01_Login.unity");
         }
@@ -602,10 +641,14 @@ namespace Math6Companion.EditorTools
             var btnLog = CreateButton(canvas, "Btn_PracticeLog", "5. NHẬT KÝ HỌC TẬP", new Vector2(0, 0), new Vector2(330, 130), new Color(0.25f, 0.6f, 0.75f));
             var btnSettings = CreateButton(canvas, "Btn_Settings", "6. CÀI ĐẶT HỆ THỐNG", new Vector2(360, 0), new Vector2(330, 130), new Color(0.45f, 0.5f, 0.6f));
 
+            // Nút nổi bật dẫn vào Thế giới 3D Làng Sen
+            var btnVillage3D = CreateButton(canvas, "Btn_Village3D", ">> BƯỚC VÀO THẾ GIỚI 3D LÀNG SEN TRI THỨC <<", new Vector2(0, -110), new Vector2(700, 65), new Color(0.18f, 0.75f, 0.38f));
+
             var manager = new GameObject("_MainMenuManager").AddComponent<MainMenuUIController>();
             SetField(manager, "nicknameText", nickText);
             SetField(manager, "userSubInfoText", subText);
             SetField(manager, "avatarImage", avatar.GetComponent<Image>());
+            SetField(manager, "enterVillage3DButton", btnVillage3D);
             SetField(manager, "lessonListButton", btnLesson);
             SetField(manager, "mcqPracticeButton", btnMCQ);
             SetField(manager, "essayPracticeButton", btnEssay);
@@ -654,8 +697,13 @@ namespace Math6Companion.EditorTools
             var csf = content.GetComponent<ContentSizeFitter>();
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            scrollGo.GetComponent<ScrollRect>().content = cRt;
-            scrollGo.GetComponent<ScrollRect>().viewport = viewport.GetComponent<RectTransform>();
+            var sr = scrollGo.GetComponent<ScrollRect>();
+            sr.content = cRt;
+            sr.viewport = viewport.GetComponent<RectTransform>();
+            sr.scrollSensitivity = 38f;
+            sr.inertia = true;
+            sr.decelerationRate = 0.135f;
+            sr.movementType = ScrollRect.MovementType.Elastic;
 
             // Action Modal
             var modal = new GameObject("ActionModal", typeof(RectTransform), typeof(Image));
@@ -749,7 +797,8 @@ namespace Math6Companion.EditorTools
         {
             CreateBaseScene("05_MCQPractice", out GameObject canvas);
 
-            var topicTitle = CreateText(canvas, "TopicTitleText", "Chủ đề: Số nguyên (DỄ)", 26, new Vector2(-400, 480), new Vector2(500, 50), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
+            var backBtn = CreateButton(canvas, "Btn_BackToMenu", "< Menu", new Vector2(-780, 480), new Vector2(160, 50), new Color(0.3f, 0.35f, 0.45f));
+            var topicTitle = CreateText(canvas, "TopicTitleText", "Chủ đề: Số nguyên (DỄ)", 26, new Vector2(-320, 480), new Vector2(500, 50), new Color(0.95f, 0.75f, 0.2f), TextAlignmentOptions.MidlineLeft);
             var progress = CreateText(canvas, "ProgressText", "Câu 1/10", 26, new Vector2(0, 480), new Vector2(200, 50), Color.white);
             var timer = CreateText(canvas, "TimerText", "00:30", 28, new Vector2(400, 480), new Vector2(200, 50), Color.yellow, TextAlignmentOptions.MidlineRight);
 
@@ -780,6 +829,7 @@ namespace Math6Companion.EditorTools
             SetField(manager, "feedbackText", feedback);
             SetField(manager, "nextButton", nextBtn);
             SetField(manager, "closeQuizButton", closeBtn);
+            SetField(manager, "backToMenuButton", backBtn);
 
             // Mảng Button
             var so = new SerializedObject(manager);
@@ -1147,6 +1197,7 @@ namespace Math6Companion.EditorTools
             {
                 $"{SCENES_DIR}/00_Bootstrapper.unity",
                 $"{SCENES_DIR}/01_Login.unity",
+                $"{SCENES_DIR}/02_VillageWorld.unity",
                 $"{SCENES_DIR}/02_MainMenu.unity",
                 $"{SCENES_DIR}/03_LessonList.unity",
                 $"{SCENES_DIR}/04_LessonContent.unity",

@@ -65,8 +65,20 @@ namespace Math6Companion.Core
             }
             yield return new WaitForSeconds(0.3f);
 
-            // 3. Khởi tạo Service Layer (Mock hoặc Real)
-            UpdateProgress(0.7f, "Kiểm tra kết nối dịch vụ...");
+            // 3. Khởi tạo Service Layer (Google Sheets API & Gemini AI Service)
+            UpdateProgress(0.7f, "Kết nối dịch vụ Google Sheets & Gemini AI...");
+            if (Math6Companion.Core.Services.GoogleSheetsNetworkService.Instance == null)
+            {
+                var goSheets = new GameObject("[GoogleSheetsNetworkService]");
+                goSheets.AddComponent<Math6Companion.Core.Services.GoogleSheetsNetworkService>();
+            }
+
+            if (Math6Companion.Core.Services.GeminiAITutorService.Instance == null)
+            {
+                var goGemini = new GameObject("[GeminiAITutorService]");
+                goGemini.AddComponent<Math6Companion.Core.Services.GeminiAITutorService>();
+            }
+
             if (Math6Companion.Core.Mock.MockNetworkService.Instance == null)
             {
                 if (mockNetworkPrefab != null)

@@ -73,6 +73,7 @@ namespace Math6Companion.Core.Contracts
         public QuestionOptionMap options;
         public string correctAnswer;
         public List<RubricItem> rubric;
+        public string rubricRaw; // Cỗi thô từ server để tránh parse JSON trên Google server
         public string explanation;
         public int maxScore;
     }
@@ -85,7 +86,9 @@ namespace Math6Companion.Core.Contracts
         public string title;
         public string description;
         public int grade;
+        public int orderIndex;
         public string summaryText;
+        public string objectives;
         public string videoUrl;
         public int userHighestScore;
         public string topStudentNickname;
@@ -103,6 +106,24 @@ namespace Math6Companion.Core.Contracts
         public int maxScore;
         public int timeSpentSeconds;
         public int mistakesCount;
+        public string timestamp;
+    }
+
+    [Serializable]
+    public class AITutorLogSubmission
+    {
+        public string action = "logAITutor";
+        public string userId;
+        public string lessonId;
+        public string questionId;
+        public string sessionType; // "SOCRATIC_HINT", "ESSAY_GRADING", "MINIGAME_HELP"
+        public string studentPrompt;
+        public string studentAnswer;
+        public string aiFeedback;
+        public string detectedMistake;
+        public int score;
+        public int maxScore;
+        public string timestamp;
     }
 
     [Serializable]
@@ -175,6 +196,7 @@ namespace Math6Companion.Core.Contracts
         public string questionId;
         public string prompt;
         public string studentSteps;
+        public string imageBase64;
         public List<RubricItem> rubric;
     }
 
@@ -206,6 +228,7 @@ namespace Math6Companion.Core.Contracts
         void GetLessons(string topic, Action<bool, List<LessonData>, string> callback);
         void GetQuestions(string topic, string grade, Action<bool, List<QuestionData>, string> callback);
         void SaveResult(ResultSubmission submission, Action<bool, List<BadgeData>, string> callback);
+        void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback);
         void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback);
     }
 

@@ -18,6 +18,7 @@ namespace Math6Companion.UI
         [SerializeField] private Image avatarImage;
 
         [Header("Core Feature Buttons")]
+        [SerializeField] private Button enterVillage3DButton;  // 0. Bước vào Thế giới 3D Làng Sen
         [SerializeField] private Button lessonListButton;      // 1. Danh sách bài học
         [SerializeField] private Button mcqPracticeButton;     // 2. Luyện tập trắc nghiệm
         [SerializeField] private Button essayPracticeButton;   // 3. Luyện tập tự luận
@@ -33,14 +34,32 @@ namespace Math6Companion.UI
             UpdateUserProfileUI();
 
             // Đăng ký sự kiện các nút
+            if (enterVillage3DButton != null)
+                enterVillage3DButton.onClick.AddListener(() => NavigateToScene("02_VillageWorld"));
+
             if (lessonListButton != null)
                 lessonListButton.onClick.AddListener(() => NavigateToScene("03_LessonList"));
 
             if (mcqPracticeButton != null)
-                mcqPracticeButton.onClick.AddListener(() => NavigateToScene("05_MCQPractice"));
+                mcqPracticeButton.onClick.AddListener(() =>
+                {
+                    PlayerPrefs.SetString("Current_Lesson_ID", "");
+                    PlayerPrefs.SetString("Current_Lesson_Title", "");
+                    PlayerPrefs.SetString("Current_Lesson_Topic", "ALL");
+                    PlayerPrefs.SetInt("Quiz_IsWrongReviewMode", 0);
+                    LessonListUIController.CurrentSelectedLesson = null;
+                    NavigateToScene("05_MCQPractice");
+                });
 
             if (essayPracticeButton != null)
-                essayPracticeButton.onClick.AddListener(() => NavigateToScene("06_EssayPractice"));
+                essayPracticeButton.onClick.AddListener(() =>
+                {
+                    PlayerPrefs.SetString("Current_Lesson_ID", "");
+                    PlayerPrefs.SetString("Current_Lesson_Title", "");
+                    PlayerPrefs.SetString("Current_Lesson_Topic", "ALL");
+                    LessonListUIController.CurrentSelectedLesson = null;
+                    NavigateToScene("06_EssayPractice");
+                });
 
             if (versusLobbyButton != null)
                 versusLobbyButton.onClick.AddListener(() => NavigateToScene("09_VersusLobby"));
@@ -57,25 +76,28 @@ namespace Math6Companion.UI
 
         private void UpdateUserProfileUI()
         {
+            string nick = "Hiệp Sĩ Toán 6";
+            string cls = "6A1";
+            string name = "Nguyễn Văn An";
+
             if (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null)
             {
                 var user = SessionManager.Instance.CurrentUser;
-                if (nicknameText != null)
-                {
-                    nicknameText.text = !string.IsNullOrEmpty(user.nickname) ? user.nickname : user.fullName;
-                }
+                if (!string.IsNullOrEmpty(user.nickname)) nick = user.nickname;
+                else if (!string.IsNullOrEmpty(user.fullName)) nick = user.fullName;
 
-                if (userSubInfoText != null)
-                {
-                    userSubInfoText.text = $"Lớp: {user.classId} | {user.fullName}";
-                }
+                if (!string.IsNullOrEmpty(user.classId)) cls = user.classId;
+                if (!string.IsNullOrEmpty(user.fullName)) name = user.fullName;
             }
             else
             {
-                // Dữ liệu mặc định nếu chạy trực tiếp Scene Menu khi test trong Unity Editor
-                if (nicknameText != null) nicknameText.text = "Học sinh Toán 6";
-                if (userSubInfoText != null) userSubInfoText.text = "Lớp 6A1 | Chưa đăng nhập";
+                nick = PlayerPrefs.GetString("User_Nickname", PlayerPrefs.GetString("User_FullName", "Hiệp Sĩ Toán 6"));
+                cls = PlayerPrefs.GetString("User_ClassId", "6A1");
+                name = PlayerPrefs.GetString("User_FullName", "Nguyễn Văn An");
             }
+
+            if (nicknameText != null) nicknameText.text = nick;
+            if (userSubInfoText != null) userSubInfoText.text = $"Lớp: {cls} | {name}";
         }
 
         private void NavigateToScene(string sceneName)
@@ -83,6 +105,11 @@ namespace Math6Companion.UI
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayButtonClick();
+            }
+
+            if (SessionManager.Instance != null)
+            {
+                SessionManager.Instance.ReturnSceneName = sceneName == "02_VillageWorld" ? "02_VillageWorld" : "02_MainMenu";
             }
 
             SceneManager.LoadScene(sceneName);

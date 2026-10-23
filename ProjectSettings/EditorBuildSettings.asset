@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/01_Login.unity
     guid: 1fd8db3e9b77e9c4fba8fcc799bfb7f4
   - enabled: 1
+    path: Assets/Scenes/02_VillageWorld.unity
+    guid: 8b4c29fa71e84a29a5cb62e3d9f10a8b
+  - enabled: 1
     path: Assets/Scenes/02_MainMenu.unity
     guid: fce9ea388e3df9141b529aa6ed1e6245
   - enabled: 1

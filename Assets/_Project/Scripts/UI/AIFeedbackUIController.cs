@@ -37,7 +37,7 @@ namespace Math6Companion.UI
                 backToScoreButton.onClick.AddListener(() => NavigateScene("07_Score"));
 
             if (backToMenuButton != null)
-                backToMenuButton.onClick.AddListener(() => NavigateScene("02_MainMenu"));
+                backToMenuButton.onClick.AddListener(() => NavigateScene(SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld"));
 
             if (nextWrongQuestionButton != null)
                 nextWrongQuestionButton.onClick.AddListener(OnNextClicked);
@@ -50,22 +50,88 @@ namespace Math6Companion.UI
 
         private void LoadFeedbackData()
         {
-            if (ScoreSessionContext.WrongQuestionPrompts != null && ScoreSessionContext.WrongQuestionPrompts.Count > 0)
+            if (ScoreSessionContext.ActivityType == "ESSAY" && !string.IsNullOrEmpty(ScoreSessionContext.EssayFeedback))
+            {
+                // Phản hồi bài tự luận theo Rubric
+                if (tutorGreetingText != null)
+                {
+                    tutorGreetingText.text = "Thầy Minh đã phân tích bài tự luận của em:";
+                }
+                if (questionTitleText != null) questionTitleText.text = "Đánh giá theo Rubric từng bước";
+
+                if (diagnosisBodyText != null)
+                {
+                    diagnosisBodyText.text = ScoreSessionContext.EssayFeedback;
+                    var rt = diagnosisBodyText.GetComponent<RectTransform>();
+                    if (rt != null)
+                    {
+                        rt.anchoredPosition = new Vector2(0, 30);
+                        rt.sizeDelta = new Vector2(1020, 260);
+                    }
+                }
+
+                if (ruleReminderText != null)
+                {
+                    ruleReminderText.gameObject.SetActive(false);
+                }
+
+                if (analogousProblemText != null)
+                {
+                    var rtAnalog = analogousProblemText.GetComponent<RectTransform>();
+                    if (rtAnalog != null)
+                    {
+                        rtAnalog.anchoredPosition = new Vector2(0, -170);
+                        rtAnalog.sizeDelta = new Vector2(1020, 60);
+                    }
+                    analogousProblemText.text = "Bài tương tự: Thử rèn luyện thêm bài tập cùng dạng để nắm vững các bước nhé!";
+                    analogousProblemText.gameObject.SetActive(true);
+                }
+
+                if (nextWrongQuestionButton != null) nextWrongQuestionButton.gameObject.SetActive(false);
+                if (prevWrongQuestionButton != null) prevWrongQuestionButton.gameObject.SetActive(false);
+                if (pageIndicatorText != null) pageIndicatorText.text = "Tự luận";
+            }
+            else if (ScoreSessionContext.WrongQuestionPrompts != null && ScoreSessionContext.WrongQuestionPrompts.Count > 0)
             {
                 currentWrongIndex = 0;
                 DisplayWrongQuestion(currentWrongIndex);
             }
             else if (!string.IsNullOrEmpty(ScoreSessionContext.EssayFeedback))
             {
-                // Phản hồi bài tự luận
+                // Fallback nếu có feedback tự luận
                 if (tutorGreetingText != null)
                 {
                     tutorGreetingText.text = "Thầy Minh đã phân tích bài tự luận của em:";
                 }
                 if (questionTitleText != null) questionTitleText.text = "Đánh giá theo Rubric từng bước";
-                if (diagnosisBodyText != null) diagnosisBodyText.text = ScoreSessionContext.EssayFeedback;
-                if (ruleReminderText != null) ruleReminderText.text = "Quy tắc: Luôn kiểm tra lại dấu âm/dương trước khi chuyển sang bước tiếp theo.";
-                if (analogousProblemText != null) analogousProblemText.text = "Bài tương tự: Thử giải biểu thức: 20 - (4 + 3) * 2.";
+
+                if (diagnosisBodyText != null)
+                {
+                    diagnosisBodyText.text = ScoreSessionContext.EssayFeedback;
+                    var rt = diagnosisBodyText.GetComponent<RectTransform>();
+                    if (rt != null)
+                    {
+                        rt.anchoredPosition = new Vector2(0, 30);
+                        rt.sizeDelta = new Vector2(1020, 260);
+                    }
+                }
+
+                if (ruleReminderText != null)
+                {
+                    ruleReminderText.gameObject.SetActive(false);
+                }
+
+                if (analogousProblemText != null)
+                {
+                    var rtAnalog = analogousProblemText.GetComponent<RectTransform>();
+                    if (rtAnalog != null)
+                    {
+                        rtAnalog.anchoredPosition = new Vector2(0, -170);
+                        rtAnalog.sizeDelta = new Vector2(1020, 60);
+                    }
+                    analogousProblemText.text = "Bài tương tự: Thử giải biểu thức: 20 - (4 + 3) * 2.";
+                    analogousProblemText.gameObject.SetActive(true);
+                }
 
                 if (nextWrongQuestionButton != null) nextWrongQuestionButton.gameObject.SetActive(false);
                 if (prevWrongQuestionButton != null) prevWrongQuestionButton.gameObject.SetActive(false);
@@ -113,7 +179,7 @@ namespace Math6Companion.UI
                 diagnosisBodyText.text = $"Em đã chọn: '{wrongAns}' (Chưa chính xác).\nĐáp án đúng là: '{correctAns}'.\n\nGiải thích chi tiết: {explanation}";
 
             if (ruleReminderText != null)
-                ruleReminderText.text = "Lưu ý: Luôn đọc kỹ quy tắc cộng trừ số nguyên và thứ tự thực hiện phép tính trong ngoặc trước!";
+                ruleReminderText.text = "Lưu ý: Đọc kỹ đề bài và đối chiếu với lời giải chi tiết ở trên để nắm vững phương pháp giải nhé!";
 
             if (analogousProblemText != null)
                 analogousProblemText.text = "Em hãy ghi nhớ quy tắc này để không bị nhầm lẫn trong lần làm tiếp theo nhé!";

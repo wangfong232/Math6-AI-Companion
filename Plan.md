@@ -35,8 +35,13 @@ Nhóm 3 sinh viên xây dựng dự án trong thời gian 8–9 tuần cần gi�
    * Cho phép học sinh giải ra vở nháp, sử dụng **Nút Chụp ảnh trực tiếp từ Camera** hoặc **Nút Chọn ảnh từ thư viện thiết bị**.
    * Ảnh nộp bài được mã hóa Base64 hoặc upload Drive gửi sang Gemini 1.5/2.0 Flash để nhận diện và chấm điểm theo Rubric từng bước.
    * Cung cấp thêm Bàn phím ảo toán học (Virtual Math Keypad) dự phòng gõ công thức trực tiếp.
-3. **Kiến trúc 11 Scene chuẩn hóa**:
-   * Phân tách mạch lạc từng trách nhiệm của màn hình: từ Đăng nhập, Menu chính, Học lý thuyết, Luyện tập trắc nghiệm/tự luận đến Đối kháng và Nhật ký.
+3. **Kiến trúc Thế Giới 3D "Làng Sen Tri Thức" & 11 Scene chuẩn hóa**:
+   * **Thế Giới 3D (`02_VillageWorld`)**: Nhân vật học sinh góc nhìn thứ ba tự do chạy nhảy khám phá làng quê Việt Nam (Chùa Một Cột, ruộng bậc thang Tây Bắc, quán phở vỉa hè) cùng Bé AI Companion (Scout Bot) bay theo hỗ trợ.
+   * **4 Minigame Toán 6 Thực Tế**:
+     - *Minigame 1: Quán Phở Cụ Ba*: Phân số (1/2 bánh, 1/4 thịt, 1/4 nước dùng) & Phép tính số nguyên khi thanh toán.
+     - *Minigame 2: Ruộng Bậc Thang*: Trục số nguyên $\mathbb{Z}$ & Độ cao/độ sâu âm dương.
+     - *Minigame 3: Chùa Một Cột*: Hình học trực quan & Trục đối xứng gương.
+     - *Minigame 4: Bảng Cáo Thị Làng*: Cầu nối tích hợp trực tiếp vào 11 Scene UI chuẩn (Lý thuyết, Trắc nghiệm, Tự luận, Thi đấu đối kháng 3 phút).
    * Tái sử dụng **Scene Điểm (`07_Score`)** và **Scene AI Gợi ý (`08_AIFeedback`)** làm màn hình dùng chung (Shared Scenes) cho tất cả các chế độ luyện tập và thi đấu.
 4. **Cơ chế Thi đấu đối kháng 3 phút (Versus Battle)**:
    * Quét danh sách tài khoản đang đăng nhập trong cơ sở dữ liệu.
@@ -240,13 +245,10 @@ flowchart TD
 | Scene nguồn | Hành động / Sự kiện | Scene đích | Dữ liệu truyền kèm (State/Payload) |
 | :--- | :--- | :--- | :--- |
 | `00_Bootstrapper` | Khởi tạo xong Services | `01_Login` | Không |
-| `01_Login` | Xác thực đăng nhập thành công | `02_MainMenu` | `UserData` (userId, fullName, role, nickname) |
-| `02_MainMenu` | Bấm "Danh sách bài học" | `03_LessonList` | `userProgressList` |
-| `02_MainMenu` | Bấm "Luyện tập trắc nghiệm" | `05_MCQPractice` | `mode = SOLO_PRACTICE, questionCount = 10` |
-| `02_MainMenu` | Bấm "Luyện tập tự luận" | `06_EssayPractice` | `mode = SOLO_PRACTICE, randomQuestion = true` |
-| `02_MainMenu` | Bấm "Thi đấu đối kháng" | `09_VersusLobby` | `currentUserId, nickname` |
-| `02_MainMenu` | Bấm "Nhật ký luyện tập" | `10_PracticeLog` | `view = SUMMARY_DEFAULT` |
-| `02_MainMenu` | Bấm "Cài đặt" | `11_Settings` | `currentAudioSettings, currentBrightness, nickname` |
+| `01_Login` | Xác thực đăng nhập thành công | `02_VillageWorld` | `UserData` (userId, fullName, role, nickname) -> Vào trực tiếp Thế giới 3D |
+| `02_VillageWorld` (Hub 3D) | Tương tác Bảng Cáo Thị / Phím tắt | `03_LessonList`, `05`, `06`, `09`, `10`, `11` | Tự động lưu vị trí & góc nhìn nhân vật (`SessionManager.SaveVillagePosition`) |
+| `02_MainMenu` | Bấm "Bước vào Thế giới 3D" | `02_VillageWorld` | Khôi phục vị trí lưu hoặc xuất phát đầu làng |
+| `03_LessonList` / `06` / `07` / `09` / `10` / `11` | Bấm "Quay lại" / "Về Làng Sen" | `SessionManager.ReturnSceneName` (`02_VillageWorld`) | Tự động đưa nhân vật trở lại đúng vị trí trước Bảng Cáo Thị / Quầy tương tác |
 | `03_LessonList` | Chọn "Nội dung Text/Video" | `04_LessonContent` | `selectedLessonId, initialTab = TEXT/VIDEO` |
 | `03_LessonList` | Chọn "Luyện trắc nghiệm bài này"| `05_MCQPractice` | `lessonId = selectedLessonId, count = 10` |
 | `03_LessonList` | Chọn "Luyện tự luận bài này" | `06_EssayPractice` | `lessonId = selectedLessonId` |
@@ -255,7 +257,7 @@ flowchart TD
 | `06_EssayPractice`| Nộp bài chụp/chọn ảnh | `07_Score` | `EssayResult` (score, maxScore, rubricAnalysis, imageRef) |
 | `07_Score` | Bấm "Gợi ý câu sai bằng AI" | `08_AIFeedback` | `FeedbackContext` (wrongQuestions / essayRubricAnalysis) |
 | `07_Score` | Bấm "Làm lại" | `05_MCQPractice` hoặc `06_EssayPractice` | `retryContext` |
-| `07_Score` / `08_AIFeedback` | Bấm "Về Menu chính" | `02_MainMenu` | Không |
+| `07_Score` / `08_AIFeedback` | Bấm "Về Làng Sen 3D" | `02_VillageWorld` | Khôi phục vị trí đứng của học sinh |
 | `09_VersusLobby` | Cả 2 Accept & Chọn Trắc nghiệm | `05_MCQPractice` | `mode = VERSUS_BATTLE, timer = 180s, opponentData` |
 | `09_VersusLobby` | Cả 2 Accept & Chọn Tự luận | `06_EssayPractice` | `mode = VERSUS_BATTLE, timer = 180s, opponentData` |
 

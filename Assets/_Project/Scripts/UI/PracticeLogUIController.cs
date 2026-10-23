@@ -44,6 +44,7 @@ namespace Math6Companion.UI
 
         private struct MockLessonLog
         {
+            public string lessonId;
             public string title;
             public int attempts;
             public int highestScore;
@@ -55,6 +56,17 @@ namespace Math6Companion.UI
 
         private void Awake()
         {
+            if (lessonDropdown != null && lessonDropdown.template != null)
+            {
+                var templateScroll = lessonDropdown.template.GetComponentInChildren<ScrollRect>();
+                if (templateScroll != null)
+                {
+                    templateScroll.scrollSensitivity = 48f;
+                    templateScroll.inertia = true;
+                    templateScroll.decelerationRate = 0.135f;
+                }
+            }
+
             if (lessonDropdown != null && lessonDropdown.template == null)
             {
                 var dropGo = lessonDropdown.gameObject;
@@ -152,11 +164,111 @@ namespace Math6Companion.UI
                 lessonDropdown.onValueChanged.AddListener(OnLessonDropdownChanged);
             }
 
-            InitMockData();
+            string target = PlayerPrefs.GetString("PracticeLog_TargetLesson", "");
+            if (!string.IsNullOrEmpty(target))
+            {
+                isDetailMode = true;
+            }
+
+            LoadLivePracticeData();
             UpdateViewMode();
         }
 
-        private void InitMockData()
+        public void LoadLivePracticeData()
+        {
+            var networkService = Math6Companion.Core.Services.NetworkServiceProvider.NetworkService;
+            string userId = PlayerPrefs.GetString("User_ID", "STU_001");
+
+            // Khởi tạo trước dữ liệu dự phòng
+            InitDefaultLessonLogs();
+
+            if (networkService != null)
+            {
+                networkService.GetLessons("ALL", (lOk, lessons, lMsg) =>
+                {
+                    if (this == null || gameObject == null) return;
+
+                    networkService.GetStudentAnalytics(userId, (anOk, analytics, anMsg) =>
+                    {
+                        if (this == null || gameObject == null) return;
+
+                        if (anOk && analytics != null)
+                        {
+                            // 2. Cập nhật chi tiết từng bài học từ Sheet kết hợp bộ nhớ cục bộ
+                            if (lessons != null && lessons.Count > 0)
+                            {
+                                mockLogs.Clear();
+                                int completedCount = 0;
+                                float totalScoreSum = 0;
+                                int totalAttemptsSum = 0;
+
+                                foreach (var les in lessons)
+                                {
+                                    var prog = analytics.progressList?.Find(p => p.lessonId == les.lessonId);
+                                    int localHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{les.lessonId}", -1);
+                                    int localAtt = PlayerPrefs.GetInt($"Lesson_Attempts_{les.lessonId}", 0);
+                                    string localDate = PlayerPrefs.GetString($"Lesson_LastDate_{les.lessonId}", "");
+
+                                    int att = prog != null && prog.attempts > 0 ? prog.attempts : localAtt;
+                                    int high = prog != null && prog.highestScore > 0 ? prog.highestScore : (localHigh >= 0 ? localHigh : les.userHighestScore);
+                                    int last = prog != null && prog.lastScore > 0 ? prog.lastScore : (localHigh >= 0 ? localHigh : high);
+                                    string dateStr = !string.IsNullOrEmpty(localDate) ? localDate : "Gần đây";
+
+                                    if (att > 0 || high > 0)
+                                    {
+                                        completedCount++;
+                                        totalScoreSum += high;
+                                        totalAttemptsSum += Mathf.Max(att, 1);
+                                    }
+
+                                    mockLogs.Add(new MockLessonLog
+                                    {
+                                        lessonId = les.lessonId,
+                                        title = les.title,
+                                        attempts = Mathf.Max(att, 0),
+                                        highestScore = high,
+                                        lastScore = last,
+                                        lastDate = dateStr
+                                    });
+                                }
+
+                                // 1. Cập nhật thống kê tổng quan chính xác theo số bài đã hoàn thành
+                                int finalCompleted = completedCount > 0 ? completedCount : analytics.completedLessons;
+                                float finalAvg = completedCount > 0 ? (totalScoreSum / completedCount) : (analytics.averageScore > 0 ? analytics.averageScore : 0f);
+                                int finalAttempts = totalAttemptsSum > 0 ? totalAttemptsSum : Mathf.Max(completedCount, 1);
+
+                                if (totalLessonsCompletedText != null) 
+                                    totalLessonsCompletedText.text = $"{finalCompleted} / {lessons.Count} Bài";
+                                
+                                if (averageScoreText != null) 
+                                    averageScoreText.text = $"{finalAvg:F1} / 10";
+
+                                if (totalAttemptsText != null) 
+                                    totalAttemptsText.text = $"{finalAttempts} lần";
+
+                                if (totalTimeText != null) 
+                                    totalTimeText.text = $"{Mathf.Max(finalAttempts * 5, 10)} phút";
+
+                                string targetLesson = PlayerPrefs.GetString("PracticeLog_TargetLesson", "");
+                                if (!string.IsNullOrEmpty(targetLesson))
+                                {
+                                    int matchIdx = mockLogs.FindIndex(m => m.lessonId == targetLesson || m.title.Contains(targetLesson));
+                                    if (matchIdx >= 0)
+                                    {
+                                        currentLessonIndex = matchIdx;
+                                    }
+                                    PlayerPrefs.DeleteKey("PracticeLog_TargetLesson");
+                                }
+
+                                RefreshDropdownOptions();
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        private void InitDefaultLessonLogs()
         {
             mockLogs = new List<MockLessonLog>
             {
@@ -165,7 +277,17 @@ namespace Math6Companion.UI
                 new MockLessonLog { title = "Bài 3: Khái niệm & Rút gọn phân số", attempts = 6, highestScore = 9, lastScore = 7, lastDate = "3 ngày trước lúc 20:00" }
             };
 
-            // Điền dữ liệu vào Dropdown nếu hợp lệ
+            RefreshDropdownOptions();
+
+            // Điền dữ liệu tổng hợp mặc định
+            if (totalLessonsCompletedText != null) totalLessonsCompletedText.text = "3 / 3 Bài";
+            if (averageScoreText != null) averageScoreText.text = "8.8 / 10";
+            if (totalAttemptsText != null) totalAttemptsText.text = "19 lần";
+            if (totalTimeText != null) totalTimeText.text = "1 giờ 45 phút";
+        }
+
+        private void RefreshDropdownOptions()
+        {
             if (lessonDropdown != null && lessonDropdown.enabled && lessonDropdown.template != null)
             {
                 lessonDropdown.ClearOptions();
@@ -177,11 +299,10 @@ namespace Math6Companion.UI
                 lessonDropdown.AddOptions(options);
             }
 
-            // Điền dữ liệu tổng hợp
-            if (totalLessonsCompletedText != null) totalLessonsCompletedText.text = "3 / 3 Bài";
-            if (averageScoreText != null) averageScoreText.text = "8.8 / 10";
-            if (totalAttemptsText != null) totalAttemptsText.text = "19 lần";
-            if (totalTimeText != null) totalTimeText.text = "1 giờ 45 phút";
+            if (isDetailMode)
+            {
+                OnLessonDropdownChanged(currentLessonIndex);
+            }
         }
 
         private void OnToggleModeClicked()
@@ -237,20 +358,24 @@ namespace Math6Companion.UI
 
             if (fallbackDropdownLabel != null)
             {
-                fallbackDropdownLabel.text = $"[Bài {index + 1}/3] {log.title}  (Bấm để đổi bài >)";
+                fallbackDropdownLabel.text = $"[Bài {index + 1}/{mockLogs.Count}] {log.title}  (Bấm để đổi bài >)";
             }
+
+            int normHighest = LessonListUIController.GetNormalizedScore(log.highestScore);
+            int normLast = LessonListUIController.GetNormalizedScore(log.lastScore);
 
             if (selectedLessonTitleText != null) selectedLessonTitleText.text = log.title;
             if (attemptsCountText != null) attemptsCountText.text = $"{log.attempts} lần làm bài";
-            if (highestScoreText != null) highestScoreText.text = $"{log.highestScore} / 10 điểm";
-            if (lastScoreText != null) lastScoreText.text = $"{log.lastScore} / 10 điểm";
+            if (highestScoreText != null) highestScoreText.text = $"{normHighest} / 10 điểm";
+            if (lastScoreText != null) lastScoreText.text = $"{normLast} / 10 điểm";
             if (lastDateText != null) lastDateText.text = $"Lần cuối: {log.lastDate}";
         }
 
         private void OnBackToMenuClicked()
         {
             PlayClick();
-            SceneManager.LoadScene("02_MainMenu");
+            string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
+            SceneManager.LoadScene(target);
         }
 
         private void PlayClick()

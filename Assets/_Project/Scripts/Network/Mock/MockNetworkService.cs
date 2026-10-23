@@ -9,12 +9,37 @@ namespace Math6Companion.Core.Mock
 {
     public class MockNetworkService : MonoBehaviour, INetworkService, IAITutorService
     {
-        public static MockNetworkService Instance { get; private set; }
+        private static bool isQuitting = false;
+        private static MockNetworkService instance;
+        public static MockNetworkService Instance
+        {
+            get
+            {
+                if (isQuitting) return null;
+                if (instance == null)
+                {
+                    instance = FindAnyObjectByType<MockNetworkService>();
+                    if (instance == null && !isQuitting)
+                    {
+                        var go = new GameObject("[MockNetworkService]");
+                        instance = go.AddComponent<MockNetworkService>();
+                        DontDestroyOnLoad(go);
+                    }
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         private void Awake()
         {
-            if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-            else { Destroy(gameObject); }
+            if (instance == null) { instance = this; DontDestroyOnLoad(gameObject); }
+            else if (instance != this) { Destroy(gameObject); }
+        }
+
+        private void OnApplicationQuit()
+        {
+            isQuitting = true;
         }
 
         #region INetworkService Mock
@@ -156,6 +181,15 @@ namespace Math6Companion.Core.Mock
             }));
         }
 
+        public void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                Debug.Log($"[MockNetworkService] AI Tutor Log saved: {logSubmission?.sessionType} | Student: {logSubmission?.studentAnswer} | Feedback: {logSubmission?.aiFeedback}");
+                callback?.Invoke(true, "Ghi nhận AI Tutor log (Mock) thành công!");
+            }));
+        }
+
         public void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback)
         {
             StartCoroutine(SimulateDelay(() =>
@@ -255,17 +289,41 @@ namespace Math6Companion.Core.Mock
         {
             StartCoroutine(SimulateDelay(() =>
             {
+                bool hasImage = !string.IsNullOrEmpty(payload.imageBase64);
+                string text = payload.studentSteps ?? "";
+                bool hasText = !string.IsNullOrEmpty(text) && !text.Contains("(Không có bài làm)");
+
+                if (!hasImage && !hasText)
+                {
+                    callback(true, new AIGradingResponse
+                    {
+                        score = 0,
+                        maxScore = 10,
+                        passed = false,
+                        detectedMistakeType = "UNREADABLE_OR_IRRELEVANT_IMAGE",
+                        pedagogicalFeedback = "Học sinh chưa cung cấp bài giải hoặc ảnh bài làm không hợp lệ.",
+                        stepAnalysis = new List<StepAnalysisItem>
+                        {
+                            new StepAnalysisItem { step = 1, isCorrect = false, comment = "Chưa có lời giải bước 1" },
+                            new StepAnalysisItem { step = 2, isCorrect = false, comment = "Chưa có lời giải bước 2" },
+                            new StepAnalysisItem { step = 3, isCorrect = false, comment = "Chưa có lời giải bước 3" }
+                        }
+                    }, "Success");
+                    return;
+                }
+
                 callback(true, new AIGradingResponse
                 {
-                    score = 8,
+                    score = 10,
                     maxScore = 10,
                     passed = true,
                     detectedMistakeType = "NONE",
-                    pedagogicalFeedback = "Bài làm rất rõ ràng, thực hiện đúng thứ tự các phép tính!",
+                    pedagogicalFeedback = "Bài làm rất rõ ràng, thực hiện chuẩn xác thứ tự các phép tính trong ngoặc trước, nhân chia trước cộng trừ sau!",
                     stepAnalysis = new List<StepAnalysisItem>
                     {
-                        new StepAnalysisItem { step = 1, isCorrect = true, comment = "Đúng bước 1" },
-                        new StepAnalysisItem { step = 2, isCorrect = true, comment = "Đúng bước 2" }
+                        new StepAnalysisItem { step = 1, isCorrect = true, comment = "Tính đúng trong ngoặc: (3 + 2) = 5" },
+                        new StepAnalysisItem { step = 2, isCorrect = true, comment = "Nhân trước: 5 * 2 = 10" },
+                        new StepAnalysisItem { step = 3, isCorrect = true, comment = "Trừ sau: 15 - 10 = 5" }
                     }
                 }, "Success");
             }));

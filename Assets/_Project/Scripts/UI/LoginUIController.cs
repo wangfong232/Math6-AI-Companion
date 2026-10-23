@@ -19,21 +19,37 @@ namespace Math6Companion.UI
         [SerializeField] private Button loginButton;
         [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private GameObject loadingIndicator;
+        [Header("Quick Test Login Buttons")]
+        [SerializeField] private Button quickStudentButton;
+        [SerializeField] private Button quickTeacherButton;
 
         private INetworkService networkService;
 
         private void Start()
         {
-            // Kết nối với MockNetworkService (hoặc GoogleSheetsClient sau này khi M2 ghép vào)
-            networkService = MockNetworkService.Instance;
-            if (networkService == null)
+            // Kết nối với Network Service (Google Sheets Web App qua NetworkServiceProvider)
+            networkService = Math6Companion.Core.Services.NetworkServiceProvider.NetworkService;
+
+            // Làm sạch input và tắt rich text để tránh IME/Vietkey chèn tag <u>
+            if (usernameInput != null)
             {
-                networkService = FindAnyObjectByType<MockNetworkService>();
+                usernameInput.richText = false;
+                if (usernameInput.textComponent != null) usernameInput.textComponent.richText = false;
+                usernameInput.onValueChanged.AddListener(val =>
+                {
+                    if (statusText != null && statusText.color == Color.red) statusText.text = string.Empty;
+                });
             }
 
             if (passwordInput != null)
             {
+                passwordInput.richText = false;
+                if (passwordInput.textComponent != null) passwordInput.textComponent.richText = false;
                 passwordInput.contentType = TMP_InputField.ContentType.Password;
+                passwordInput.onValueChanged.AddListener(val =>
+                {
+                    if (statusText != null && statusText.color == Color.red) statusText.text = string.Empty;
+                });
             }
 
             if (statusText != null)
@@ -50,6 +66,61 @@ namespace Math6Companion.UI
             {
                 loginButton.onClick.AddListener(OnLoginButtonClicked);
             }
+
+            // Tự động tìm và liên kết 2 nút đăng nhập nhanh
+            if (quickStudentButton == null)
+            {
+                var btn = GameObject.Find("Btn_QuickStudent");
+                if (btn != null) quickStudentButton = btn.GetComponent<Button>();
+            }
+            if (quickStudentButton != null)
+            {
+                quickStudentButton.onClick.RemoveAllListeners();
+                quickStudentButton.onClick.AddListener(() => QuickFillAccount("student_01", "123"));
+            }
+
+            if (quickTeacherButton == null)
+            {
+                var btn = GameObject.Find("Btn_QuickTeacher");
+                if (btn != null) quickTeacherButton = btn.GetComponent<Button>();
+            }
+            if (quickTeacherButton != null)
+            {
+                quickTeacherButton.onClick.RemoveAllListeners();
+                quickTeacherButton.onClick.AddListener(() => QuickFillAccount("teacher_01", "123"));
+            }
+        }
+
+        private void Update()
+        {
+            // Cho phép bấm Enter để đăng nhập nhanh
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
+                if (loginButton != null && loginButton.interactable)
+                {
+                    OnLoginButtonClicked();
+                }
+            }
+        }
+
+        public void QuickFillAccount(string username, string password)
+        {
+            if (usernameInput != null)
+            {
+                usernameInput.text = username;
+            }
+            if (passwordInput != null)
+            {
+                passwordInput.text = password;
+            }
+            if (statusText != null)
+            {
+                statusText.text = $"Đã điền tài khoản: {username}. Đang đăng nhập...";
+                statusText.color = Color.green;
+            }
+
+            // Tự động đăng nhập ngay khi bấm nút nhanh
+            OnLoginButtonClicked();
         }
 
         private void OnLoginButtonClicked()
@@ -67,11 +138,8 @@ namespace Math6Companion.UI
             SetLoadingState(true);
             ShowStatus("Đang đăng nhập...", Color.yellow);
 
-            // Băm SHA-256 mật khẩu theo đúng yêu cầu bảo mật
-            string passHash = ComputeSha256Hash(password);
-
             // Gọi hàm đăng nhập qua Interface INetworkService
-            networkService.Login(username, passHash, (success, userData, message) =>
+            networkService.Login(username, password, (success, userData, message) =>
             {
                 SetLoadingState(false);
 
@@ -97,8 +165,8 @@ namespace Math6Companion.UI
                         PlayerPrefs.Save();
                     }
 
-                    // Chuyển sang Main Menu theo kiến trúc mới
-                    SceneManager.LoadScene("02_MainMenu");
+                    // Chuyển sang Thế giới 3D Làng Sen Tri Thức
+                    SceneManager.LoadScene("02_VillageWorld");
                 }
                 else
                 {

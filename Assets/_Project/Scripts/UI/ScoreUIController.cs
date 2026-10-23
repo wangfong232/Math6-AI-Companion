@@ -79,7 +79,15 @@ namespace Math6Companion.UI
                 retryButton.onClick.AddListener(OnRetryClicked);
 
             if (backToMenuButton != null)
+            {
                 backToMenuButton.onClick.AddListener(OnBackToMenuClicked);
+                var btnTxt = backToMenuButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnTxt != null)
+                {
+                    string ret = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
+                    btnTxt.text = ret == "02_VillageWorld" ? "Về Làng Sen 3D" : "Về Menu Chính";
+                }
+            }
 
             DisplayScoreData();
         }
@@ -179,7 +187,8 @@ namespace Math6Companion.UI
         private void OnBackToMenuClicked()
         {
             PlayClick();
-            SceneManager.LoadScene("02_MainMenu");
+            string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
+            SceneManager.LoadScene(target);
         }
 
         private void PlayClick()
