@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -27,6 +27,15 @@ namespace Math6Companion.UI
         public static string OpponentNickname = "BảoToánHọc";
         public static int OpponentScore = 6;
         public static string EssayFeedback = "";
+        public static string CurrentQuestionId = "";
+        public static string CurrentQuestionPrompt = "";
+        public static string CurrentQuestionTopic = "";
+        public static string RemedialExercise = "";
+        public static string PenaltyRuleToCopy = "";
+        public static string RetryCorrectLines = "";
+        public static string RetryWrongLineHint = "";
+        public static int FirstWrongLineIndex = -1;
+        public static List<string> WrongStepsToCopy = new List<string>();
 
         public static void Reset()
         {
@@ -45,6 +54,15 @@ namespace Math6Companion.UI
             OpponentNickname = "";
             OpponentScore = 0;
             EssayFeedback = "";
+            CurrentQuestionId = "";
+            CurrentQuestionPrompt = "";
+            CurrentQuestionTopic = "";
+            RemedialExercise = "";
+            PenaltyRuleToCopy = "";
+            RetryCorrectLines = "";
+            RetryWrongLineHint = "";
+            FirstWrongLineIndex = -1;
+            WrongStepsToCopy.Clear();
         }
     }
 
@@ -176,6 +194,21 @@ namespace Math6Companion.UI
             PlayClick();
             if (ScoreSessionContext.ActivityType == "ESSAY")
             {
+                if (!string.IsNullOrEmpty(ScoreSessionContext.CurrentQuestionId))
+                {
+                    PlayerPrefs.SetString("Retry_Essay_Question_ID", ScoreSessionContext.CurrentQuestionId);
+                }
+                if (!string.IsNullOrEmpty(ScoreSessionContext.CurrentQuestionPrompt))
+                {
+                    PlayerPrefs.SetString("Retry_Essay_Question_Prompt", ScoreSessionContext.CurrentQuestionPrompt);
+                }
+                PlayerPrefs.SetString("Retry_Essay_Correct_Lines", ScoreSessionContext.RetryCorrectLines ?? "");
+                PlayerPrefs.SetInt("Retry_Essay_First_Wrong_Index", ScoreSessionContext.FirstWrongLineIndex);
+                if (!string.IsNullOrEmpty(ScoreSessionContext.RetryWrongLineHint))
+                {
+                    PlayerPrefs.SetString("Retry_Essay_Wrong_Hint", ScoreSessionContext.RetryWrongLineHint);
+                }
+                PlayerPrefs.Save();
                 SceneManager.LoadScene("06_EssayPractice");
             }
             else

@@ -35,7 +35,7 @@ namespace Math6Companion.UI
         [SerializeField] private Button backToMenuButton;
 
         [Header("Quiz Settings")]
-        [SerializeField] private float timePerQuestion = 30f;
+        [SerializeField] private float timePerQuestion = 90f;
 
         private List<QuestionData> questionList = new List<QuestionData>();
         private int currentQuestionIndex = 0;
@@ -259,7 +259,16 @@ namespace Math6Companion.UI
 
                     if (success && questions != null && questions.Count > 0)
                     {
-                        questionList = SelectAndShuffleQuizQuestions(questions, currentLessonId, currentLessonTitle, topic, difficulty, 10);
+                        var allQ = new List<QuestionData>(questions);
+                        if (TeacherConfigManager.Instance != null)
+                        {
+                            var customMCQs = TeacherConfigManager.Instance.GetCustomQuestionDataList(6, topic, "MCQ");
+                            if (customMCQs != null && customMCQs.Count > 0)
+                            {
+                                allQ.InsertRange(0, customMCQs);
+                            }
+                        }
+                        questionList = SelectAndShuffleQuizQuestions(allQ, currentLessonId, currentLessonTitle, topic, difficulty, 10);
                     }
                     else
                     {
@@ -792,7 +801,7 @@ namespace Math6Companion.UI
 
             if (feedbackText != null)
             {
-                feedbackText.text = "Hết giờ! " + questionList[currentQuestionIndex].explanation;
+                feedbackText.text = "Hết giờ! " + FormatMathString(questionList[currentQuestionIndex].explanation);
                 feedbackText.color = Color.yellow;
             }
 
@@ -820,7 +829,7 @@ namespace Math6Companion.UI
                 optionButtons[index].image.color = new Color(0.4f, 0.9f, 0.4f); // Xanh lá
                 if (feedbackText != null)
                 {
-                    feedbackText.text = "Chính xác! " + questionList[currentQuestionIndex].explanation;
+                    feedbackText.text = "Chính xác! " + FormatMathString(questionList[currentQuestionIndex].explanation);
                     feedbackText.color = Color.green;
                 }
 
@@ -843,7 +852,7 @@ namespace Math6Companion.UI
 
                 if (feedbackText != null)
                 {
-                    feedbackText.text = $"Sai rồi! {questionList[currentQuestionIndex].explanation}";
+                    feedbackText.text = $"Sai rồi! {FormatMathString(questionList[currentQuestionIndex].explanation)}";
                     feedbackText.color = Color.red;
                 }
             }
@@ -1012,25 +1021,7 @@ namespace Math6Companion.UI
         private string FormatMathString(string text)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
-            return GoogleSheetsNetworkService.SanitizeMathText(text)
-                .Replace("\\u2208", " thuộc ")
-                .Replace("\u2208", " thuộc ")
-                .Replace("∈", " thuộc ")
-                .Replace("\\u2209", " không thuộc ")
-                .Replace("\u2209", " không thuộc ")
-                .Replace("∉", " không thuộc ")
-                .Replace("\\u2282", " con ")
-                .Replace("\u2282", " con ")
-                .Replace("⊂", " con ")
-                .Replace("\\u2286", " con hoặc bằng ")
-                .Replace("\u2286", " con hoặc bằng ")
-                .Replace("⊆", " con hoặc bằng ")
-                .Replace("\\u2229", " giao ")
-                .Replace("\u2229", " giao ")
-                .Replace("∩", " giao ")
-                .Replace("\\u222A", " hợp ")
-                .Replace("\u222A", " hợp ")
-                .Replace("∪", " hợp ");
+            return Math6Companion.Core.MathTextSanitizer.SanitizeForDisplay(text);
         }
     }
 }

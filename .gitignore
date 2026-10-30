@@ -78,3 +78,6 @@ Thumbs.db
 # Unity Crash Recovery
 [Aa]ssets/_Recovery/
 [Aa]ssets/_Recovery.meta
+# API Keys & Secrets
+gemini_key.txt
+*key*.txt

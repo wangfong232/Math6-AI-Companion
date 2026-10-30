@@ -622,7 +622,7 @@ namespace Math6Companion.Gameplay3D
             var bodyTmp = card.Find("Body")?.GetComponent<TextMeshProUGUI>();
             if (bodyTmp != null)
             {
-                bodyTmp.text = $"<color=#7ed6df><i>\"{story}\"</i></color>\n\n<color=#f39c12>⏳ Đang chuẩn bị câu hỏi thử thách...</color>";
+                bodyTmp.text = $"<color=#7ed6df><i>\"{story}\"</i></color>\n\n<color=#f39c12>Đang chuẩn bị câu hỏi thử thách...</color>";
             }
 
             for (int i = 0; i < 4; i++)

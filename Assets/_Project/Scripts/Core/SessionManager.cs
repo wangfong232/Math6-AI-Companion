@@ -48,6 +48,18 @@ namespace Math6Companion.Core
 
         public UserData CurrentUser => currentUser;
         public bool IsLoggedIn => currentUser != null && !string.IsNullOrEmpty(currentUser.userId);
+        public bool IsTeacher
+        {
+            get
+            {
+                if (currentUser != null && !string.IsNullOrEmpty(currentUser.role))
+                {
+                    return currentUser.role.Trim().Equals("TEACHER", StringComparison.OrdinalIgnoreCase);
+                }
+                string savedRole = PlayerPrefs.GetString("User_Role", "");
+                return !string.IsNullOrEmpty(savedRole) && savedRole.Trim().Equals("TEACHER", StringComparison.OrdinalIgnoreCase);
+            }
+        }
         public string CurrentNickname => currentUser != null && !string.IsNullOrEmpty(currentUser.nickname)
             ? currentUser.nickname
             : (currentUser != null && !string.IsNullOrEmpty(currentUser.fullName) ? currentUser.fullName : PlayerPrefs.GetString("User_Nickname", "Trạng Tí"));
@@ -77,6 +89,12 @@ namespace Math6Companion.Core
 
             LoadSavedPreferences();
             InitScreenDimmer();
+
+            // Khởi tạo hệ thống quản lý phiên chơi và giới hạn thời gian lành mạnh cho học sinh lớp 6
+            _ = PlaySessionManager.Instance;
+
+            // Khởi tạo hệ thống cấu hình & quản trị lộ trình dành cho Giáo viên
+            _ = TeacherConfigManager.Instance;
         }
 
         private void InitScreenDimmer()

@@ -76,6 +76,10 @@ namespace Math6Companion.Core.Contracts
         public string rubricRaw; // Cỗi thô từ server để tránh parse JSON trên Google server
         public string explanation;
         public int maxScore;
+        public string imageUrl;
+        public string imgUrl;
+
+        public string EffectiveImageUrl => !string.IsNullOrEmpty(imageUrl) ? imageUrl : (!string.IsNullOrEmpty(imgUrl) ? imgUrl : "");
     }
 
     [Serializable]
@@ -198,6 +202,8 @@ namespace Math6Companion.Core.Contracts
         public string studentSteps;
         public string imageBase64;
         public List<RubricItem> rubric;
+        public string correctAnswer;
+        public string explanation;
     }
 
     [Serializable]
@@ -218,6 +224,9 @@ namespace Math6Companion.Core.Contracts
         public List<StepAnalysisItem> stepAnalysis;
         public string pedagogicalFeedback;
         public string remedialExercise;
+        public string penaltyRuleToCopy;
+        public int firstWrongStepIndex = -1;
+        public string correctStepsPrefix;
     }
     #endregion
 
@@ -236,6 +245,7 @@ namespace Math6Companion.Core.Contracts
     {
         void SendTutorTurn(TutorTurnPayload payload, Action<bool, AITutorStepResponse, string> callback);
         void GradeEssay(EssaySubmissionPayload payload, Action<bool, AIGradingResponse, string> callback);
+        void ExtractTextFromImage(string imageBase64, Action<bool, string, string> callback);
     }
     #endregion
 }

@@ -6,6 +6,7 @@ using TMPro;
 using Math6Companion.Core;
 using Math6Companion.Core.Contracts;
 using Math6Companion.Core.Mock;
+using Math6Companion.Core.Services;
 
 namespace Math6Companion.UI
 {
@@ -142,7 +143,7 @@ namespace Math6Companion.UI
                 txtRt.anchorMin = Vector2.zero; txtRt.anchorMax = Vector2.one;
                 txtRt.offsetMin = Vector2.zero; txtRt.offsetMax = Vector2.zero;
                 var tmp = txtGo.GetComponent<TextMeshProUGUI>();
-                tmp.text = "<b>[📖] DANH SÁCH BÀI</b>";
+                tmp.text = "<b>[BÀI HỌC] DANH SÁCH BÀI</b>";
                 tmp.fontSize = 14;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.color = Color.white;
@@ -215,8 +216,8 @@ namespace Math6Companion.UI
             if (ankiTabBadgeText != null)
             {
                 ankiTabBadgeText.text = wrongCount > 0 
-                    ? $"<b>[🔥] ÔN CÂU SAI <color=#f1c40f>({wrongCount})</color></b>"
-                    : "<b>[🔥] SỔ TAY CÂU SAI</b>";
+                    ? $"<b>[SỔ TAY] ÔN CÂU SAI <color=#f1c40f>({wrongCount})</color></b>"
+                    : "<b>[SỔ TAY] SỔ TAY CÂU SAI</b>";
             }
         }
 
@@ -280,6 +281,37 @@ namespace Math6Companion.UI
 
         public void LoadLessons(string topic)
         {
+            // 1. Ưu tiên lấy trực tiếp từ TeacherConfigManager để nhận ngay các bài học mới và cấu hình do Giáo viên chỉnh sửa
+            if (TeacherConfigManager.Instance != null && TeacherConfigManager.Instance.Lessons != null && TeacherConfigManager.Instance.Lessons.Count > 0)
+            {
+                var list = new List<LessonData>();
+                foreach (var tl in TeacherConfigManager.Instance.Lessons)
+                {
+                    if (tl.grade != 6) continue;
+                    if (!string.IsNullOrEmpty(topic) && topic != "ALL" && !GoogleSheetsNetworkService.IsTopicMatch(tl.topic, topic))
+                        continue;
+
+                    list.Add(new LessonData
+                    {
+                        lessonId = tl.lessonId,
+                        title = tl.title,
+                        topic = tl.topic,
+                        summaryText = tl.summaryText,
+                        videoUrl = tl.videoUrl,
+                        grade = 6,
+                        orderIndex = tl.orderIndex
+                    });
+                }
+                if (list.Count > 0)
+                {
+                    currentLessons = list;
+                    if (!isAnkiTabActive)
+                    {
+                        PopulateLessonList();
+                    }
+                }
+            }
+
             if (networkService == null)
             {
                 networkService = Math6Companion.Core.Services.NetworkServiceProvider.NetworkService;
@@ -291,19 +323,22 @@ namespace Math6Companion.UI
                 {
                     if (this == null || gameObject == null) return;
 
-                    if (success && lessons != null && lessons.Count > 0)
+                    // Nếu chưa có bài học từ TeacherConfigManager thì mới nạp từ network/fallback
+                    if (currentLessons == null || currentLessons.Count == 0)
                     {
-                        currentLessons = lessons;
-                    }
-                    else
-                    {
-                        currentLessons = GetFallbackLessons(topic);
-                    }
+                        if (success && lessons != null && lessons.Count > 0)
+                        {
+                            currentLessons = lessons;
+                        }
+                        else
+                        {
+                            currentLessons = GetFallbackLessons(topic);
+                        }
 
-                    // Hiển thị danh sách bài học NGAY LẬP TỨC, không để người dùng phải chờ đợi
-                    if (!isAnkiTabActive)
-                    {
-                        PopulateLessonList();
+                        if (!isAnkiTabActive)
+                        {
+                            PopulateLessonList();
+                        }
                     }
 
                     // Đồng bộ điểm cao nhất của chính học sinh từ Google Sheet Analytics (bất đồng bộ trong nền)
@@ -357,6 +392,7 @@ namespace Math6Companion.UI
                         description = "Tìm hiểu phân số, tính chất cơ bản và rút gọn phân số",
                         grade = 6,
                         summaryText = "Phân số có dạng a/b với a, b là số nguyên, b khác 0.",
+                        videoUrl = "https://www.youtube.com/watch?v=ZKNbig3XpM8",
                         userHighestScore = 9,
                         topStudentNickname = "AnThầnĐồng",
                         topStudentAttempts = 12
@@ -369,6 +405,7 @@ namespace Math6Companion.UI
                         description = "Cộng, trừ, nhân, chia phân số cùng mẫu và khác mẫu",
                         grade = 6,
                         summaryText = "Quy đồng mẫu số khi cộng trừ hai phân số khác mẫu.",
+                        videoUrl = "https://www.youtube.com/watch?v=ZEZ-AYF2XEU",
                         userHighestScore = 10,
                         topStudentNickname = "Trạng Tí",
                         topStudentAttempts = 20
@@ -381,6 +418,7 @@ namespace Math6Companion.UI
                 new LessonData
                 {
                     lessonId = "LES_INT_01",
+                    videoUrl = "https://www.youtube.com/watch?v=vcR0jey6xcI",
                     topic = "Integers",
                     title = "Bài 1: Phép cộng và trừ số nguyên",
                     description = "Quy tắc cộng trừ số nguyên cùng dấu và khác dấu",
@@ -393,6 +431,7 @@ namespace Math6Companion.UI
                 new LessonData
                 {
                     lessonId = "LES_INT_02",
+                    videoUrl = "https://www.youtube.com/watch?v=mYyUEaSUcu4",
                     topic = "Integers",
                     title = "Bài 2: Phép nhân và chia hai số nguyên",
                     description = "Quy tắc nhân chia số nguyên, cùng dấu dương khác dấu âm",
@@ -405,6 +444,7 @@ namespace Math6Companion.UI
                 new LessonData
                 {
                     lessonId = "LES_INT_03",
+                    videoUrl = "https://www.youtube.com/watch?v=ZEZ-AYF2XEU",
                     topic = "Integers",
                     title = "Bài 3: Trục số nguyên và Thứ tự trong tập hợp Z",
                     description = "Biểu diễn số nguyên trên trục số, so sánh hai số nguyên",
@@ -429,15 +469,20 @@ namespace Math6Companion.UI
 
             foreach (var lesson in currentLessons)
             {
+                var teacherCfg = TeacherConfigManager.Instance != null ? TeacherConfigManager.Instance.Lessons.Find(x => x.lessonId == lesson.lessonId) : null;
+                bool isLockedByTeacher = (teacherCfg != null && !teacherCfg.isEnabled);
+
                 GameObject cardObj = null;
                 if (lessonCardPrefab != null)
                 {
                     cardObj = Instantiate(lessonCardPrefab, lessonListContent);
                     var texts = cardObj.GetComponentsInChildren<TextMeshProUGUI>();
-                    if (texts.Length >= 1) texts[0].text = lesson.title;
+                    if (texts.Length >= 1) texts[0].text = isLockedByTeacher ? $"<color=#F87171>[ĐÃ KHÓA]</color> {lesson.title}" : lesson.title;
                     if (texts.Length >= 2)
                     {
-                        texts[1].text = $"Diem cao: {lesson.userHighestScore}/10 | Top: {lesson.topStudentNickname} ({lesson.topStudentAttempts} lan)";
+                        texts[1].text = isLockedByTeacher 
+                            ? "<color=#F87171>Tạm khóa theo kế hoạch Giáo viên</color>"
+                            : $"Diem cao: {lesson.userHighestScore}/10 | Top: {lesson.topStudentNickname} ({lesson.topStudentAttempts} lan)";
                     }
                 }
                 else
@@ -451,7 +496,7 @@ namespace Math6Companion.UI
                     le.minHeight = 110;
 
                     var img = cardObj.GetComponent<Image>();
-                    img.color = new Color(0.13f, 0.18f, 0.26f);
+                    img.color = isLockedByTeacher ? new Color(0.08f, 0.10f, 0.15f) : new Color(0.13f, 0.18f, 0.26f);
 
                     var btn = cardObj.GetComponent<Button>();
                     var nav = btn.navigation;
@@ -459,8 +504,8 @@ namespace Math6Companion.UI
                     btn.navigation = nav;
 
                     var colors = btn.colors;
-                    colors.normalColor = new Color(0.13f, 0.18f, 0.26f);
-                    colors.highlightedColor = new Color(0.18f, 0.26f, 0.38f);
+                    colors.normalColor = isLockedByTeacher ? new Color(0.08f, 0.10f, 0.15f) : new Color(0.13f, 0.18f, 0.26f);
+                    colors.highlightedColor = isLockedByTeacher ? new Color(0.10f, 0.12f, 0.18f) : new Color(0.18f, 0.26f, 0.38f);
                     colors.pressedColor = new Color(0.10f, 0.14f, 0.20f);
                     btn.colors = colors;
 
@@ -474,10 +519,10 @@ namespace Math6Companion.UI
                     titleRt.offsetMax = new Vector2(-10, -12);
 
                     var titleTmp = titleGo.GetComponent<TextMeshProUGUI>();
-                    titleTmp.text = lesson.title;
+                    titleTmp.text = isLockedByTeacher ? $"<color=#F87171>[ĐÃ KHÓA]</color> {lesson.title}" : lesson.title;
                     titleTmp.fontSize = 23;
                     titleTmp.fontStyle = FontStyles.Bold;
-                    titleTmp.color = new Color(0.95f, 0.75f, 0.2f); // Vàng gold sang trọng
+                    titleTmp.color = isLockedByTeacher ? new Color(0.6f, 0.65f, 0.75f) : new Color(0.95f, 0.75f, 0.2f);
                     titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
                     // 2. Mô tả / Thời lượng
@@ -490,9 +535,11 @@ namespace Math6Companion.UI
                     subRt.offsetMax = new Vector2(-10, 0);
 
                     var subTmp = subGo.GetComponent<TextMeshProUGUI>();
-                    subTmp.text = !string.IsNullOrEmpty(lesson.description) ? lesson.description : "Chuyên đề Toán 6 • Lý thuyết & Luyện tập";
+                    subTmp.text = isLockedByTeacher
+                        ? "<color=#EF4444>Bài học đang tạm khóa theo kế hoạch giảng dạy của Thầy/Cô.</color>"
+                        : (!string.IsNullOrEmpty(lesson.description) ? lesson.description : "Chuyên đề Toán 6 • Lý thuyết & Luyện tập");
                     subTmp.fontSize = 17;
-                    subTmp.color = new Color(0.7f, 0.8f, 0.9f);
+                    subTmp.color = isLockedByTeacher ? new Color(0.5f, 0.55f, 0.65f) : new Color(0.7f, 0.8f, 0.9f);
                     subTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
                     // 3. Thông tin thành tích & Top
@@ -505,14 +552,22 @@ namespace Math6Companion.UI
                     statsRt.offsetMax = new Vector2(-25, -10);
 
                     var statsTmp = statsGo.GetComponent<TextMeshProUGUI>();
-                    int localHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{lesson.lessonId}", -1);
-                    int localAtt = PlayerPrefs.GetInt($"Lesson_Attempts_{lesson.lessonId}", 0);
-                    int normalizedScore = localHigh >= 0 ? localHigh : GetNormalizedScore(lesson.userHighestScore);
-                    int attCount = localAtt > 0 ? localAtt : lesson.topStudentAttempts;
-                    statsTmp.text = $"Điểm bạn: <color=#f1c40f><b>{normalizedScore}/10</b></color>\n<size=15><color=#95a5a6>Đã làm: {attCount} lần</color></size>";
+                    if (isLockedByTeacher)
+                    {
+                        statsTmp.text = "<color=#F87171>TẠM KHÓA</color>\n<size=14><color=#94A3B8>Theo kế hoạch GV</color></size>";
+                        statsTmp.color = new Color(0.95f, 0.35f, 0.35f);
+                    }
+                    else
+                    {
+                        int localHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{lesson.lessonId}", -1);
+                        int localAtt = PlayerPrefs.GetInt($"Lesson_Attempts_{lesson.lessonId}", 0);
+                        int normalizedScore = localHigh >= 0 ? localHigh : GetNormalizedScore(lesson.userHighestScore);
+                        int attCount = localAtt > 0 ? localAtt : lesson.topStudentAttempts;
+                        statsTmp.text = $"Điểm bạn: <color=#f1c40f><b>{normalizedScore}/10</b></color>\n<size=15><color=#95a5a6>Đã làm: {attCount} lần</color></size>";
+                        statsTmp.color = new Color(0.18f, 0.75f, 0.45f);
+                    }
                     statsTmp.fontSize = 18;
                     statsTmp.fontStyle = FontStyles.Bold;
-                    statsTmp.color = new Color(0.18f, 0.75f, 0.45f); // Xanh ngọc
                     statsTmp.alignment = TextAlignmentOptions.MidlineRight;
                 }
 
@@ -556,7 +611,7 @@ namespace Math6Companion.UI
             rtHT.offsetMin = new Vector2(20, 0);
             rtHT.offsetMax = new Vector2(-20, -10);
             var tmpHT = heroTxtGo.GetComponent<TextMeshProUGUI>();
-            tmpHT.text = "<b>[🔥] SỔ TAY CÂU SAI • ANKI / QUIZLET (SPACED REPETITION)</b>\n" +
+            tmpHT.text = "<b>[SỔ TAY] SỔ TAY CÂU SAI - ANKI / QUIZLET (SPACED REPETITION)</b>\n" +
                          $"<size=16><color=#ecf0f1>Tự động lặp lại ngắt quãng các câu bạn từng làm sai để khắc phục điểm yếu.</color></size>\n" +
                          $"<size=17>Tổng câu sai: <color=#e74c3c><b>{total}</b></color>  |  Đã thuộc: <color=#2ecc71><b>{mastered}</b></color>  |  Cần ôn tập ngay: <color=#f1c40f><b>{needReview} câu</b></color></size>";
             tmpHT.fontSize = 20;
@@ -578,7 +633,7 @@ namespace Math6Companion.UI
             hlgB.childControlHeight = false;
 
             // Nút 1: Bắt đầu ôn tập Anki
-            var startAnkiBtn = CreateActionButton(btnBar, "Btn_StartAnki", "<b>[🚀] BẮT ĐẦU ÔN TẬP ANKI</b>", new Vector2(260, 42), new Color(0.18f, 0.75f, 0.45f));
+            var startAnkiBtn = CreateActionButton(btnBar, "Btn_StartAnki", "<b>[>] BẮT ĐẦU ÔN TẬP ANKI</b>", new Vector2(260, 42), new Color(0.18f, 0.75f, 0.45f));
             startAnkiBtn.onClick.AddListener(() =>
             {
                 PlayClick();
@@ -627,7 +682,7 @@ namespace Math6Companion.UI
                 rtET.anchorMin = Vector2.zero; rtET.anchorMax = Vector2.one;
                 rtET.offsetMin = new Vector2(20, 0); rtET.offsetMax = new Vector2(-20, 0);
                 var tmpE = emptyTxtGo.GetComponent<TextMeshProUGUI>();
-                tmpE.text = "🎉 <b>Tuyệt vời! Hiện bạn không có câu hỏi nào bị sai cần ôn tập.</b>\n<size=16><color=#7f8c8d>Hãy tiếp tục luyện tập các bài học hoặc bấm '+ Thêm 3 câu mẫu' ở trên để trải nghiệm chế độ ôn tập lặp lại ngắt quãng.</color></size>";
+                tmpE.text = "<b>Tuyệt vời! Hiện bạn không có câu hỏi nào bị sai cần ôn tập.</b>\n<size=16><color=#7f8c8d>Hãy tiếp tục luyện tập các bài học hoặc bấm '+ Thêm 3 câu mẫu' ở trên để trải nghiệm chế độ ôn tập lặp lại ngắt quãng.</color></size>";
                 tmpE.fontSize = 18;
                 tmpE.alignment = TextAlignmentOptions.Center;
                 tmpE.color = new Color(0.18f, 0.75f, 0.45f);
@@ -655,18 +710,18 @@ namespace Math6Companion.UI
                 var tmpT = txtGo.GetComponent<TextMeshProUGUI>();
 
                 string statusBadge = item.reviewCorrectCount >= 2 
-                    ? "<color=#2ecc71><b>[⭐ ĐÃ THUỘC - MASTERED]</b></color>"
-                    : $"<color=#f39c12><b>[🔥 CẦN ÔN: {item.reviewCorrectCount}/2 lần đúng]</b></color>";
+                    ? "<color=#2ecc71><b>[ĐÃ THUỘC - MASTERED]</b></color>"
+                    : $"<color=#f39c12><b>[CẦN ÔN: {item.reviewCorrectCount}/2 lần đúng]</b></color>";
 
                 tmpT.text = $"<b>Câu {i + 1}:</b> {item.prompt}  {statusBadge}\n" +
-                            $"<size=15><color=#e74c3c>❌ Bạn đã chọn: {item.studentAnswer}</color>   |   <color=#2ecc71>✅ Đáp án đúng: {item.correctAnswer}</color></size>\n" +
-                            $"<size=14><color=#bdc3c7>💡 {item.explanation}</color></size>";
+                            $"<size=15><color=#e74c3c>[X] Bạn đã chọn: {item.studentAnswer}</color>   |   <color=#2ecc71>✅ Đáp án đúng: {item.correctAnswer}</color></size>\n" +
+                            $"<size=14><color=#bdc3c7>[Giải thích]: {item.explanation}</color></size>";
                 tmpT.fontSize = 17;
                 tmpT.lineSpacing = 6;
                 tmpT.alignment = TextAlignmentOptions.TopLeft;
 
                 // Nút Ôn câu này bên phải card
-                var reviewBtn = CreateActionButton(card, $"Btn_Review_{i}", "<b>[⚡] ÔN CÂU NÀY</b>", new Vector2(145, 45), new Color(0.85f, 0.25f, 0.25f));
+                var reviewBtn = CreateActionButton(card, $"Btn_Review_{i}", "<b>[ÔN TẬP] CÂU NÀY</b>", new Vector2(145, 45), new Color(0.85f, 0.25f, 0.25f));
                 var rtRB = reviewBtn.GetComponent<RectTransform>();
                 rtRB.anchorMin = new Vector2(1, 0.5f);
                 rtRB.anchorMax = new Vector2(1, 0.5f);
@@ -851,6 +906,13 @@ namespace Math6Companion.UI
 
         private void OnLessonCardClicked(LessonData lesson)
         {
+            var teacherCfg = TeacherConfigManager.Instance != null ? TeacherConfigManager.Instance.Lessons.Find(x => x.lessonId == lesson.lessonId) : null;
+            if (teacherCfg != null && !teacherCfg.isEnabled)
+            {
+                if (AudioManager.Instance != null) AudioManager.Instance.PlayWrongSound();
+                return;
+            }
+
             PlayClick();
             selectedLesson = lesson;
             CurrentSelectedLesson = lesson;

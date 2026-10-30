@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -65,7 +65,7 @@ namespace Math6Companion.EditorTools
                 try
                 {
                     File.WriteAllText(flagPath, DateTime.UtcNow.ToString());
-                    Debug.Log("[Math6 SceneAutoBuilder] 🔄 Tự động đồng bộ hóa & nâng cấp giao diện toàn bộ 11 Scene sang phong cách Modern EdTech...");
+                    Debug.Log("[Math6 SceneAutoBuilder] Tự động đồng bộ hóa & nâng cấp giao diện toàn bộ 11 Scene sang phong cách Modern EdTech...");
                     ExecuteBuildAllScenesDirect(false);
                     Debug.Log("[Math6 SceneAutoBuilder] ✅ Đã tự động cập nhật xong toàn bộ 11 Scene giao diện mới đẹp mắt!");
                 }
@@ -76,7 +76,7 @@ namespace Math6Companion.EditorTools
             };
         }
 
-        [MenuItem("Math6 / 🚀 TỰ ĐỘNG TẠO ĐẦY ĐỦ 11 SCENE VÀO DỰ ÁN", priority = 0)]
+        [MenuItem("Math6 / TỰ ĐỘNG TẠO ĐẦY ĐỦ 11 SCENE VÀO DỰ ÁN", priority = 0)]
         public static void GenerateAllScenes()
         {
             ExecuteBuildAllScenesDirect(true);
@@ -87,7 +87,7 @@ namespace Math6Companion.EditorTools
             ExecuteBuildAllScenesDirect(false);
         }
 
-        [MenuItem("Math6 / 🧹 DỌN DẸP SCRIPT MISSING TRONG TẤT CẢ SCENE", priority = 10)]
+        [MenuItem("Math6 / DỌN DẸP SCRIPT MISSING TRONG TẤT CẢ SCENE", priority = 10)]
         public static void CleanMissingScriptsInAllScenes()
         {
             string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { SCENES_DIR });
@@ -204,7 +204,7 @@ namespace Math6Companion.EditorTools
             s_pill = LoadOrCreateUISprite("ui_pill.png", new Vector4(30, 20, 30, 20));
             s_circle = LoadOrCreateUISprite("ui_circle.png", Vector4.zero);
             s_inputField = LoadOrCreateUISprite("ui_input_field.png", new Vector4(18, 16, 18, 16));
-            Debug.Log($"[Math6 SceneAutoBuilder] 🎨 Đã tải thành công bộ Sprites UI: Glass={s_cardGlass != null}, Button={s_buttonModern != null}, Pill={s_pill != null}, Circle={s_circle != null}, Input={s_inputField != null}");
+            Debug.Log($"[Math6 SceneAutoBuilder] Đã tải thành công bộ Sprites UI: Glass={s_cardGlass != null}, Button={s_buttonModern != null}, Pill={s_pill != null}, Circle={s_circle != null}, Input={s_inputField != null}");
         }
 
         private static Sprite LoadOrCreateUISprite(string fileName, Vector4 border)
@@ -737,7 +737,7 @@ namespace Math6Companion.EditorTools
             var hero = CreateCard(canvas, "HeroCard", new Vector2(0, 60), new Vector2(750, 360));
             
             // App Badge
-            CreateBadge(hero, "AppBadge", "📐 HỆ THỐNG HỌC TẬP THÔNG MINH 4.0", new Vector2(0, 110), new Vector2(360, 36), ColorPrimaryBlue, 14);
+            CreateBadge(hero, "AppBadge", "[TOÁN 6] HỆ THỐNG HỌC TẬP THÔNG MINH", new Vector2(0, 110), new Vector2(360, 36), ColorPrimaryBlue, 14);
 
             CreateText(hero, "Title", "MATH 6 • AI COMPANION", 46, new Vector2(0, 50), new Vector2(700, 70), ColorAmberGold, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
             CreateText(hero, "SubTitle", "Ôn Luyện Toán 6 Theo SGK Mới • Tích Hợp Gia Sư Trực Tuyến & Thế Giới 3D", 18, new Vector2(0, -10), new Vector2(680, 50), ColorTextBody);
@@ -766,7 +766,7 @@ namespace Math6Companion.EditorTools
             // Floating Modern Glass Card
             var panel = CreateCard(canvas, "LoginCard", Vector2.zero, new Vector2(520, 620));
 
-            CreateBadge(panel, "LoginBadge", "📐 TOÁN 6 AI COMPANION", new Vector2(0, 245), new Vector2(250, 32), ColorPrimaryBlue, 13);
+            CreateBadge(panel, "LoginBadge", "[TOÁN 6] AI COMPANION", new Vector2(0, 245), new Vector2(250, 32), ColorPrimaryBlue, 13);
             CreateText(panel, "CardTitle", "ĐĂNG NHẬP", 32, new Vector2(0, 195), new Vector2(400, 50), ColorTextTitle, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
             CreateText(panel, "CardSubTitle", "Học tập thông minh cùng gia sư ảo Gemini", 16, new Vector2(0, 155), new Vector2(400, 30), ColorTextMuted);
 
@@ -774,13 +774,13 @@ namespace Math6Companion.EditorTools
             var passInput = CreateInputField(panel, "PasswordInput", "Mật khẩu...", new Vector2(0, 15), new Vector2(420, 55));
             passInput.contentType = TMP_InputField.ContentType.Password;
 
-            var loginBtn = CreateButton(panel, "LoginButton", "BẮT ĐẦU HỌC NGAY  🚀", new Vector2(0, -60), new Vector2(420, 56), ColorPrimaryBlue, null, null, null, 20);
+            var loginBtn = CreateButton(panel, "LoginButton", "BẮT ĐẦU HỌC NGAY  >>", new Vector2(0, -60), new Vector2(420, 56), ColorPrimaryBlue, null, null, null, 20);
             var status = CreateText(panel, "StatusText", "", 16, new Vector2(0, -115), new Vector2(420, 30), ColorAmberGold);
 
             // Quick login outline pills
             CreateText(panel, "QuickLabel", "── Hoặc chọn tài khoản mẫu ──", 14, new Vector2(0, -155), new Vector2(300, 25), ColorTextMuted);
-            var btnStudent = CreateButton(panel, "Btn_QuickStudent", "👨‍🎓 Học Sinh (student_01)", new Vector2(0, -195), new Vector2(420, 44), ColorEmeraldGreen, null, null, null, 16);
-            var btnTeacher = CreateButton(panel, "Btn_QuickTeacher", "👩‍🏫 Giáo Viên (teacher_01)", new Vector2(0, -250), new Vector2(420, 44), ColorSlateSecondary, null, null, null, 16);
+            var btnStudent = CreateButton(panel, "Btn_QuickStudent", "Học Sinh (student_01)", new Vector2(0, -195), new Vector2(420, 44), ColorEmeraldGreen, null, null, null, 16);
+            var btnTeacher = CreateButton(panel, "Btn_QuickTeacher", "Giáo Viên (teacher_01)", new Vector2(0, -250), new Vector2(420, 44), ColorSlateSecondary, null, null, null, 16);
 
             var loading = new GameObject("LoadingIndicator", typeof(RectTransform));
             loading.transform.SetParent(panel.transform, false);
@@ -829,23 +829,23 @@ namespace Math6Companion.EditorTools
             var subText = CreateText(header, "UserSubInfoText", "Lớp 6A1 • THCS Chu Văn An", 15, new Vector2(105, -14), new Vector2(250, 24), ColorTextMuted, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
 
             // Stats Badges (Center-Right Header)
-            CreateBadge(header, "StreakBadge", "🔥 5 Ngày Học", new Vector2(-195, 0), new Vector2(130, 36), new Color(0.85f, 0.40f, 0.10f), 14, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
-            var logoutBtn = CreateButton(header, "Btn_Logout", "Đăng xuất ⎋", new Vector2(-35, 0), new Vector2(130, 42), ColorCoralRed, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), 16);
+            CreateBadge(header, "StreakBadge", "Streak: 5 Ngày Học", new Vector2(-195, 0), new Vector2(130, 36), new Color(0.85f, 0.40f, 0.10f), 14, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
+            var logoutBtn = CreateButton(header, "Btn_Logout", "Đăng xuất [ESC]", new Vector2(-35, 0), new Vector2(130, 42), ColorCoralRed, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), 16);
 
             // Main Menu Title
             CreateTopCenterText(canvas, "MenuTitle", "TRUNG TÂM HỌC TẬP TOÁN 6", 34, new Vector2(800, 50), ColorAmberGold, 115);
             CreateText(canvas, "MenuSub", "Chọn một phương thức học tập để rèn luyện kỹ năng", 16, new Vector2(0, -155), new Vector2(800, 30), ColorTextMuted, TextAlignmentOptions.Center, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
             // 6 Interactive Game Mode Cards (Modern Palette)
-            var btnLesson = CreateButton(canvas, "Btn_LessonList", "📘  1. BÀI HỌC TOÁN 6\n<size=15><color=#A8C5E8>Lý thuyết & Video SGK Mới</color></size>", new Vector2(-370, 115), new Vector2(340, 130), ColorPrimaryBlue, null, null, null, 19);
-            var btnMCQ = CreateButton(canvas, "Btn_MCQPractice", "🎯  2. LUYỆN TRẮC NGHIỆM\n<size=15><color=#A6E8C8>Ngân hàng câu hỏi thông minh</color></size>", new Vector2(0, 115), new Vector2(340, 130), ColorEmeraldGreen, null, null, null, 19);
-            var btnEssay = CreateButton(canvas, "Btn_EssayPractice", "📝  3. LUYỆN TỰ LUẬN\n<size=15><color=#D8B4F8>Chụp ảnh bài, AI chấm bước</color></size>", new Vector2(370, 115), new Vector2(340, 130), ColorPurpleViolet, null, null, null, 19);
-            var btnVersus = CreateButton(canvas, "Btn_VersusLobby", "⚔️  4. ĐẤU ĐỐI KHÁNG (3P)\n<size=15><color=#FCD34D>Thi đấu tốc độ thời gian thực</color></size>", new Vector2(-370, -35), new Vector2(340, 130), new Color(0.88f, 0.42f, 0.12f), null, null, null, 19);
-            var btnLog = CreateButton(canvas, "Btn_PracticeLog", "📊  5. NHẬT KÝ HỌC TẬP\n<size=15><color=#BAE6FD>Thành tích & Tiến độ rèn luyện</color></size>", new Vector2(0, -35), new Vector2(340, 130), ColorCyanTeal, null, null, null, 19);
-            var btnSettings = CreateButton(canvas, "Btn_Settings", "⚙️  6. CÀI ĐẶT HỆ THỐNG\n<size=15><color=#CBD5E1>Âm thanh, đồ họa & tài khoản</color></size>", new Vector2(370, -35), new Vector2(340, 130), ColorSlateSecondary, null, null, null, 19);
+            var btnLesson = CreateButton(canvas, "Btn_LessonList", "1. BÀI HỌC TOÁN 6\n<size=15><color=#A8C5E8>Lý thuyết & Video SGK Mới</color></size>", new Vector2(-370, 115), new Vector2(340, 130), ColorPrimaryBlue, null, null, null, 19);
+            var btnMCQ = CreateButton(canvas, "Btn_MCQPractice", "2. LUYỆN TRẮC NGHIỆM\n<size=15><color=#A6E8C8>Ngân hàng câu hỏi thông minh</color></size>", new Vector2(0, 115), new Vector2(340, 130), ColorEmeraldGreen, null, null, null, 19);
+            var btnEssay = CreateButton(canvas, "Btn_EssayPractice", "3. LUYỆN TỰ LUẬN\n<size=15><color=#D8B4F8>Chụp ảnh bài, AI chấm bước</color></size>", new Vector2(370, 115), new Vector2(340, 130), ColorPurpleViolet, null, null, null, 19);
+            var btnVersus = CreateButton(canvas, "Btn_VersusLobby", "  4. ĐẤU ĐỐI KHÁNG (3P)\n<size=15><color=#FCD34D>Thi đấu tốc độ thời gian thực</color></size>", new Vector2(-370, -35), new Vector2(340, 130), new Color(0.88f, 0.42f, 0.12f), null, null, null, 19);
+            var btnLog = CreateButton(canvas, "Btn_PracticeLog", "5. NHẬT KÝ HỌC TẬP\n<size=15><color=#BAE6FD>Thành tích & Tiến độ rèn luyện</color></size>", new Vector2(0, -35), new Vector2(340, 130), ColorCyanTeal, null, null, null, 19);
+            var btnSettings = CreateButton(canvas, "Btn_Settings", "  6. CÀI ĐẶT HỆ THỐNG\n<size=15><color=#CBD5E1>Âm thanh, đồ họa & tài khoản</color></size>", new Vector2(370, -35), new Vector2(340, 130), ColorSlateSecondary, null, null, null, 19);
 
             // Hero 3D Village Banner (Bottom-Center Anchor)
-            var btnVillage3D = CreateBottomCenterButton(canvas, "Btn_Village3D", "🏡  KHÁM PHÁ THẾ GIỚI 3D LÀNG SEN TRI THỨC  ✨\n<size=15><color=#D1FAE5>Tương tác thời gian thực • Làm nhiệm vụ học tập thế giới mở</color></size>", new Vector2(780, 75), ColorEmeraldGreen, 30, 20);
+            var btnVillage3D = CreateBottomCenterButton(canvas, "Btn_Village3D", "[3D]  KHAM PHA THE GIOI 3D LANG SEN TRI THUC\n<size=15><color=#D1FAE5>Tuong tac thoi gian thuc - Lam nhiem vu hoc tap the gioi mo</color></size>", new Vector2(780, 75), ColorEmeraldGreen, 30, 20);
 
             var manager = new GameObject("_MainMenuManager").AddComponent<MainMenuUIController>();
             SetField(manager, "nicknameText", nickText);
@@ -923,12 +923,12 @@ namespace Math6Companion.EditorTools
             var modalTitle = CreateText(card, "ModalLessonTitle", "Tên Bài Học", 26, new Vector2(0, 225), new Vector2(560, 48), ColorAmberGold, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
             var modalStats = CreateText(card, "ModalStatsText", "Điểm cao nhất: 10/10 • Top 1: AnThầnĐồng (15 lần)", 17, new Vector2(0, 175), new Vector2(560, 35), ColorTextMuted);
 
-            var btnText = CreateButton(card, "Btn_TextLesson", "📖  Xem Tóm Tắt Lý Thuyết (SGK)", new Vector2(0, 105), new Vector2(540, 54), ColorPrimaryBlue, null, null, null, 18);
-            var btnVideo = CreateButton(card, "Btn_VideoLesson", "🎬  Xem Video Bài Giảng Trực Quan", new Vector2(0, 35), new Vector2(540, 54), ColorCoralRed, null, null, null, 18);
-            var btnMCQ = CreateButton(card, "Btn_MCQPractice", "🎯  Luyện Tập Trắc Nghiệm Thông Minh", new Vector2(0, -35), new Vector2(540, 54), ColorEmeraldGreen, null, null, null, 18);
+            var btnText = CreateButton(card, "Btn_TextLesson", "Xem Tóm Tắt Lý Thuyết (SGK)", new Vector2(0, 105), new Vector2(540, 54), ColorPrimaryBlue, null, null, null, 18);
+            var btnVideo = CreateButton(card, "Btn_VideoLesson", "Xem Video Bài Giảng Trực Quan", new Vector2(0, 35), new Vector2(540, 54), ColorCoralRed, null, null, null, 18);
+            var btnMCQ = CreateButton(card, "Btn_MCQPractice", "Luyện Tập Trắc Nghiệm Thông Minh", new Vector2(0, -35), new Vector2(540, 54), ColorEmeraldGreen, null, null, null, 18);
             var btnEssay = CreateButton(card, "Btn_EssayPractice", "📝  Luyện Tự Luận & Nhờ AI Chấm", new Vector2(0, -105), new Vector2(540, 54), ColorPurpleViolet, null, null, null, 18);
             var btnLog = CreateButton(card, "Btn_PracticeLog", "📊  Xem Lịch Sử Điểm Của Bài Này", new Vector2(0, -175), new Vector2(540, 54), ColorCyanTeal, null, null, null, 18);
-            var btnClose = CreateButton(card, "Btn_CloseModal", "✕", new Vector2(290, 250), new Vector2(44, 44), ColorSlateSecondary, null, null, null, 20, s_circle);
+            var btnClose = CreateButton(card, "Btn_CloseModal", "[X]", new Vector2(290, 250), new Vector2(44, 44), ColorSlateSecondary, null, null, null, 20, s_circle);
 
             var manager = new GameObject("_LessonListManager").AddComponent<LessonListUIController>();
             SetField(manager, "backToMenuButton", backBtn);
@@ -955,8 +955,8 @@ namespace Math6Companion.EditorTools
             var title = CreateTopCenterText(canvas, "LessonTitleText", "Bài 1: Phép cộng và phép trừ số nguyên", 30, new Vector2(850, 48), ColorAmberGold, 18);
 
             // Tab Buttons
-            var btnTabTxt = CreateButton(canvas, "TabBtn_Text", "📖  Lý Thuyết Tóm Tắt", new Vector2(-165, -85), new Vector2(300, 50), ColorPrimaryBlue, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
-            var btnTabVid = CreateButton(canvas, "TabBtn_Video", "🎬  Video Bài Giảng", new Vector2(165, -85), new Vector2(300, 50), ColorSlateSecondary, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
+            var btnTabTxt = CreateButton(canvas, "TabBtn_Text", "Lý Thuyết Tóm Tắt", new Vector2(-165, -85), new Vector2(300, 50), ColorPrimaryBlue, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
+            var btnTabVid = CreateButton(canvas, "TabBtn_Video", "Video Bài Giảng", new Vector2(165, -85), new Vector2(300, 50), ColorSlateSecondary, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
 
             // Responsive Content Panels
             var txtPanel = CreateCard(canvas, "TextContentPanel", Vector2.zero, Vector2.zero, null, new Vector2(0.06f, 0.14f), new Vector2(0.94f, 0.84f), new Vector2(0.5f, 0.5f));
@@ -966,7 +966,7 @@ namespace Math6Companion.EditorTools
             vidPanel.SetActive(false);
 
             var vidInfo = CreateText(vidPanel, "VideoInfoText", "Video bài giảng minh họa trực quan chuẩn Bộ GD&ĐT", 24, new Vector2(0, 60), new Vector2(900, 80), ColorTextTitle, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
-            var playVidBtn = CreateButton(vidPanel, "Btn_PlayExternalVideo", "▶   MỞ XEM VIDEO BÀI GIẢNG FULL HD", new Vector2(0, -40), new Vector2(450, 65), ColorCoralRed, null, null, null, 19);
+            var playVidBtn = CreateButton(vidPanel, "Btn_PlayExternalVideo", ">   MỞ XEM VIDEO BÀI GIẢNG FULL HD", new Vector2(0, -40), new Vector2(450, 65), ColorCoralRed, null, null, null, 19);
 
             // Bottom CTA Buttons
             var btnStartMCQ = CreateButton(canvas, "Btn_StartMCQ", "🎯  Làm Bài Trắc Nghiệm Này", new Vector2(-190, 32), new Vector2(350, 56), ColorEmeraldGreen, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
@@ -995,12 +995,12 @@ namespace Math6Companion.EditorTools
 
             // Top Status Bar
             var backBtn = CreateTopLeftButton(canvas, "Btn_BackToMenu", "← Menu", new Vector2(120, 42), ColorSlateSecondary, 35, 20);
-            var topicTitle = CreateText(canvas, "TopicTitleText", "📘 Chủ đề: Số nguyên (DỄ)", 22, new Vector2(175, -20), new Vector2(360, 42), ColorAmberGold, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), FontStyles.Bold);
+            var topicTitle = CreateText(canvas, "TopicTitleText", "Chủ đề: Số nguyên (DỄ)", 22, new Vector2(175, -20), new Vector2(360, 42), ColorAmberGold, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), FontStyles.Bold);
             
             // Progress & Timer Badges
             var progress = CreateTopCenterText(canvas, "ProgressText", "CÂU 01 / 10", 24, new Vector2(220, 42), ColorTextTitle, 20);
-            var timer = CreateText(canvas, "TimerText", "⏱ 00:30", 24, new Vector2(-195, -20), new Vector2(140, 42), ColorAmberGold, TextAlignmentOptions.MidlineRight, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), FontStyles.Bold);
-            var closeBtn = CreateTopRightButton(canvas, "CloseQuizButton", "Nộp sớm ✕", new Vector2(130, 42), ColorCoralRed, 35, 20);
+            var timer = CreateText(canvas, "TimerText", "01:30", 24, new Vector2(-195, -20), new Vector2(140, 42), ColorAmberGold, TextAlignmentOptions.MidlineRight, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), FontStyles.Bold);
+            var closeBtn = CreateTopRightButton(canvas, "CloseQuizButton", "Nộp sớm [X]", new Vector2(130, 42), ColorCoralRed, 35, 20);
 
             // Elevated Question Card
             var card = CreateCard(canvas, "QuestionCard", new Vector2(0, -90), new Vector2(1150, 200), null, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
@@ -1021,6 +1021,7 @@ namespace Math6Companion.EditorTools
             SetField(manager, "topicTitleText", topicTitle);
             SetField(manager, "progressText", progress);
             SetField(manager, "timerText", timer);
+            SetField(manager, "timePerQuestion", 90f);
             SetField(manager, "promptText", prompt);
             SetField(manager, "feedbackText", feedback);
             SetField(manager, "nextButton", nextBtn);
@@ -1061,23 +1062,40 @@ namespace Math6Companion.EditorTools
             var title = CreateTopCenterText(canvas, "ProblemTitleText", "BÀI TẬP TỰ LUẬN: THỨ TỰ THỰC HIỆN PHÉP TÍNH", 30, new Vector2(900, 48), ColorAmberGold, 18);
 
             // Problem Card
-            var card = CreateCard(canvas, "ProblemCard", new Vector2(0, -90), new Vector2(1180, 135), null, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
-            CreateBadge(card, "PBadge", "ĐỀ BÀI TỰ LUẬN", new Vector2(0, 48), new Vector2(180, 26), ColorPurpleViolet, 12);
-            var prompt = CreateText(card, "ProblemPromptText", "Thực hiện phép tính theo từng bước giải: A = 15 - (3 + 2) × 2", 24, new Vector2(0, -10), new Vector2(1100, 75), ColorTextTitle, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
+            var card = CreateCard(canvas, "ProblemCard", new Vector2(0, -125), new Vector2(1460, 110), null, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            CreateBadge(card, "PBadge", "ĐỀ BÀI TỰ LUẬN", new Vector2(0, 38), new Vector2(180, 26), ColorPurpleViolet, 12);
+            var prompt = CreateText(card, "ProblemPromptText", "Thực hiện phép tính theo từng bước: A = 15 - (3 + 2) × 2", 22, new Vector2(0, -12), new Vector2(1400, 55), ColorTextTitle, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
 
-            // 3 Action Buttons
-            var btnCapture = CreateButton(canvas, "Btn_CapturePhoto", "📸  1. Chụp Ảnh Bài Làm", new Vector2(-330, -250), new Vector2(310, 52), ColorPrimaryBlue, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
-            var btnPick = CreateButton(canvas, "Btn_PickImage", "📁  2. Chọn Ảnh Từ Máy", new Vector2(0, -250), new Vector2(310, 52), ColorPurpleViolet, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
-            var btnSample = CreateButton(canvas, "Btn_SamplePhoto", "📄  3. Vở Mẫu Toán 6", new Vector2(330, -250), new Vector2(310, 52), ColorEmeraldGreen, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 18);
+            // 1. CỘT TRÁI: LeftPhotoCard (Ảnh bài làm)
+            var leftCard = CreateCard(canvas, "LeftPhotoCard", new Vector2(-375, -255), new Vector2(710, 480), new Color(0.10f, 0.15f, 0.24f, 0.90f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            CreateBadge(leftCard, "PhotoBadge", "ẢNH BÀI LÀM (CHỤP HOẶC TẢI LÊN)", new Vector2(0, 215), new Vector2(340, 26), new Color(0.18f, 0.40f, 0.85f, 0.95f), 12);
 
-            // Photo Preview Frame
-            var prevContainer = CreateCard(canvas, "PreviewContainer", new Vector2(0, -35), new Vector2(500, 290), new Color(0.05f, 0.07f, 0.12f));
+            var btnCapture = CreateButton(leftCard, "Btn_CapturePhoto", "[1. Chụp Ảnh]", new Vector2(-220, 175), new Vector2(200, 38), ColorPrimaryBlue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 15);
+            var btnPick = CreateButton(leftCard, "Btn_PickImage", "[2. Chọn Tệp Ảnh]", new Vector2(0, 175), new Vector2(200, 38), ColorPurpleViolet, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 15);
+            var btnSample = CreateButton(leftCard, "Btn_SamplePhoto", "[3. Vở Mẫu]", new Vector2(220, 175), new Vector2(200, 38), ColorEmeraldGreen, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 15);
+
+            var prevContainer = CreateCard(leftCard, "PreviewContainer", new Vector2(0, -35), new Vector2(660, 330), new Color(0.04f, 0.07f, 0.12f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             var preview = new GameObject("ImagePreview", typeof(RectTransform), typeof(RawImage));
             preview.transform.SetParent(prevContainer.transform, false);
             SetFullStretch(preview.GetComponent<RectTransform>());
 
-            var photoStatus = CreateText(canvas, "PhotoStatusText", "Hãy chụp ảnh bài làm, chọn ảnh từ máy hoặc bấm xem vở mẫu để AI chấm", 19, new Vector2(0, 115), new Vector2(950, 40), ColorAmberGold, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-            var submitBtn = CreateBottomCenterButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ GIA SƯ AI CHẤM NGAY  🤖", new Vector2(460, 62), ColorEmeraldGreen, 35, 19);
+            var placeholderGo = new GameObject("PlaceholderText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            placeholderGo.transform.SetParent(prevContainer.transform, false);
+            SetFullStretch(placeholderGo.GetComponent<RectTransform>());
+            var plTxt = placeholderGo.GetComponent<TextMeshProUGUI>();
+            plTxt.text = "<size=20><b>CHƯA CÓ ẢNH BÀI LÀM</b></size>\n\n<size=15>Bấm nút phía trên để Chụp ảnh, Chọn ảnh từ máy hoặc Nạp vở mẫu để AI chuyển thành chữ.</size>";
+            plTxt.alignment = TextAlignmentOptions.Center;
+            plTxt.color = new Color(0.6f, 0.7f, 0.85f, 0.6f);
+
+            // 2. CỘT PHẢI: RightTextCard (Lời giải văn bản & Bàn phím toán)
+            var rightCard = CreateCard(canvas, "RightTextCard", new Vector2(375, -255), new Vector2(710, 480), new Color(0.10f, 0.15f, 0.24f, 0.90f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            CreateBadge(rightCard, "TextBadge", "LỜI GIẢI TỰ LUẬN (OCR TỰ ĐIỀN HOẶC GÕ TAY)", new Vector2(0, 215), new Vector2(430, 26), new Color(0.85f, 0.55f, 0.10f, 0.95f), 12);
+
+            var inputField = CreateInputField(rightCard, "SolutionInputField", "AI Thầy Minh sẽ tự động chuyển các dòng viết tay từ ảnh vào đây, hoặc em có thể gõ/sửa lời giải tại đây...", new Vector2(0, 50), new Vector2(660, 240));
+            inputField.lineType = TMP_InputField.LineType.MultiLineNewline;
+
+            var photoStatus = CreateText(canvas, "PhotoStatusText", "Hãy chụp ảnh bài làm, chọn ảnh từ máy hoặc bấm xem vở mẫu để AI nhận diện chữ", 16, new Vector2(0, 75), new Vector2(1200, 30), ColorAmberGold, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            var submitBtn = CreateBottomCenterButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ GIA SƯ AI CHẤM NGAY  🤖", new Vector2(580, 50), ColorEmeraldGreen, 20, 18);
 
             var manager = new GameObject("_EssayManager").AddComponent<EssayUIController>();
             SetField(manager, "problemTitleText", title);
@@ -1088,8 +1106,10 @@ namespace Math6Companion.EditorTools
             SetField(manager, "loadSamplePhotoButton", btnSample);
             SetField(manager, "imagePreview", preview.GetComponent<RawImage>());
             SetField(manager, "previewContainer", prevContainer);
+            SetField(manager, "solutionInputField", inputField);
             SetField(manager, "photoStatusText", photoStatus);
             SetField(manager, "submitButton", submitBtn);
+            manager.EnsureQuestionIllustrationUI();
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), $"{SCENES_DIR}/06_EssayPractice.unity");
         }
@@ -1103,24 +1123,24 @@ namespace Math6Companion.EditorTools
             var card = CreateCard(canvas, "ResultCard", Vector2.zero, new Vector2(760, 720));
 
             // Stars
-            CreateText(card, "StarsText", "⭐ ⭐ ⭐", 48, new Vector2(0, 280), new Vector2(400, 60), ColorAmberGold);
+            CreateText(card, "StarsText", "* * *", 48, new Vector2(0, 280), new Vector2(400, 60), ColorAmberGold);
             var scoreBig = CreateText(card, "ScoreBigText", "8.5 / 10", 72, new Vector2(0, 205), new Vector2(450, 95), ColorAmberGold, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
-            CreateBadge(card, "ScorePill", "🎉 HOÀN THÀNH XUẤT SẮC!", new Vector2(0, 140), new Vector2(280, 36), ColorEmeraldGreen, 15);
+            CreateBadge(card, "ScorePill", "HOÀN THÀNH XUẤT SẮC!", new Vector2(0, 140), new Vector2(280, 36), ColorEmeraldGreen, 15);
 
             var scoreDetail = CreateText(card, "ScoreDetailText", "Số câu trả lời đúng: 8 / 10 câu", 22, new Vector2(0, 85), new Vector2(500, 35), ColorTextTitle);
-            var timeSpent = CreateText(card, "TimeSpentText", "⏱ Thời gian hoàn thành: 00:45", 20, new Vector2(0, 45), new Vector2(500, 35), ColorTextMuted);
+            var timeSpent = CreateText(card, "TimeSpentText", "Thời gian hoàn thành: 00:45", 20, new Vector2(0, 45), new Vector2(500, 35), ColorTextMuted);
 
             // Versus Banner (Conditional)
             var vsBanner = CreateCard(card, "VersusBannerPanel", new Vector2(0, -10), new Vector2(620, 95), new Color(0.12f, 0.18f, 0.30f));
             vsBanner.SetActive(false);
 
-            var vsResult = CreateText(vsBanner, "VersusResultText", "🏆 CHIẾN THẮNG (WINNER)!", 28, new Vector2(0, 18), new Vector2(550, 42), ColorEmeraldGreen, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
+            var vsResult = CreateText(vsBanner, "VersusResultText", "CHIẾN THẮNG (WINNER)!", 28, new Vector2(0, 18), new Vector2(550, 42), ColorEmeraldGreen, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
             var vsCompare = CreateText(vsBanner, "VersusCompareText", "Bạn: 80đ   VS   BảoToánHọc: 60đ", 18, new Vector2(0, -22), new Vector2(550, 32), ColorTextTitle);
 
             // Action Buttons
-            var btnAI = CreateButton(card, "Btn_AIFeedback", "🤖  XEM GỢI Ý & SỬA CÂU SAI BẰNG AI  >", new Vector2(0, -125), new Vector2(540, 62), ColorPurpleViolet, null, null, null, 19);
-            var btnRetry = CreateButton(card, "Btn_Retry", "🔄  Làm Lại Đề Này", new Vector2(0, -200), new Vector2(540, 54), ColorEmeraldGreen, null, null, null, 18);
-            var btnMenu = CreateButton(card, "Btn_BackToMenu", "🏠  Về Menu Chính", new Vector2(0, -265), new Vector2(540, 50), ColorSlateSecondary, null, null, null, 17);
+            var btnAI = CreateButton(card, "Btn_AIFeedback", "XEM GỢI Ý & SỬA CÂU SAI BẰNG AI  >", new Vector2(0, -125), new Vector2(540, 62), ColorPurpleViolet, null, null, null, 19);
+            var btnRetry = CreateButton(card, "Btn_Retry", "Làm Lại Đề Này", new Vector2(0, -200), new Vector2(540, 54), ColorEmeraldGreen, null, null, null, 18);
+            var btnMenu = CreateButton(card, "Btn_BackToMenu", "Về Menu Chính", new Vector2(0, -265), new Vector2(540, 50), ColorSlateSecondary, null, null, null, 17);
 
             var manager = new GameObject("_ScoreManager").AddComponent<ScoreUIController>();
             SetField(manager, "scoreBigText", scoreBig);
@@ -1145,28 +1165,28 @@ namespace Math6Companion.EditorTools
             var backMenu = CreateTopRightButton(canvas, "Btn_BackToMenu", "Về Menu →", new Vector2(140, 44), ColorSlateSecondary, 35, 20);
 
             // Tutor Badge & Greeting
-            CreateBadge(canvas, "TutorBadge", "🤖 GIA SƯ AI GEMINI • THẦY MINH", new Vector2(0, -18), new Vector2(350, 36), ColorPurpleViolet, 14, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            CreateBadge(canvas, "TutorBadge", "GIA SƯ AI GEMINI - THẦY MINH", new Vector2(0, -18), new Vector2(350, 36), ColorPurpleViolet, 14, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
             var greeting = CreateText(canvas, "TutorGreetingText", "Chào em! Thầy ở đây để cùng em phân tích chi tiết lỗi sai và cách khắc phục nhé:", 22, new Vector2(0, -60), new Vector2(1000, 35), ColorTextTitle, TextAlignmentOptions.Center, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
-            // Dialogue Card
-            var card = CreateCard(canvas, "DialogueCard", new Vector2(0, -110), new Vector2(1150, 480), null, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            // Dialogue Card - Thiết kế mở rộng to đẹp, thoáng đãng
+            var card = CreateCard(canvas, "DialogueCard", new Vector2(0, -96), new Vector2(1540, 840), null, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
-            var qTitle = CreateText(card, "QuestionTitleText", "Câu hỏi: Tính (-15) + 7", 26, new Vector2(0, 185), new Vector2(1050, 50), ColorAmberGold, TextAlignmentOptions.MidlineLeft, null, null, null, FontStyles.Bold);
+            var qTitle = CreateText(card, "QuestionTitleText", "Câu hỏi: Tính (-15) + 7", 22, new Vector2(0, -24), new Vector2(1460, 52), ColorAmberGold, TextAlignmentOptions.MidlineLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), FontStyles.Bold);
             
             // 3 Structured Sub-Cards
-            var boxDiag = CreateCard(card, "Box_Diag", new Vector2(0, 100), new Vector2(1060, 95), new Color(0.25f, 0.12f, 0.15f, 0.85f));
-            var diag = CreateText(boxDiag, "DiagnosisBodyText", "❌ Nguyên nhân sai: Em đã quên đặt dấu trừ của số có giá trị tuyệt đối lớn hơn.", 20, Vector2.zero, new Vector2(1020, 80), new Color(1f, 0.8f, 0.8f), TextAlignmentOptions.TopLeft);
+            var boxDiag = CreateCard(card, "Box_Diag", new Vector2(0, -84), new Vector2(1460, 240), new Color(0.25f, 0.12f, 0.15f, 0.85f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var diag = CreateText(boxDiag, "DiagnosisBodyText", "[!] Nguyên nhân sai: Em đã quên đặt dấu trừ của số có giá trị tuyệt đối lớn hơn.", 18, Vector2.zero, new Vector2(1400, 210), new Color(1f, 0.8f, 0.8f), TextAlignmentOptions.TopLeft);
 
-            var boxRule = CreateCard(card, "Box_Rule", new Vector2(0, -10), new Vector2(1060, 95), new Color(0.10f, 0.22f, 0.18f, 0.85f));
-            var rule = CreateText(boxRule, "RuleReminderText", "💡 Quy tắc cốt lõi: Muốn cộng hai số nguyên khác dấu, ta lấy số lớn trừ số bé và đặt dấu của số lớn hơn trước kết quả.", 20, Vector2.zero, new Vector2(1020, 80), new Color(0.8f, 1f, 0.85f), TextAlignmentOptions.TopLeft);
+            var boxRule = CreateCard(card, "Box_Rule", new Vector2(0, -345), new Vector2(1460, 210), new Color(0.10f, 0.22f, 0.18f, 0.85f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var rule = CreateText(boxRule, "RuleReminderText", "[Quy tắc cốt lõi]: Muốn cộng hai số nguyên khác dấu, ta lấy số lớn trừ số bé và đặt dấu của số lớn hơn trước kết quả.", 18, new Vector2(0, -14), new Vector2(1400, 52), new Color(0.8f, 1f, 0.85f), TextAlignmentOptions.TopLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
 
-            var boxAnalog = CreateCard(card, "Box_Analog", new Vector2(0, -120), new Vector2(1060, 95), new Color(0.25f, 0.20f, 0.10f, 0.85f));
-            var analog = CreateText(boxAnalog, "AnalogousProblemText", "🎯 Bài tập rèn luyện tương tự: Hãy tính giá trị biểu thức: (-20) + 12 = ?", 21, Vector2.zero, new Vector2(1020, 80), new Color(1f, 0.95f, 0.7f), TextAlignmentOptions.TopLeft, null, null, null, FontStyles.Bold);
+            var boxAnalog = CreateCard(card, "Box_Analog", new Vector2(0, -575), new Vector2(1460, 80), new Color(0.25f, 0.20f, 0.10f, 0.85f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var analog = CreateText(boxAnalog, "AnalogousProblemText", "[Bài tập rèn luyện tương tự]: Hãy tính giá trị biểu thức: (-20) + 12 = ?", 18, Vector2.zero, new Vector2(1400, 60), new Color(1f, 0.95f, 0.7f), TextAlignmentOptions.TopLeft, null, null, null, FontStyles.Bold);
 
             // Pagination
-            var btnPrev = CreateButton(canvas, "Btn_Prev", "← Câu Trước", new Vector2(-250, 40), new Vector2(210, 54), ColorSlateSecondary, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
-            var page = CreateText(canvas, "PageIndicatorText", "CÂU 1 / 3", 22, new Vector2(0, 40), new Vector2(160, 45), ColorTextTitle, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), FontStyles.Bold);
-            var btnNext = CreateButton(canvas, "Btn_Next", "Câu Tiếp Theo →", new Vector2(250, 40), new Vector2(210, 54), ColorPrimaryBlue, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
+            var btnPrev = CreateButton(canvas, "Btn_Prev", "← Câu Trước", new Vector2(-280, 36), new Vector2(230, 56), ColorSlateSecondary, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 19);
+            var page = CreateText(canvas, "PageIndicatorText", "CÂU 1 / 3", 22, new Vector2(0, 36), new Vector2(180, 50), ColorTextTitle, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), FontStyles.Bold);
+            var btnNext = CreateButton(canvas, "Btn_Next", "Câu Tiếp Theo →", new Vector2(280, 36), new Vector2(230, 56), ColorPrimaryBlue, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 19);
 
             var manager = new GameObject("_AIFeedbackManager").AddComponent<AIFeedbackUIController>();
             SetField(manager, "tutorGreetingText", greeting);
@@ -1190,7 +1210,7 @@ namespace Math6Companion.EditorTools
 
             var backBtn = CreateTopLeftButton(canvas, "Btn_Back", "← Menu", new Vector2(130, 44), ColorSlateSecondary, 35, 20);
             CreateTopCenterText(canvas, "Title", "ĐẤU TRƯỜNG ĐỐI KHÁNG TOÁN 6", 32, new Vector2(750, 48), ColorAmberGold, 18);
-            CreateBadge(canvas, "TimeBadge", "⏱ THỜI GIAN: 3 PHÚT (180s)", new Vector2(-35, -20), new Vector2(230, 36), ColorPrimaryBlue, 13, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            CreateBadge(canvas, "TimeBadge", "THỜI GIAN: 3 PHÚT (180s)", new Vector2(-35, -20), new Vector2(230, 36), ColorPrimaryBlue, 13, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f));
 
             // Arena Card
             var card = CreateCard(canvas, "ScanningCard", new Vector2(0, 40), new Vector2(850, 360));
@@ -1210,7 +1230,7 @@ namespace Math6Companion.EditorTools
             CreateBadge(oCard, "OBadge", "ĐỐI THỦ", new Vector2(0, 60), new Vector2(90, 26), ColorCoralRed, 12);
             var scanningText = CreateText(oCard, "ScanningIndicatorText", "🔍 Đang tìm đối thủ...", 19, new Vector2(0, 0), new Vector2(260, 60), ColorAmberGold);
 
-            var matchBtn = CreateButton(card, "Btn_RandomMatch", "⚔️  BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN  >", new Vector2(0, -115), new Vector2(480, 64), new Color(0.88f, 0.42f, 0.12f), null, null, null, 20);
+            var matchBtn = CreateButton(card, "Btn_RandomMatch", "  BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN  >", new Vector2(0, -115), new Vector2(480, 64), new Color(0.88f, 0.42f, 0.12f), null, null, null, 20);
 
             var status = CreateText(canvas, "StatusText", "Hệ thống sẽ ghép cặp học sinh có cùng trình độ kỹ năng", 18, new Vector2(0, 45), new Vector2(800, 35), ColorTextMuted, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
 
@@ -1224,9 +1244,9 @@ namespace Math6Companion.EditorTools
             var mCard = CreateCard(matchModal, "MCard", Vector2.zero, new Vector2(620, 430));
             CreateBadge(mCard, "FoundBadge", "ĐÃ TÌM THẤY TRẬN ĐẤU!", new Vector2(0, 155), new Vector2(260, 36), ColorEmeraldGreen, 14);
             var foundText = CreateText(mCard, "MatchFoundText", "Đối thủ: BảoToánHọc (Lớp 6A2)\nTrình độ: Cao cấp", 24, new Vector2(0, 75), new Vector2(520, 80), ColorTextTitle, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
-            var countdown = CreateText(mCard, "CountdownAcceptText", "⏱ Tự động hủy sau: 10s", 19, new Vector2(0, 10), new Vector2(500, 35), ColorAmberGold);
-            var btnAccept = CreateButton(mCard, "Btn_Accept", "✓   CHẤP NHẬN THI ĐẤU (ACCEPT)", new Vector2(0, -60), new Vector2(440, 58), ColorEmeraldGreen, null, null, null, 19);
-            var btnDecline = CreateButton(mCard, "Btn_Decline", "✕   TỪ CHỐI", new Vector2(0, -135), new Vector2(440, 50), ColorCoralRed, null, null, null, 17);
+            var countdown = CreateText(mCard, "CountdownAcceptText", "Tự động hủy sau: 10s", 19, new Vector2(0, 10), new Vector2(500, 35), ColorAmberGold);
+            var btnAccept = CreateButton(mCard, "Btn_Accept", "[OK]   CHẤP NHẬN THI ĐẤU (ACCEPT)", new Vector2(0, -60), new Vector2(440, 58), ColorEmeraldGreen, null, null, null, 19);
+            var btnDecline = CreateButton(mCard, "Btn_Decline", "[X]   TỪ CHỐI", new Vector2(0, -135), new Vector2(440, 50), ColorCoralRed, null, null, null, 17);
 
             // Mode Selection Modal
             var modeModal = new GameObject("ModeSelectionModal", typeof(RectTransform), typeof(Image));
@@ -1238,8 +1258,8 @@ namespace Math6Companion.EditorTools
             var modeCard = CreateCard(modeModal, "ModeCard", Vector2.zero, new Vector2(620, 380));
             CreateBadge(modeCard, "ModeBadge", "THỂ THỨC THI ĐẤU", new Vector2(0, 135), new Vector2(200, 34), ColorPrimaryBlue, 14);
             CreateText(modeCard, "ModeTitle", "CHỌN THỂ THỨC ĐỐI KHÁNG (3 PHÚT)", 26, new Vector2(0, 75), new Vector2(560, 45), ColorAmberGold, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
-            var btnMcqMode = CreateButton(modeCard, "Btn_ChooseMCQ", "🎯  Đấu Trắc Nghiệm Tốc Độ (10 Câu)", new Vector2(0, -5), new Vector2(450, 60), ColorPrimaryBlue, null, null, null, 19);
-            var btnEssayMode = CreateButton(modeCard, "Btn_ChooseEssay", "📝  Đấu Tự Luận Nhanh (1 Bài Chấm AI)", new Vector2(0, -85), new Vector2(450, 60), ColorPurpleViolet, null, null, null, 19);
+            var btnMcqMode = CreateButton(modeCard, "Btn_ChooseMCQ", "Đấu Trắc Nghiệm Tốc Độ (10 Câu)", new Vector2(0, -5), new Vector2(450, 60), ColorPrimaryBlue, null, null, null, 19);
+            var btnEssayMode = CreateButton(modeCard, "Btn_ChooseEssay", "Đấu Tự Luận Nhanh (1 Bài Chấm AI)", new Vector2(0, -85), new Vector2(450, 60), ColorPurpleViolet, null, null, null, 19);
 
             var manager = new GameObject("_VersusManager").AddComponent<VersusLobbyUIController>();
             SetField(manager, "backToMenuButton", backBtn);
@@ -1275,16 +1295,16 @@ namespace Math6Companion.EditorTools
 
             // 4 Modern Metrics Badges
             var cardL = CreateCard(sumPanel, "MetricCard1", new Vector2(0, 105), new Vector2(750, 62), new Color(0.12f, 0.17f, 0.28f));
-            var totalLess = CreateText(cardL, "TotalLessonsCompletedText", "📘   Số bài học đã hoàn thành:  3 / 3 Bài", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
+            var totalLess = CreateText(cardL, "TotalLessonsCompletedText", "Số bài học đã hoàn thành:  3 / 3 Bài", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
 
             var cardS = CreateCard(sumPanel, "MetricCard2", new Vector2(0, 25), new Vector2(750, 62), new Color(0.12f, 0.17f, 0.28f));
-            var avgScore = CreateText(cardS, "AverageScoreText", "🎯   Điểm trung bình toàn khóa:  8.8 / 10", 22, Vector2.zero, new Vector2(700, 40), ColorEmeraldGreen, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
+            var avgScore = CreateText(cardS, "AverageScoreText", "Điểm trung bình toàn khóa:  8.8 / 10", 22, Vector2.zero, new Vector2(700, 40), ColorEmeraldGreen, TextAlignmentOptions.Center, null, null, null, FontStyles.Bold);
 
             var cardA = CreateCard(sumPanel, "MetricCard3", new Vector2(0, -55), new Vector2(750, 62), new Color(0.12f, 0.17f, 0.28f));
-            var totalAtt = CreateText(cardA, "TotalAttemptsText", "🔄   Tổng số lượt rèn luyện:  19 lần", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
+            var totalAtt = CreateText(cardA, "TotalAttemptsText", "Tổng số lượt rèn luyện:  19 lần", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
 
             var cardT = CreateCard(sumPanel, "MetricCard4", new Vector2(0, -135), new Vector2(750, 62), new Color(0.12f, 0.17f, 0.28f));
-            var totalTime = CreateText(cardT, "TotalTimeText", "⏱   Tổng thời lượng học tập:  1 giờ 45 phút", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
+            var totalTime = CreateText(cardT, "TotalTimeText", "Tổng thời lượng học tập:  1 giờ 45 phút", 22, Vector2.zero, new Vector2(700, 40), ColorTextTitle);
 
             // Mode 2: Detail
             var detPanel = CreateCard(canvas, "Mode2_DetailPanel", new Vector2(0, -25), new Vector2(920, 620));
@@ -1336,7 +1356,7 @@ namespace Math6Companion.EditorTools
             var card = CreateCard(canvas, "SettingsCard", new Vector2(0, -25), new Vector2(880, 760));
 
             // Section 1: Audio
-            CreateBadge(card, "AudioBadge", "🔊 ÂM THANH & HIỆU ỨNG", new Vector2(-220, 305), new Vector2(250, 32), ColorPrimaryBlue, 13);
+            CreateBadge(card, "AudioBadge", "ÂM THANH & HIỆU ỨNG", new Vector2(-220, 305), new Vector2(250, 32), ColorPrimaryBlue, 13);
             
             CreateText(card, "LblMaster", "Âm lượng tổng:", 20, new Vector2(-220, 245), new Vector2(250, 35), ColorTextTitle, TextAlignmentOptions.MidlineLeft);
             var slMaster = CreateSlider(card, "MasterSlider", new Vector2(70, 245), new Vector2(320, 22));
@@ -1351,7 +1371,7 @@ namespace Math6Companion.EditorTools
             var txtSfxVal = CreateText(card, "SfxValText", "100%", 18, new Vector2(295, 135), new Vector2(80, 35), ColorAmberGold);
 
             // Section 2: Display
-            CreateBadge(card, "DispBadge", "🖥️ HIỂN THỊ & GIAO DIỆN", new Vector2(-220, 50), new Vector2(250, 32), ColorPurpleViolet, 13);
+            CreateBadge(card, "DispBadge", "HIỂN THỊ & GIAO DIỆN", new Vector2(-220, 50), new Vector2(250, 32), ColorPurpleViolet, 13);
             
             CreateText(card, "LblBright", "Độ sáng màn hình:", 20, new Vector2(-220, -5), new Vector2(250, 35), ColorTextTitle, TextAlignmentOptions.MidlineLeft);
             var slBright = CreateSlider(card, "BrightSlider", new Vector2(70, -5), new Vector2(320, 22));
@@ -1361,9 +1381,9 @@ namespace Math6Companion.EditorTools
             var fullToggle = CreateToggle(card, "FullScreenToggle", "Chế độ toàn màn hình (Full Screen)", new Vector2(-220, -115), new Vector2(500, 38));
 
             // Section 3: Data & Account
-            CreateBadge(card, "AccBadge", "👤 DỮ LIỆU & TÀI KHOẢN", new Vector2(-220, -185), new Vector2(250, 32), ColorEmeraldGreen, 13);
+            CreateBadge(card, "AccBadge", "DỮ LIỆU & TÀI KHOẢN", new Vector2(-220, -185), new Vector2(250, 32), ColorEmeraldGreen, 13);
             var btnReset = CreateButton(card, "Btn_ResetProgress", "Làm mới dữ liệu luyện tập", new Vector2(-120, -245), new Vector2(300, 48), ColorCoralRed, null, null, null, 17);
-            var btnSave = CreateButton(card, "Btn_SaveSettings", "LƯU CÀI ĐẶT  ✓", new Vector2(200, -245), new Vector2(260, 48), ColorEmeraldGreen, null, null, null, 18);
+            var btnSave = CreateButton(card, "Btn_SaveSettings", "LƯU CÀI ĐẶT  [OK]", new Vector2(200, -245), new Vector2(260, 48), ColorEmeraldGreen, null, null, null, 18);
 
             var status = CreateText(card, "SettingsStatusText", "", 17, new Vector2(0, -305), new Vector2(600, 35), ColorAmberGold);
 
@@ -1388,7 +1408,7 @@ namespace Math6Companion.EditorTools
         #endregion
 
         #region Build Settings Auto-Register
-        [MenuItem("Math6 / 📋 ĐỒNG BỘ TẤT CẢ SCENE VÀO BUILD SETTINGS", priority = 2)]
+        [MenuItem("Math6 / ĐỒNG BỘ TẤT CẢ SCENE VÀO BUILD SETTINGS", priority = 2)]
         public static void RegisterScenesInBuildSettings()
         {
             var orderedScenes = new List<string>
@@ -1444,7 +1464,7 @@ namespace Math6Companion.EditorTools
             }
 
             EditorBuildSettings.scenes = editorBuildScenes.ToArray();
-            Debug.Log($"[Math6 SceneAutoBuilder] 📋 Đã tự động cập nhật {EditorBuildSettings.scenes.Length} Scene vào Build Settings!");
+            Debug.Log($"[Math6 SceneAutoBuilder] Đã tự động cập nhật {EditorBuildSettings.scenes.Length} Scene vào Build Settings!");
         }
         #endregion
     }

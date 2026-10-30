@@ -147,7 +147,7 @@ namespace Math6Companion.UI
             ScoreSessionContext.IsVersusMode = true;
             ScoreSessionContext.OpponentNickname = matchedOpponentNickname;
             ScoreSessionContext.OpponentScore = matchedOpponentScore;
-            ScoreSessionContext.TimeSpentSeconds = 180; // 3 phút đếm ngược
+            ScoreSessionContext.TimeSpentSeconds = (TeacherConfigManager.Instance != null) ? TeacherConfigManager.Instance.PvPDurationSeconds : 180;
 
             if (mode == "MCQ")
             {

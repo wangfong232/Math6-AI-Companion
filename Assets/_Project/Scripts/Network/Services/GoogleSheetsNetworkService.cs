@@ -366,6 +366,8 @@ namespace Math6Companion.Core.Services
                         }
                         q.prompt = SanitizeMathText(q.prompt);
                         q.explanation = SanitizeMathText(q.explanation);
+                        if (string.IsNullOrEmpty(q.imageUrl) && !string.IsNullOrEmpty(q.imgUrl)) q.imageUrl = q.imgUrl;
+                        if (!string.IsNullOrEmpty(q.imageUrl)) q.imageUrl = q.imageUrl.Trim();
                     }
 
                     cachedAllQuestions = resp.questions;
@@ -664,7 +666,7 @@ namespace Math6Companion.Core.Services
                 }
             }
 
-            return text;
+            return Math6Companion.Core.MathTextSanitizer.SanitizeForDisplay(text);
         }
 
         #endregion

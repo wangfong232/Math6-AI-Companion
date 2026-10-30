@@ -47,6 +47,13 @@ namespace Math6Companion.Core
                     go.AddComponent<SessionManager>();
                 }
             }
+
+            // Đảm bảo PlaySessionManager tồn tại
+            _ = PlaySessionManager.Instance;
+
+            // Đảm bảo TeacherConfigManager & TeacherPortalUIController sẵn sàng
+            _ = TeacherConfigManager.Instance;
+            _ = Math6Companion.UI.TeacherPortalUIController.Instance;
             yield return new WaitForSeconds(0.3f);
 
             // 2. Đảm bảo AudioManager tồn tại

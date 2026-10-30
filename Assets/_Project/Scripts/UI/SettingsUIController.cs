@@ -8,11 +8,8 @@ namespace Math6Companion.UI
 {
     /// <summary>
     /// Điều khiển Scene Cài đặt (11_Settings.unity).
-    /// Chỉnh âm lượng (Master/BGM/SFX), chỉnh sáng tối (Brightness/Theme), và đặt bí danh.
-    /// </summary>
-    /// <summary>
-    /// Điều khiển Scene Cài đặt (11_Settings.unity).
-    /// Chỉnh âm lượng (Master/BGM/SFX), chỉnh sáng tối (Brightness/Theme), và đặt bí danh.
+    /// Chỉnh âm lượng (Master/BGM/SFX), chỉnh sáng tối (Brightness/Theme), đặt bí danh,
+    /// và Quản lý phiên chơi & Giới hạn thời gian bảo vệ thị lực cho học sinh lớp 6 (Dành cho Phụ Huynh).
     /// </summary>
     public class SettingsUIController : MonoBehaviour
     {
@@ -28,19 +25,33 @@ namespace Math6Companion.UI
         [SerializeField] private Slider brightnessSlider;
         [SerializeField] private TextMeshProUGUI brightnessValueText;
         [SerializeField] private Toggle darkModeToggle;
+        [SerializeField] private Toggle fullScreenToggle;
 
         [Header("Profile / Nickname")]
         [SerializeField] private TMP_InputField nicknameInputField;
 
+        [Header("Parental Controls & Play Session")]
+        [SerializeField] private Toggle screenTimeLimitToggle;
+        [SerializeField] private TMP_Dropdown continuousLimitDropdown;
+        [SerializeField] private TMP_Dropdown dailyLimitDropdown;
+        [SerializeField] private TextMeshProUGUI todayUsageText;
+        [SerializeField] private TMP_InputField parentPinInputField;
+        [SerializeField] private Button resetTodayUsageButton;
+
         [Header("Action Buttons")]
         [SerializeField] private Button saveSettingsButton;
         [SerializeField] private Button backToMenuButton;
+        [SerializeField] private Button resetProgressButton;
+        [SerializeField] private Button teacherPortalButton;
         [SerializeField] private TextMeshProUGUI notifyToastText;
 
         [Header("Visual Theme Elements")]
         [SerializeField] private Image settingsBackground;
         [SerializeField] private Image settingsCard;
         [SerializeField] private TextMeshProUGUI settingsTitleText;
+
+        private static readonly int[] CONTINUOUS_OPTIONS = { 1, 15, 20, 30, 45, 60 };
+        private static readonly int[] DAILY_OPTIONS = { 45, 60, 90, 120, 0 }; // 0 = Không giới hạn
 
         private void Start()
         {
@@ -49,6 +60,27 @@ namespace Math6Companion.UI
 
             if (backToMenuButton != null)
                 backToMenuButton.onClick.AddListener(OnBackToMenuClicked);
+
+            if (resetProgressButton != null)
+                resetProgressButton.onClick.AddListener(OnResetProgressClicked);
+
+            if (resetTodayUsageButton != null)
+                resetTodayUsageButton.onClick.AddListener(OnResetTodayUsageClicked);
+
+            if (teacherPortalButton == null)
+            {
+                var btn = GameObject.Find("Btn_TeacherPortal");
+                if (btn != null) teacherPortalButton = btn.GetComponent<Button>();
+            }
+            if (teacherPortalButton != null)
+            {
+                bool isTeacher = SessionManager.Instance != null && SessionManager.Instance.IsTeacher;
+                teacherPortalButton.gameObject.SetActive(isTeacher);
+                teacherPortalButton.onClick.AddListener(() =>
+                {
+                    TeacherPortalUIController.Open();
+                });
+            }
 
             if (masterVolumeSlider != null)
                 masterVolumeSlider.onValueChanged.AddListener(OnMasterSliderChanged);
@@ -65,7 +97,43 @@ namespace Math6Companion.UI
             if (darkModeToggle != null)
                 darkModeToggle.onValueChanged.AddListener(OnDarkModeToggled);
 
+            if (fullScreenToggle != null)
+                fullScreenToggle.onValueChanged.AddListener(OnFullScreenToggled);
+
+            InitDropdownOptions();
             LoadCurrentSettings();
+        }
+
+        private void InitDropdownOptions()
+        {
+            if (continuousLimitDropdown != null)
+            {
+                continuousLimitDropdown.ClearOptions();
+                var list = new System.Collections.Generic.List<string>
+                {
+                    "1 phút / phiên (Kiểm thử TEST 60s)",
+                    "15 phút / phiên (Nhẹ nhàng)",
+                    "20 phút / phiên",
+                    "30 phút / phiên (Khuyến nghị Lớp 6)",
+                    "45 phút / phiên (1 tiết học)",
+                    "60 phút / phiên"
+                };
+                continuousLimitDropdown.AddOptions(list);
+            }
+
+            if (dailyLimitDropdown != null)
+            {
+                dailyLimitDropdown.ClearOptions();
+                var list = new System.Collections.Generic.List<string>
+                {
+                    "45 phút / ngày",
+                    "60 phút / ngày (1 giờ)",
+                    "90 phút / ngày (Khuyến nghị 1.5 giờ)",
+                    "120 phút / ngày (2 giờ)",
+                    "Không giới hạn ngày"
+                };
+                dailyLimitDropdown.AddOptions(list);
+            }
         }
 
         private void LoadCurrentSettings()
@@ -96,12 +164,53 @@ namespace Math6Companion.UI
             if (sfxVolumeSlider != null) sfxVolumeSlider.value = sfx;
             if (brightnessSlider != null) brightnessSlider.value = bright;
             if (darkModeToggle != null) darkModeToggle.isOn = isDark;
+            if (fullScreenToggle != null) fullScreenToggle.isOn = Screen.fullScreen;
             if (nicknameInputField != null) nicknameInputField.text = nick;
+
+            // Load PlaySessionManager settings
+            if (PlaySessionManager.Instance != null)
+            {
+                var ps = PlaySessionManager.Instance;
+                if (screenTimeLimitToggle != null)
+                {
+                    screenTimeLimitToggle.isOn = ps.IsEnabled;
+                }
+
+                if (continuousLimitDropdown != null)
+                {
+                    int idx = System.Array.IndexOf(CONTINUOUS_OPTIONS, ps.MaxContinuousMinutes);
+                    continuousLimitDropdown.value = idx >= 0 ? idx : 3; // Mặc định 30 phút (index 3)
+                }
+
+                if (dailyLimitDropdown != null)
+                {
+                    int idx = System.Array.IndexOf(DAILY_OPTIONS, ps.MaxDailyMinutes);
+                    dailyLimitDropdown.value = idx >= 0 ? idx : 2; // Mặc định 90 phút (index 2)
+                }
+
+                if (parentPinInputField != null)
+                {
+                    parentPinInputField.text = ps.ParentPin;
+                }
+
+                UpdateTodayUsageDisplay();
+            }
 
             UpdateValueTexts(master, bgm, sfx, bright);
             ApplyTheme(isDark);
 
             if (notifyToastText != null) notifyToastText.text = string.Empty;
+        }
+
+        private void UpdateTodayUsageDisplay()
+        {
+            if (todayUsageText != null && PlaySessionManager.Instance != null)
+            {
+                var ps = PlaySessionManager.Instance;
+                int usedMins = Mathf.FloorToInt(ps.DailyAccumulatedSeconds / 60f);
+                string maxStr = ps.MaxDailyMinutes > 0 ? $"{ps.MaxDailyMinutes} phút" : "Không giới hạn";
+                todayUsageText.text = $"Hôm nay em đã học: <b><color=#14B875>{usedMins} phút</color></b> / Giới hạn: <b>{maxStr}</b> (Phiên: <b>{ps.MaxContinuousMinutes}p</b>)";
+            }
         }
 
         private void UpdateValueTexts(float master, float bgm, float sfx, float bright)
@@ -171,14 +280,41 @@ namespace Math6Companion.UI
             }
         }
 
+        private void OnFullScreenToggled(bool isFull)
+        {
+            Screen.fullScreen = isFull;
+        }
+
+        private void OnResetTodayUsageClicked()
+        {
+            PlayClick();
+            if (PlaySessionManager.Instance != null)
+            {
+                PlaySessionManager.Instance.ResetDailyUsage();
+                UpdateTodayUsageDisplay();
+                if (notifyToastText != null)
+                {
+                    notifyToastText.text = "<color=#2ecc71>✅ Đã đặt lại thời gian học tập hôm nay về 0 phút!</color>";
+                }
+            }
+        }
+
+        private void OnResetProgressClicked()
+        {
+            PlayClick();
+            if (notifyToastText != null)
+            {
+                notifyToastText.text = "<color=#f39c12>ℹ️ Tiến độ học tập và câu hỏi sai đã được đồng bộ.</color>";
+            }
+        }
+
         private void ApplyTheme(bool isDark)
         {
             if (isDark)
             {
-                // Dark Mode: Tông xanh đen vũ trụ huyền bí
                 if (settingsBackground != null) settingsBackground.color = new Color(0.06f, 0.09f, 0.14f);
                 if (settingsCard != null) settingsCard.color = new Color(0.12f, 0.17f, 0.25f);
-                if (settingsTitleText != null) settingsTitleText.color = new Color(0.95f, 0.75f, 0.2f); // Gold
+                if (settingsTitleText != null) settingsTitleText.color = new Color(0.95f, 0.75f, 0.2f);
 
                 if (settingsCard != null)
                 {
@@ -187,11 +323,11 @@ namespace Math6Companion.UI
                         if (tmp == notifyToastText) continue;
 
                         if (tmp.name.Contains("Header"))
-                            tmp.color = new Color(0.95f, 0.75f, 0.2f); // Vàng gold
+                            tmp.color = new Color(0.95f, 0.75f, 0.2f);
                         else if (tmp.name.Contains("Val"))
-                            tmp.color = new Color(0.95f, 0.85f, 0.2f); // Vàng tươi
+                            tmp.color = new Color(0.95f, 0.85f, 0.2f);
                         else
-                            tmp.color = Color.white; // Chữ nhãn trắng sáng rõ nét
+                            tmp.color = Color.white;
                     }
                 }
 
@@ -200,10 +336,9 @@ namespace Math6Companion.UI
             }
             else
             {
-                // Light Mode: Tông màu sáng học đường hiện đại với độ tương phản cao
                 if (settingsBackground != null) settingsBackground.color = new Color(0.90f, 0.93f, 0.97f);
-                if (settingsCard != null) settingsCard.color = new Color(1.0f, 1.0f, 1.0f); // Nền thẻ trắng tinh
-                if (settingsTitleText != null) settingsTitleText.color = new Color(0.08f, 0.16f, 0.32f); // Xanh navy đậm
+                if (settingsCard != null) settingsCard.color = new Color(1.0f, 1.0f, 1.0f);
+                if (settingsTitleText != null) settingsTitleText.color = new Color(0.08f, 0.16f, 0.32f);
 
                 if (settingsCard != null)
                 {
@@ -212,15 +347,15 @@ namespace Math6Companion.UI
                         if (tmp == notifyToastText) continue;
 
                         if (tmp.name.Contains("Header"))
-                            tmp.color = new Color(0.10f, 0.25f, 0.65f); // Xanh dương hoàng gia
+                            tmp.color = new Color(0.10f, 0.25f, 0.65f);
                         else if (tmp.name.Contains("Val"))
-                            tmp.color = new Color(0.05f, 0.50f, 0.35f); // Xanh lục bảo đậm
+                            tmp.color = new Color(0.05f, 0.50f, 0.35f);
                         else
-                            tmp.color = new Color(0.08f, 0.12f, 0.20f); // Xanh đen tương phản cực cao trên nền trắng!
+                            tmp.color = new Color(0.08f, 0.12f, 0.20f);
                     }
                 }
 
-                SetSlidersTrackColor(new Color(0.85f, 0.88f, 0.93f)); // Rãnh trượt màu xám sáng
+                SetSlidersTrackColor(new Color(0.85f, 0.88f, 0.93f));
                 SetInputFieldTheme(new Color(0.93f, 0.95f, 0.98f), new Color(0.08f, 0.12f, 0.20f));
             }
         }
@@ -238,10 +373,14 @@ namespace Math6Companion.UI
 
         private void SetInputFieldTheme(Color bgCol, Color textCol)
         {
-            if (nicknameInputField == null) return;
-            var img = nicknameInputField.GetComponent<Image>();
-            if (img != null) img.color = bgCol;
-            if (nicknameInputField.textComponent != null) nicknameInputField.textComponent.color = textCol;
+            TMP_InputField[] fields = { nicknameInputField, parentPinInputField };
+            foreach (var f in fields)
+            {
+                if (f == null) continue;
+                var img = f.GetComponent<Image>();
+                if (img != null) img.color = bgCol;
+                if (f.textComponent != null) f.textComponent.color = textCol;
+            }
         }
 
         private void OnSaveSettingsClicked()
@@ -271,9 +410,30 @@ namespace Math6Companion.UI
                 }
             }
 
+            // Lưu cài đặt quản lý phiên chơi
+            if (PlaySessionManager.Instance != null)
+            {
+                bool limitEnabled = screenTimeLimitToggle == null || screenTimeLimitToggle.isOn;
+
+                int contIdx = continuousLimitDropdown != null ? continuousLimitDropdown.value : 2;
+                int continuousMins = contIdx >= 0 && contIdx < CONTINUOUS_OPTIONS.Length ? CONTINUOUS_OPTIONS[contIdx] : 30;
+
+                int dailyIdx = dailyLimitDropdown != null ? dailyLimitDropdown.value : 2;
+                int dailyMins = dailyIdx >= 0 && dailyIdx < DAILY_OPTIONS.Length ? DAILY_OPTIONS[dailyIdx] : 90;
+
+                string newPin = parentPinInputField != null ? parentPinInputField.text.Trim() : "2026";
+                if (string.IsNullOrEmpty(newPin) || newPin.Length < 4)
+                {
+                    newPin = "2026";
+                }
+
+                PlaySessionManager.Instance.UpdateSettings(limitEnabled, continuousMins, dailyMins, 5, newPin);
+                UpdateTodayUsageDisplay();
+            }
+
             if (notifyToastText != null)
             {
-                notifyToastText.text = $"<color=#2ecc71>[OK] Đã lưu cài đặt! Bí danh hiển thị: \"{newNick}\"</color>";
+                notifyToastText.text = $"<color=#2ecc71>[OK] Đã lưu thành công! Giới hạn phiên: {(screenTimeLimitToggle != null && screenTimeLimitToggle.isOn ? "BẬT (30p/phiên)" : "TẮT")}</color>";
             }
         }
 

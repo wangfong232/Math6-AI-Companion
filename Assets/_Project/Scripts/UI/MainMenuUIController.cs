@@ -28,6 +28,7 @@ namespace Math6Companion.UI
 
         [Header("System Buttons")]
         [SerializeField] private Button logoutButton;
+        [SerializeField] private Button teacherPortalButton; // 7. Bảng điều khiển Giáo Viên
 
         private void Start()
         {
@@ -72,6 +73,77 @@ namespace Math6Companion.UI
 
             if (logoutButton != null)
                 logoutButton.onClick.AddListener(OnLogoutClicked);
+
+            EnsureTeacherButtonExists();
+        }
+
+        private void EnsureTeacherButtonExists()
+        {
+            bool isTeacher = SessionManager.Instance != null && SessionManager.Instance.IsTeacher;
+
+            if (teacherPortalButton != null)
+            {
+                teacherPortalButton.onClick.RemoveAllListeners();
+                teacherPortalButton.onClick.AddListener(() =>
+                {
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayButtonClick();
+                    TeacherPortalUIController.Open();
+                });
+                teacherPortalButton.gameObject.SetActive(isTeacher);
+                return;
+            }
+
+            var existingBtn = GameObject.Find("Btn_TeacherPortal");
+            if (existingBtn != null)
+            {
+                teacherPortalButton = existingBtn.GetComponent<Button>();
+                teacherPortalButton.onClick.RemoveAllListeners();
+                teacherPortalButton.onClick.AddListener(() =>
+                {
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayButtonClick();
+                    TeacherPortalUIController.Open();
+                });
+                teacherPortalButton.gameObject.SetActive(isTeacher);
+                return;
+            }
+
+            // Tự động dựng nút "Quản Trị Giáo Viên" trên ProfileHeader
+            var header = GameObject.Find("ProfileHeader");
+            if (header != null)
+            {
+                var btnGo = new GameObject("Btn_TeacherPortal", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnGo.transform.SetParent(header.transform, false);
+                var rt = btnGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(1f, 0.5f);
+                rt.anchorMax = new Vector2(1f, 0.5f);
+                rt.pivot = new Vector2(1f, 0.5f);
+                rt.anchoredPosition = new Vector2(-180, 0);
+                rt.sizeDelta = new Vector2(215, 42);
+
+                btnGo.GetComponent<Image>().color = new Color(0.15f, 0.55f, 0.85f, 1f);
+
+                var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                txtGo.transform.SetParent(btnGo.transform, false);
+                var tRt = txtGo.GetComponent<RectTransform>();
+                tRt.anchorMin = Vector2.zero;
+                tRt.anchorMax = Vector2.one;
+                tRt.offsetMin = Vector2.zero;
+                tRt.offsetMax = Vector2.zero;
+                var txt = txtGo.GetComponent<TextMeshProUGUI>();
+                txt.text = "Quản Trị Giáo Viên";
+                txt.fontSize = 15;
+                txt.fontStyle = FontStyles.Bold;
+                txt.alignment = TextAlignmentOptions.Center;
+                txt.color = Color.white;
+
+                teacherPortalButton = btnGo.GetComponent<Button>();
+                teacherPortalButton.onClick.AddListener(() =>
+                {
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayButtonClick();
+                    TeacherPortalUIController.Open();
+                });
+                teacherPortalButton.gameObject.SetActive(isTeacher);
+            }
         }
 
         private void UpdateUserProfileUI()
@@ -98,6 +170,13 @@ namespace Math6Companion.UI
 
             if (nicknameText != null) nicknameText.text = nick;
             if (userSubInfoText != null) userSubInfoText.text = $"Lớp: {cls} | {name}";
+
+            // Chỉ hiển thị nút Giáo Viên nếu đăng nhập bằng tài khoản Giáo Viên
+            bool isTeacher = SessionManager.Instance != null && SessionManager.Instance.IsTeacher;
+            if (teacherPortalButton != null)
+            {
+                teacherPortalButton.gameObject.SetActive(isTeacher);
+            }
         }
 
         private void NavigateToScene(string sceneName)

@@ -143,10 +143,14 @@ namespace Math6Companion.Core
             if (correctSfx != null) PlaySFX(correctSfx);
         }
 
+        public void PlayCorrect() => PlayCorrectSound();
+
         public void PlayWrongSound()
         {
             if (wrongSfx != null) PlaySFX(wrongSfx);
         }
+
+        public void PlayWrong() => PlayWrongSound();
 
         public void PlayPreviewTone()
         {

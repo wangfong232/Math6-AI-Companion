@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Math6Companion.Core;
+using Math6Companion.Core.Services;
 
 namespace Math6Companion.UI
 {
@@ -42,6 +43,19 @@ namespace Math6Companion.UI
         private UnityEngine.Video.VideoPlayer videoPlayer;
         private RenderTexture videoRenderTexture;
         private Button inGamePlayButton;
+
+        // Thanh điều khiển Video Player trong game (In-Game Video Controls Bar)
+        private GameObject videoControlsBar;
+        private Button videoPlayPauseButton;
+        private TextMeshProUGUI videoPlayPauseText;
+        private Slider videoTimelineSlider;
+        private TextMeshProUGUI videoTimeDisplay;
+        private Button videoReplayButton;
+        private Button videoMuteButton;
+        private TextMeshProUGUI videoMuteText;
+        private bool isVideoControlsDragging = false;
+        private bool isVideoMuted = false;
+        private bool isStreamVideoPlaying = false;
 
         // Các thành phần Video Player Hoạt Họa Trong Game
         private GameObject lecturePlayerOverlay;
@@ -113,6 +127,28 @@ namespace Math6Companion.UI
             SwitchTab(LessonListUIController.PreferredContentTab);
         }
 
+
+        private void Update()
+        {
+            if (isStreamVideoPlaying && videoPlayer != null && videoPlayer.isPlaying)
+            {
+                if (!isVideoControlsDragging && videoTimelineSlider != null && videoPlayer.length > 0)
+                {
+                    float progress = Mathf.Clamp01((float)(videoPlayer.time / videoPlayer.length));
+                    videoTimelineSlider.SetValueWithoutNotify(progress);
+                }
+
+                if (videoTimeDisplay != null)
+                {
+                    int curMin = (int)videoPlayer.time / 60;
+                    int curSec = (int)videoPlayer.time % 60;
+                    int totMin = (int)videoPlayer.length / 60;
+                    int totSec = (int)videoPlayer.length % 60;
+                    videoTimeDisplay.text = $"{curMin:D2}:{curSec:D2} / {totMin:D2}:{totSec:D2}";
+                }
+            }
+        }
+
         private void SetupVideoLayoutAndPlayer()
         {
             if (videoContentPanel == null) return;
@@ -179,7 +215,7 @@ namespace Math6Companion.UI
                 rtI.anchorMin = Vector2.zero; rtI.anchorMax = Vector2.one;
                 rtI.offsetMin = Vector2.zero; rtI.offsetMax = Vector2.zero;
                 var tmpI = iconGo.GetComponent<TextMeshProUGUI>();
-                tmpI.text = "▶";
+                tmpI.text = ">";
                 tmpI.fontSize = 38;
                 tmpI.alignment = TextAlignmentOptions.Center;
                 tmpI.color = Color.white;
@@ -191,6 +227,9 @@ namespace Math6Companion.UI
 
             // Xây dựng Giao Diện Bài Giảng Điện Tử Hoạt Họa Trong Game (Interactive Lecture Screen)
             BuildLecturePlayerUI(screenContainer);
+
+            // Xây dựng Thanh Điều Khiển Video Player Trong Game (In-Game Video Controls Bar)
+            BuildVideoControlsBar(screenContainer);
 
             // Khởi tạo Unity VideoPlayer Component
             videoPlayer = screenContainer.GetComponent<UnityEngine.Video.VideoPlayer>();
@@ -206,19 +245,281 @@ namespace Math6Companion.UI
             videoPlayer.renderMode = UnityEngine.Video.VideoRenderMode.RenderTexture;
             videoPlayer.targetTexture = videoRenderTexture;
 
-            // Định vị lại nút Mở Xem Trình Duyệt xuống phía dưới màn hình video
+            // Định vị lại 2 nút điều hướng phía dưới màn hình video
+            // Nút 1: Mở xem trực tiếp trên YouTube (watch?v=) - Tránh 100% Lỗi 153 của Embed
             if (playExternalVideoButton != null)
             {
                 var rtBtn = playExternalVideoButton.GetComponent<RectTransform>();
                 rtBtn.anchorMin = new Vector2(0.5f, 0.5f);
                 rtBtn.anchorMax = new Vector2(0.5f, 0.5f);
                 rtBtn.pivot = new Vector2(0.5f, 0.5f);
-                rtBtn.anchoredPosition = new Vector2(0, -215);
-                rtBtn.sizeDelta = new Vector2(380, 44);
+                rtBtn.anchoredPosition = new Vector2(-190, -215);
+                rtBtn.sizeDelta = new Vector2(360, 44);
+
+                var imgBtn = playExternalVideoButton.GetComponent<Image>();
+                if (imgBtn != null) imgBtn.color = new Color(0.85f, 0.16f, 0.16f);
 
                 var txtBtn = playExternalVideoButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (txtBtn != null) txtBtn.text = "<b>[>] Mở Xem Video Gốc Trên YouTube</b>";
+                if (txtBtn != null)
+                {
+                    txtBtn.text = "<b>Xem Video Bài Giảng Trên YouTube</b>";
+                    txtBtn.fontSize = 15;
+                    txtBtn.color = Color.white;
+                }
+
+                playExternalVideoButton.onClick.RemoveAllListeners();
+                playExternalVideoButton.onClick.AddListener(OnOpenVideoUrl);
             }
+
+            // Nút 2: Mở Slide Bài Giảng Tương Tác Trong Game
+            var inGameSlideBtnGo = videoContentPanel.transform.Find("Btn_InGameSlides")?.gameObject;
+            if (inGameSlideBtnGo == null)
+            {
+                inGameSlideBtnGo = new GameObject("Btn_InGameSlides", typeof(RectTransform), typeof(Image), typeof(Button));
+                inGameSlideBtnGo.transform.SetParent(videoContentPanel.transform, false);
+                var rt = inGameSlideBtnGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = new Vector2(190, -215);
+                rt.sizeDelta = new Vector2(360, 44);
+                inGameSlideBtnGo.GetComponent<Image>().color = new Color(0.12f, 0.45f, 0.75f);
+
+                var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                txtGo.transform.SetParent(inGameSlideBtnGo.transform, false);
+                var rtT = txtGo.GetComponent<RectTransform>();
+                rtT.anchorMin = Vector2.zero; rtT.anchorMax = Vector2.one;
+                rtT.offsetMin = Vector2.zero; rtT.offsetMax = Vector2.zero;
+                var tmp = txtGo.GetComponent<TextMeshProUGUI>();
+                tmp.text = "<b>Xem Slide Tóm Tắt Trong Game</b>";
+                tmp.fontSize = 15;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = Color.white;
+            }
+            var btnSlides = inGameSlideBtnGo.GetComponent<Button>();
+            btnSlides.onClick.RemoveAllListeners();
+            btnSlides.onClick.AddListener(() =>
+            {
+                PlayClick();
+                if (lecturePlayerOverlay != null)
+                {
+                    lecturePlayerOverlay.SetActive(true);
+                    StartLecturePlayback();
+                }
+            });
+        }
+
+
+        private void BuildVideoControlsBar(GameObject container)
+        {
+            var barGo = container.transform.Find("VideoControlsBar")?.gameObject;
+            if (barGo == null)
+            {
+                barGo = new GameObject("VideoControlsBar", typeof(RectTransform), typeof(Image));
+                barGo.transform.SetParent(container.transform, false);
+                var rt = barGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0);
+                rt.anchorMax = new Vector2(1, 0);
+                rt.pivot = new Vector2(0.5f, 0);
+                rt.anchoredPosition = Vector2.zero;
+                rt.sizeDelta = new Vector2(0, 44);
+                barGo.GetComponent<Image>().color = new Color(0.04f, 0.07f, 0.12f, 0.95f);
+            }
+            videoControlsBar = barGo;
+            videoControlsBar.SetActive(false);
+
+            // Nút Play / Pause
+            var btnPP = barGo.transform.Find("Btn_PlayPause")?.gameObject;
+            if (btnPP == null)
+            {
+                btnPP = new GameObject("Btn_PlayPause", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnPP.transform.SetParent(barGo.transform, false);
+                var rt = btnPP.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.anchoredPosition = new Vector2(30, 0);
+                rt.sizeDelta = new Vector2(38, 32);
+                btnPP.GetComponent<Image>().color = new Color(0.18f, 0.55f, 0.92f);
+
+                var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                txtGo.transform.SetParent(btnPP.transform, false);
+                var rtT = txtGo.GetComponent<RectTransform>();
+                rtT.anchorMin = Vector2.zero; rtT.anchorMax = Vector2.one;
+                rtT.offsetMin = Vector2.zero; rtT.offsetMax = Vector2.zero;
+                videoPlayPauseText = txtGo.GetComponent<TextMeshProUGUI>();
+                videoPlayPauseText.text = "[||]";
+                videoPlayPauseText.fontSize = 16;
+                videoPlayPauseText.fontStyle = FontStyles.Bold;
+                videoPlayPauseText.alignment = TextAlignmentOptions.Center;
+                videoPlayPauseText.color = Color.white;
+            }
+            videoPlayPauseButton = btnPP.GetComponent<Button>();
+            videoPlayPauseButton.onClick.RemoveAllListeners();
+            videoPlayPauseButton.onClick.AddListener(OnToggleVideoPlayPause);
+
+            // Time Display text
+            var timeGo = barGo.transform.Find("TimeDisplay")?.gameObject;
+            if (timeGo == null)
+            {
+                timeGo = new GameObject("TimeDisplay", typeof(RectTransform), typeof(TextMeshProUGUI));
+                timeGo.transform.SetParent(barGo.transform, false);
+                var rt = timeGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.anchoredPosition = new Vector2(105, 0);
+                rt.sizeDelta = new Vector2(105, 28);
+                videoTimeDisplay = timeGo.GetComponent<TextMeshProUGUI>();
+                videoTimeDisplay.text = "00:00 / 00:00";
+                videoTimeDisplay.fontSize = 13;
+                videoTimeDisplay.alignment = TextAlignmentOptions.MidlineLeft;
+                videoTimeDisplay.color = new Color(0.85f, 0.92f, 1f);
+            }
+
+            // Timeline Slider
+            var sliderGo = barGo.transform.Find("TimelineSlider")?.gameObject;
+            if (sliderGo == null)
+            {
+                sliderGo = new GameObject("TimelineSlider", typeof(RectTransform), typeof(Slider));
+                sliderGo.transform.SetParent(barGo.transform, false);
+                var rt = sliderGo.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(1, 0.5f);
+                rt.offsetMin = new Vector2(170, -10);
+                rt.offsetMax = new Vector2(-110, 10);
+
+                var bgGo = new GameObject("Background", typeof(RectTransform), typeof(Image));
+                bgGo.transform.SetParent(sliderGo.transform, false);
+                var rtBg = bgGo.GetComponent<RectTransform>();
+                rtBg.anchorMin = new Vector2(0, 0.25f);
+                rtBg.anchorMax = new Vector2(1, 0.75f);
+                rtBg.offsetMin = Vector2.zero; rtBg.offsetMax = Vector2.zero;
+                bgGo.GetComponent<Image>().color = new Color(0.2f, 0.25f, 0.35f, 0.8f);
+
+                var fillAreaGo = new GameObject("Fill Area", typeof(RectTransform));
+                fillAreaGo.transform.SetParent(sliderGo.transform, false);
+                var rtFA = fillAreaGo.GetComponent<RectTransform>();
+                rtFA.anchorMin = new Vector2(0, 0.25f);
+                rtFA.anchorMax = new Vector2(1, 0.75f);
+                rtFA.offsetMin = Vector2.zero; rtFA.offsetMax = Vector2.zero;
+
+                var fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+                fillGo.transform.SetParent(fillAreaGo.transform, false);
+                var rtFill = fillGo.GetComponent<RectTransform>();
+                rtFill.sizeDelta = Vector2.zero;
+                fillGo.GetComponent<Image>().color = new Color(0.22f, 0.65f, 0.95f);
+
+                var sliderComp = sliderGo.GetComponent<Slider>();
+                sliderComp.fillRect = rtFill;
+                sliderComp.minValue = 0f;
+                sliderComp.maxValue = 1f;
+                videoTimelineSlider = sliderComp;
+            }
+            if (videoTimelineSlider != null)
+            {
+                videoTimelineSlider.onValueChanged.RemoveAllListeners();
+                videoTimelineSlider.onValueChanged.AddListener(OnVideoTimelineSeek);
+            }
+
+            // Nút Replay [<<]
+            var btnRep = barGo.transform.Find("Btn_Replay")?.gameObject;
+            if (btnRep == null)
+            {
+                btnRep = new GameObject("Btn_Replay", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnRep.transform.SetParent(barGo.transform, false);
+                var rt = btnRep.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(1, 0.5f);
+                rt.anchorMax = new Vector2(1, 0.5f);
+                rt.anchoredPosition = new Vector2(-75, 0);
+                rt.sizeDelta = new Vector2(34, 30);
+                btnRep.GetComponent<Image>().color = new Color(0.15f, 0.25f, 0.35f);
+
+                var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                txtGo.transform.SetParent(btnRep.transform, false);
+                var rtT = txtGo.GetComponent<RectTransform>();
+                rtT.anchorMin = Vector2.zero; rtT.anchorMax = Vector2.one;
+                rtT.offsetMin = Vector2.zero; rtT.offsetMax = Vector2.zero;
+                var tmp = txtGo.GetComponent<TextMeshProUGUI>();
+                tmp.text = "[R]";
+                tmp.fontSize = 15;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = Color.white;
+            }
+            videoReplayButton = btnRep.GetComponent<Button>();
+            videoReplayButton.onClick.RemoveAllListeners();
+            videoReplayButton.onClick.AddListener(OnReplayVideoInGame);
+
+            // Nút Mute [Mute / Sound]
+            var btnMute = barGo.transform.Find("Btn_Mute")?.gameObject;
+            if (btnMute == null)
+            {
+                btnMute = new GameObject("Btn_Mute", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnMute.transform.SetParent(barGo.transform, false);
+                var rt = btnMute.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(1, 0.5f);
+                rt.anchorMax = new Vector2(1, 0.5f);
+                rt.anchoredPosition = new Vector2(-30, 0);
+                rt.sizeDelta = new Vector2(34, 30);
+                btnMute.GetComponent<Image>().color = new Color(0.15f, 0.25f, 0.35f);
+
+                var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                txtGo.transform.SetParent(btnMute.transform, false);
+                var rtT = txtGo.GetComponent<RectTransform>();
+                rtT.anchorMin = Vector2.zero; rtT.anchorMax = Vector2.one;
+                rtT.offsetMin = Vector2.zero; rtT.offsetMax = Vector2.zero;
+                videoMuteText = txtGo.GetComponent<TextMeshProUGUI>();
+                videoMuteText.text = "[Vol]";
+                videoMuteText.fontSize = 16;
+                videoMuteText.alignment = TextAlignmentOptions.Center;
+                videoMuteText.color = Color.white;
+            }
+            videoMuteButton = btnMute.GetComponent<Button>();
+            videoMuteButton.onClick.RemoveAllListeners();
+            videoMuteButton.onClick.AddListener(OnToggleMuteVideo);
+        }
+
+        private void OnToggleVideoPlayPause()
+        {
+            PlayClick();
+            if (videoPlayer == null) return;
+
+            if (videoPlayer.isPlaying)
+            {
+                videoPlayer.Pause();
+                if (videoPlayPauseText != null) videoPlayPauseText.text = ">";
+            }
+            else
+            {
+                videoPlayer.Play();
+                if (videoPlayPauseText != null) videoPlayPauseText.text = "[||]";
+            }
+        }
+
+        private void OnVideoTimelineSeek(float value)
+        {
+            if (videoPlayer != null && videoPlayer.length > 0)
+            {
+                videoPlayer.time = value * videoPlayer.length;
+            }
+        }
+
+        private void OnReplayVideoInGame()
+        {
+            PlayClick();
+            if (videoPlayer != null)
+            {
+                videoPlayer.time = 0;
+                videoPlayer.Play();
+                if (videoPlayPauseText != null) videoPlayPauseText.text = "[||]";
+            }
+        }
+
+        private void OnToggleMuteVideo()
+        {
+            PlayClick();
+            if (videoPlayer == null) return;
+            isVideoMuted = !isVideoMuted;
+            videoPlayer.SetDirectAudioMute(0, isVideoMuted);
+            if (videoMuteText != null) videoMuteText.text = isVideoMuted ? "[Mute]" : "[Vol]";
         }
 
         private void BuildLecturePlayerUI(GameObject container)
@@ -379,6 +680,18 @@ namespace Math6Companion.UI
                 if (theoryBodyText != null) theoryBodyText.text = lesson.summaryText;
                 currentVideoUrl = lesson.videoUrl;
 
+                // Tự động gán video YouTube Toán 6 thực tế nếu URL đang rỗng hoặc là link mock
+                if (string.IsNullOrEmpty(currentVideoUrl) || currentVideoUrl.Contains("mock_lesson"))
+                {
+                    string topicNorm = (lesson.topic ?? "").ToLower();
+                    if (topicNorm.Contains("frac") || topicNorm.Contains("phan"))
+                        currentVideoUrl = "https://www.youtube.com/watch?v=ZKNbig3XpM8";
+                    else if (topicNorm.Contains("hinh") || topicNorm.Contains("geom"))
+                        currentVideoUrl = "https://www.youtube.com/watch?v=XUq_incBNXY";
+                    else
+                        currentVideoUrl = "https://www.youtube.com/watch?v=vcR0jey6xcI";
+                }
+
                 if (videoInfoText != null)
                 {
                     videoInfoText.text = $"<b>Video bài giảng:</b> {lesson.title}  |  <b>Nguồn:</b> Bộ GD&ĐT Toán Lớp 6";
@@ -393,7 +706,7 @@ namespace Math6Companion.UI
                 {
                     theoryBodyText.text = "1. Cộng hai số nguyên cùng dấu:\n- Muốn cộng hai số nguyên âm, ta cộng hai phần tự nhiên rồi đặt dấu '-' trước kết quả.\nVí dụ: (-5) + (-3) = -(5 + 3) = -8.\n\n2. Cộng hai số nguyên khác dấu:\n- Lấy số có phần tự nhiên lớn hơn trừ số có phần tự nhiên bé hơn, đặt dấu của số có phần tự nhiên lớn hơn trước hiệu.\nVí dụ: (-15) + 7 = -(15 - 7) = -8.";
                 }
-                currentVideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                currentVideoUrl = "https://www.youtube.com/watch?v=vcR0jey6xcI";
                 if (videoInfoText != null) videoInfoText.text = "<b>Video bài giảng:</b> Bài 1: Phép cộng và trừ số nguyên";
 
                 var dummyLesson = new Math6Companion.Core.Contracts.LessonData
@@ -490,7 +803,12 @@ namespace Math6Companion.UI
                 else if (url.Contains("embed/"))
                 {
                     var parts = url.Split(new string[] { "embed/" }, System.StringSplitOptions.None);
-                    if (parts.Length > 1) return parts[1].Split('?')[0];
+                    if (parts.Length > 1) return parts[1].Split('?')[0].Split('&')[0].Split('#')[0];
+                }
+                else if (url.Contains("shorts/"))
+                {
+                    var parts = url.Split(new string[] { "shorts/" }, System.StringSplitOptions.None);
+                    if (parts.Length > 1) return parts[1].Split('?')[0].Split('&')[0].Split('#')[0];
                 }
             }
             catch (System.Exception ex)
@@ -524,33 +842,117 @@ namespace Math6Companion.UI
         {
             PlayClick();
 
-            if (inGamePlayButton != null) inGamePlayButton.gameObject.SetActive(false);
+            var lesson = LessonListUIController.CurrentSelectedLesson;
+            string lessonTitle = lesson != null ? lesson.title : "Toán Lớp 6";
 
-            // 1. Nếu là video file trực tiếp (mp4, webm), chạy bằng Unity VideoPlayer
-            if (videoPlayer != null && !string.IsNullOrEmpty(currentVideoUrl))
+            if (videoInfoText != null)
             {
-                if (currentVideoUrl.EndsWith(".mp4", System.StringComparison.OrdinalIgnoreCase) || 
-                    currentVideoUrl.EndsWith(".webm", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    if (videoThumbnailPreview != null) videoThumbnailPreview.texture = videoRenderTexture;
-                    videoPlayer.url = currentVideoUrl;
-                    videoPlayer.Play();
-                    return;
-                }
+                videoInfoText.text = $"<color=#f39c12>[...] Đang kết nối luồng phát video: <b>{lessonTitle}</b>...</color>";
             }
 
-            // 2. Chạy Trình chiếu Bài Giảng Hoạt Họa Tương Tác Trực Tiếp Trong Game
+            // 1. Nếu là file video MP4 trực tiếp, phát ngay trên Unity VideoPlayer trong Canvas
+            if (videoPlayer != null && !string.IsNullOrEmpty(currentVideoUrl) && 
+               (currentVideoUrl.EndsWith(".mp4", System.StringComparison.OrdinalIgnoreCase) || currentVideoUrl.EndsWith(".webm", System.StringComparison.OrdinalIgnoreCase)))
+            {
+                PlayDirectStream(currentVideoUrl, lessonTitle);
+                return;
+            }
+
+            // 2. Thử bóc tách luồng phát trực tiếp trong game qua YouTubeStreamResolver
+            if (YouTubeStreamResolver.Instance != null && !string.IsNullOrEmpty(currentVideoUrl))
+            {
+                YouTubeStreamResolver.Instance.Resolve(currentVideoUrl, (success, streamUrl, err) =>
+                {
+                    if (this == null || gameObject == null) return;
+                    if (success && !string.IsNullOrEmpty(streamUrl) && videoPlayer != null)
+                    {
+                        PlayDirectStream(streamUrl, lessonTitle);
+                    }
+                    else
+                    {
+                        // Fallback an toàn: Mở trình duyệt ngoài với safe watch?v= URL (không bao giờ bị lỗi 153 của Embed)
+                        string safeUrl = GetSafeYouTubeWatchUrl(currentVideoUrl);
+                        Debug.Log($"[LessonContent] Fallback sang YouTube Watch URL: {safeUrl}");
+                        Application.OpenURL(safeUrl);
+                        if (videoInfoText != null)
+                        {
+                            videoInfoText.text = $"<color=#2ecc71><b>[ĐÃ MỞ VIDEO BÀI GIẢNG]</b></color> <b>{lessonTitle}</b> (Đang phát trên YouTube không giới hạn bản quyền).";
+                        }
+                    }
+                });
+                return;
+            }
+
+            // 3. Fallback mặc định mở trình duyệt ngoài
+            string fallbackUrl = GetSafeYouTubeWatchUrl(currentVideoUrl);
+            Application.OpenURL(fallbackUrl);
+        }
+
+        private void PlayDirectStream(string streamUrl, string lessonTitle)
+        {
+            if (inGamePlayButton != null) inGamePlayButton.gameObject.SetActive(false);
+            isStreamVideoPlaying = true;
+            if (videoThumbnailPreview != null) videoThumbnailPreview.texture = videoRenderTexture;
+            if (lecturePlayerOverlay != null) lecturePlayerOverlay.SetActive(false);
+
+            videoPlayer.url = streamUrl;
+            videoPlayer.prepareCompleted += (source) =>
+            {
+                source.Play();
+                if (videoControlsBar != null) videoControlsBar.SetActive(true);
+                if (videoPlayPauseText != null) videoPlayPauseText.text = "[||]";
+                if (videoInfoText != null)
+                {
+                    videoInfoText.text = $"<color=#2ecc71><b>[ĐANG PHÁT TRỰC TIẾP TRONG GAME]</b></color> <b>{lessonTitle}</b>";
+                }
+            };
+            videoPlayer.errorReceived += (source, message) =>
+            {
+                ActivateLectureFallback(lessonTitle);
+            };
+            videoPlayer.Prepare();
+        }
+
+        public string GetSafeYouTubeWatchUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return "https://www.youtube.com/watch?v=vcR0jey6xcI";
+            string videoId = ExtractYouTubeVideoId(url);
+            if (!string.IsNullOrEmpty(videoId))
+            {
+                return $"https://www.youtube.com/watch?v={videoId}";
+            }
+            return url;
+        }
+
+        private void ActivateLectureFallback(string lessonTitle)
+        {
+            isStreamVideoPlaying = false;
+            if (videoControlsBar != null) videoControlsBar.SetActive(false);
+
+            // 1. Chạy Trình chiếu Bài Giảng Hoạt Họa Tương Tác Trực Tiếp Trong Game
             if (lecturePlayerOverlay != null)
             {
                 lecturePlayerOverlay.SetActive(true);
                 StartLecturePlayback();
             }
 
+            // 2. Cập nhật thông báo hướng dẫn học sinh
             if (videoInfoText != null)
             {
-                var lesson = LessonListUIController.CurrentSelectedLesson;
-                string title = lesson != null ? lesson.title : "Toán 6";
-                videoInfoText.text = $"<color=#2ecc71>[DANG PHAT]</color> <b>{title}</b>";
+                videoInfoText.text = $"<color=#e67e22><b>[BÀI GIẢNG ĐIỆN TỬ TÓM TẮT]</b></color> <b>{lessonTitle}</b>  |  <i>(Em có thể bấm nút bên dưới để mở xem video gốc trên YouTube)</i>";
+            }
+
+            // 3. Làm nổi bật nút mở xem YouTube gốc ngoài trình duyệt
+            if (playExternalVideoButton != null)
+            {
+                var txt = playExternalVideoButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null)
+                {
+                    txt.text = "<b>Mở Xem Video Gốc Trên YouTube (Trình Duyệt)</b>";
+                    txt.color = new Color(1f, 0.85f, 0.2f);
+                }
+                var img = playExternalVideoButton.GetComponent<Image>();
+                if (img != null) img.color = new Color(0.75f, 0.15f, 0.15f);
             }
         }
 
@@ -708,10 +1110,8 @@ namespace Math6Companion.UI
         private void OnOpenVideoUrl()
         {
             PlayClick();
-            if (!string.IsNullOrEmpty(currentVideoUrl))
-            {
-                Application.OpenURL(currentVideoUrl);
-            }
+            string safeUrl = GetSafeYouTubeWatchUrl(currentVideoUrl);
+            Application.OpenURL(safeUrl);
         }
 
         private void OnBackToListClicked()
