@@ -7,26 +7,33 @@ namespace Math6Companion.Core
     /// <summary>
     /// Quản lý phiên làm việc của học sinh/giáo viên và cài đặt ứng dụng.
     /// Tồn tại xuyên suốt vòng đời ứng dụng (DontDestroyOnLoad).
-    /// </summary>
     public class SessionManager : MonoBehaviour
     {
+        private static bool isQuitting = false;
         private static SessionManager instance;
         public static SessionManager Instance
         {
             get
             {
+                if (isQuitting) return null;
                 if (instance == null)
                 {
                     instance = FindAnyObjectByType<SessionManager>();
-                    if (instance == null)
+                    if (instance == null && !isQuitting)
                     {
                         var go = new GameObject("[SessionManager]");
                         instance = go.AddComponent<SessionManager>();
+                        DontDestroyOnLoad(go);
                     }
                 }
                 return instance;
             }
             private set => instance = value;
+        }
+
+        private void OnApplicationQuit()
+        {
+            isQuitting = true;
         }
 
         [Header("Current User Session")]
@@ -41,6 +48,27 @@ namespace Math6Companion.Core
 
         public UserData CurrentUser => currentUser;
         public bool IsLoggedIn => currentUser != null && !string.IsNullOrEmpty(currentUser.userId);
+        public bool IsTeacher
+        {
+            get
+            {
+                if (currentUser != null && !string.IsNullOrEmpty(currentUser.role))
+                {
+                    return currentUser.role.Trim().Equals("TEACHER", StringComparison.OrdinalIgnoreCase);
+                }
+                string savedRole = PlayerPrefs.GetString("User_Role", "");
+                return !string.IsNullOrEmpty(savedRole) && savedRole.Trim().Equals("TEACHER", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+        public string CurrentNickname => currentUser != null && !string.IsNullOrEmpty(currentUser.nickname)
+            ? currentUser.nickname
+            : (currentUser != null && !string.IsNullOrEmpty(currentUser.fullName) ? currentUser.fullName : PlayerPrefs.GetString("User_Nickname", "Trạng Tí"));
+
+        [Header("Village 3D State & Routing")]
+        public string ReturnSceneName { get; set; } = "02_VillageWorld";
+        public bool HasSavedVillagePosition { get; private set; }
+        public Vector3 LastVillagePlayerPosition { get; private set; }
+        public Quaternion LastVillagePlayerRotation { get; private set; }
 
         public event Action<UserData> OnUserLoggedIn;
         public event Action OnUserLoggedOut;
@@ -61,6 +89,12 @@ namespace Math6Companion.Core
 
             LoadSavedPreferences();
             InitScreenDimmer();
+
+            // Khởi tạo hệ thống quản lý phiên chơi và giới hạn thời gian lành mạnh cho học sinh lớp 6
+            _ = PlaySessionManager.Instance;
+
+            // Khởi tạo hệ thống cấu hình & quản trị lộ trình dành cho Giáo viên
+            _ = TeacherConfigManager.Instance;
         }
 
         private void InitScreenDimmer()
@@ -154,6 +188,43 @@ namespace Math6Companion.Core
             OnSettingsChanged?.Invoke();
         }
 
+        public void SaveVillagePosition(Vector3 pos, Quaternion rot)
+        {
+            // Chỉ lưu khi vị trí người chơi hợp lệ trên Làng Sen (không bị rơi xuống vực)
+            if (pos.y < -3f || Mathf.Abs(pos.x) > 40f || Mathf.Abs(pos.z) > 40f)
+            {
+                ResetVillagePosition();
+                return;
+            }
+
+            HasSavedVillagePosition = true;
+            LastVillagePlayerPosition = pos;
+            LastVillagePlayerRotation = rot;
+
+            PlayerPrefs.SetInt("Village_HasSavedPos", 1);
+            PlayerPrefs.SetFloat("Village_PlayerPosX", pos.x);
+            PlayerPrefs.SetFloat("Village_PlayerPosY", pos.y);
+            PlayerPrefs.SetFloat("Village_PlayerPosZ", pos.z);
+            PlayerPrefs.SetFloat("Village_PlayerRotY", rot.eulerAngles.y);
+            PlayerPrefs.Save();
+        }
+
+        public void ResetVillagePosition()
+        {
+            HasSavedVillagePosition = false;
+            PlayerPrefs.DeleteKey("Village_HasSavedPos");
+            PlayerPrefs.DeleteKey("Village_PlayerPosX");
+            PlayerPrefs.DeleteKey("Village_PlayerPosY");
+            PlayerPrefs.DeleteKey("Village_PlayerPosZ");
+            PlayerPrefs.DeleteKey("Village_PlayerRotY");
+            PlayerPrefs.Save();
+        }
+
+        public void ClearSavedVillagePosition()
+        {
+            ResetVillagePosition();
+        }
+
         public void ClearSession()
         {
             currentUser = null;
@@ -165,6 +236,7 @@ namespace Math6Companion.Core
             PlayerPrefs.DeleteKey("User_ClassId");
             PlayerPrefs.Save();
 
+            ResetVillagePosition();
             OnUserLoggedOut?.Invoke();
         }
 
@@ -175,6 +247,25 @@ namespace Math6Companion.Core
             sfxVolume = PlayerPrefs.GetFloat("Settings_SfxVol", 1.0f);
             brightness = PlayerPrefs.GetFloat("Settings_Brightness", 1.0f);
             isDarkMode = PlayerPrefs.GetInt("Settings_DarkMode", 0) == 1;
+
+            if (PlayerPrefs.GetInt("Village_HasSavedPos", 0) == 1)
+            {
+                float savedY = PlayerPrefs.GetFloat("Village_PlayerPosY", 0.2f);
+                float savedX = PlayerPrefs.GetFloat("Village_PlayerPosX", 0f);
+                float savedZ = PlayerPrefs.GetFloat("Village_PlayerPosZ", 0f);
+
+                // Nếu tọa độ lưu bị rơi xuống vực sâu hoặc văng khỏi map, tự động xóa
+                if (savedY < -3f || Mathf.Abs(savedX) > 40f || Mathf.Abs(savedZ) > 40f)
+                {
+                    ResetVillagePosition();
+                }
+                else
+                {
+                    HasSavedVillagePosition = true;
+                    LastVillagePlayerPosition = new Vector3(savedX, savedY, savedZ);
+                    LastVillagePlayerRotation = Quaternion.Euler(0f, PlayerPrefs.GetFloat("Village_PlayerRotY", 0f), 0f);
+                }
+            }
 
             // Kiểm tra nếu có session cũ đã lưu
             string savedUserId = PlayerPrefs.GetString("User_ID", "");

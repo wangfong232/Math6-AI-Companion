@@ -147,7 +147,7 @@ namespace Math6Companion.UI
             ScoreSessionContext.IsVersusMode = true;
             ScoreSessionContext.OpponentNickname = matchedOpponentNickname;
             ScoreSessionContext.OpponentScore = matchedOpponentScore;
-            ScoreSessionContext.TimeSpentSeconds = 180; // 3 phút đếm ngược
+            ScoreSessionContext.TimeSpentSeconds = (TeacherConfigManager.Instance != null) ? TeacherConfigManager.Instance.PvPDurationSeconds : 180;
 
             if (mode == "MCQ")
             {
@@ -162,7 +162,8 @@ namespace Math6Companion.UI
         private void OnBackToMenuClicked()
         {
             PlayClick();
-            SceneManager.LoadScene("02_MainMenu");
+            string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
+            SceneManager.LoadScene(target);
         }
 
         private void PlayClick()

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Reflection;
 
 [CustomEditor(typeof(Readme))]
-[InitializeOnLoad]
+// [InitializeOnLoad] disabled to prevent early inspector redraw before skin initialization
 public class ReadmeEditor : Editor
 {
     static string s_ShowedReadmeSessionStateName = "ReadmeEditor.showedReadme";
@@ -16,10 +16,11 @@ public class ReadmeEditor : Editor
 
     const float k_Space = 16f;
 
-    static ReadmeEditor()
-    {
-        EditorApplication.delayCall += SelectReadmeAutomatically;
-    }
+    // Disabled automatic selection on domain reload to prevent GUIStyle initialization issues
+    // static ReadmeEditor()
+    // {
+    //     EditorApplication.delayCall += SelectReadmeAutomatically;
+    // }
 
     static void RemoveTutorial()
     {
@@ -99,7 +100,7 @@ public class ReadmeEditor : Editor
 
         var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 128f);
 
-        GUILayout.BeginHorizontal("In BigTitle");
+        GUILayout.BeginHorizontal(EditorStyles.helpBox);
         {
             if (readme.icon != null)
             {
