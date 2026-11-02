@@ -14,6 +14,7 @@ namespace Math6Companion.Core.Contracts
         public string role; // "STUDENT" or "TEACHER"
         public int grade;
         public string classId;
+        public string nickname; // Bí danh của học sinh
     }
 
     [Serializable]
@@ -23,6 +24,33 @@ namespace Math6Companion.Core.Contracts
         public string B;
         public string C;
         public string D;
+
+        public int Count => 4;
+
+        public string this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return A;
+                    case 1: return B;
+                    case 2: return C;
+                    case 3: return D;
+                    default: return string.Empty;
+                }
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: A = value; break;
+                    case 1: B = value; break;
+                    case 2: C = value; break;
+                    case 3: D = value; break;
+                }
+            }
+        }
     }
 
     [Serializable]
@@ -45,8 +73,30 @@ namespace Math6Companion.Core.Contracts
         public QuestionOptionMap options;
         public string correctAnswer;
         public List<RubricItem> rubric;
+        public string rubricRaw; // Cỗi thô từ server để tránh parse JSON trên Google server
         public string explanation;
         public int maxScore;
+        public string imageUrl;
+        public string imgUrl;
+
+        public string EffectiveImageUrl => !string.IsNullOrEmpty(imageUrl) ? imageUrl : (!string.IsNullOrEmpty(imgUrl) ? imgUrl : "");
+    }
+
+    [Serializable]
+    public class LessonData
+    {
+        public string lessonId;
+        public string topic;
+        public string title;
+        public string description;
+        public int grade;
+        public int orderIndex;
+        public string summaryText;
+        public string objectives;
+        public string videoUrl;
+        public int userHighestScore;
+        public string topStudentNickname;
+        public int topStudentAttempts;
     }
 
     [Serializable]
@@ -60,6 +110,24 @@ namespace Math6Companion.Core.Contracts
         public int maxScore;
         public int timeSpentSeconds;
         public int mistakesCount;
+        public string timestamp;
+    }
+
+    [Serializable]
+    public class AITutorLogSubmission
+    {
+        public string action = "logAITutor";
+        public string userId;
+        public string lessonId;
+        public string questionId;
+        public string sessionType; // "SOCRATIC_HINT", "ESSAY_GRADING", "MINIGAME_HELP"
+        public string studentPrompt;
+        public string studentAnswer;
+        public string aiFeedback;
+        public string detectedMistake;
+        public int score;
+        public int maxScore;
+        public string timestamp;
     }
 
     [Serializable]
@@ -132,7 +200,10 @@ namespace Math6Companion.Core.Contracts
         public string questionId;
         public string prompt;
         public string studentSteps;
+        public string imageBase64;
         public List<RubricItem> rubric;
+        public string correctAnswer;
+        public string explanation;
     }
 
     [Serializable]
@@ -153,6 +224,9 @@ namespace Math6Companion.Core.Contracts
         public List<StepAnalysisItem> stepAnalysis;
         public string pedagogicalFeedback;
         public string remedialExercise;
+        public string penaltyRuleToCopy;
+        public int firstWrongStepIndex = -1;
+        public string correctStepsPrefix;
     }
     #endregion
 
@@ -160,8 +234,10 @@ namespace Math6Companion.Core.Contracts
     public interface INetworkService
     {
         void Login(string username, string passwordHash, Action<bool, UserData, string> callback);
+        void GetLessons(string topic, Action<bool, List<LessonData>, string> callback);
         void GetQuestions(string topic, string grade, Action<bool, List<QuestionData>, string> callback);
         void SaveResult(ResultSubmission submission, Action<bool, List<BadgeData>, string> callback);
+        void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback);
         void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback);
     }
 
@@ -169,6 +245,7 @@ namespace Math6Companion.Core.Contracts
     {
         void SendTutorTurn(TutorTurnPayload payload, Action<bool, AITutorStepResponse, string> callback);
         void GradeEssay(EssaySubmissionPayload payload, Action<bool, AIGradingResponse, string> callback);
+        void ExtractTextFromImage(string imageBase64, Action<bool, string, string> callback);
     }
     #endregion
 }

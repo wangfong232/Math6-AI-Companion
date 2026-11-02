@@ -34,7 +34,19 @@ namespace Math6Companion.UI
             }
         }
 
-      public void InsertSymbol(string symbol)
+              private void RefreshCaretAndFocus()
+        {
+            if (targetInputField == null) return;
+            targetInputField.interactable = true;
+            targetInputField.customCaretColor = true;
+            targetInputField.caretColor = new Color(0.2f, 0.95f, 1f, 1f);
+            targetInputField.caretWidth = 3;
+            targetInputField.caretBlinkRate = 0.85f;
+            targetInputField.selectionColor = new Color(0.18f, 0.50f, 0.95f, 0.45f);
+            RefreshCaretAndFocus();
+        }
+
+        public void InsertSymbol(string symbol)
 {
     if (targetInputField == null) return;
 
@@ -53,6 +65,7 @@ namespace Math6Companion.UI
     targetInputField.caretPosition = nextPos;
     targetInputField.selectionStringAnchorPosition = nextPos;
     targetInputField.selectionStringFocusPosition = nextPos;
+    RefreshCaretAndFocus();
 }
 
 public void InsertTemplate(string prefix, string suffix)
@@ -75,6 +88,7 @@ public void InsertTemplate(string prefix, string suffix)
     targetInputField.caretPosition = insidePos;
     targetInputField.selectionStringAnchorPosition = insidePos;
     targetInputField.selectionStringFocusPosition = insidePos;
+    RefreshCaretAndFocus();
 }
 
 public void Backspace()
@@ -96,6 +110,7 @@ public void Backspace()
         targetInputField.caretPosition = start;
         targetInputField.selectionStringAnchorPosition = start;
         targetInputField.selectionStringFocusPosition = start;
+        RefreshCaretAndFocus();
         return;
     }
 
@@ -131,6 +146,7 @@ public void Backspace()
             targetInputField.selectionStringAnchorPosition = newPos;
             targetInputField.selectionStringFocusPosition = newPos;
         }
+        RefreshCaretAndFocus();
     }
 }
 
@@ -140,7 +156,43 @@ public void Backspace()
             targetInputField.text = string.Empty;
             targetInputField.stringPosition = 0;
             targetInputField.caretPosition = 0;
-            targetInputField.ActivateInputField();
+            RefreshCaretAndFocus();
+        }
+
+        public void InsertFraction()
+        {
+            // Chèn phân số dạng ( / ) với con trỏ nằm ở vị trí tử số
+            InsertTemplate("(", "/)");
+        }
+
+        public void InsertEquationLine()
+        {
+            // Xuống dòng và thêm dấu = cho bước giải tiếp theo
+            if (targetInputField == null) return;
+            string txt = targetInputField.text ?? "";
+            if (string.IsNullOrEmpty(txt) || txt.EndsWith("\n"))
+            {
+                InsertSymbol("= ");
+            }
+            else
+            {
+                InsertSymbol("\n= ");
+            }
+        }
+
+        public void InsertParentheses()
+        {
+            InsertTemplate("(", ")");
+        }
+
+        public void InsertBrackets()
+        {
+            InsertTemplate("[", "]");
+        }
+
+        public void InsertBraces()
+        {
+            InsertTemplate("{", "}");
         }
 
         // Đảm bảo con trỏ luôn trỏ vào cuối text nếu ô bị mất focus
