@@ -1455,13 +1455,7 @@ namespace Math6Companion.EditorTools
                 }
             }
 
-            // Thêm các Scene 3D gameplay nếu có
-            string forestPath = "Assets/VertexRageStudio/LowPolyNature/Scenes/ForestPath.unity";
-            if (File.Exists(forestPath) && !addedPaths.Contains(forestPath))
-            {
-                editorBuildScenes.Add(new EditorBuildSettingsScene(forestPath, true));
-                addedPaths.Add(forestPath);
-            }
+            
 
             EditorBuildSettings.scenes = editorBuildScenes.ToArray();
             Debug.Log($"[Math6 SceneAutoBuilder] Đã tự động cập nhật {EditorBuildSettings.scenes.Length} Scene vào Build Settings!");

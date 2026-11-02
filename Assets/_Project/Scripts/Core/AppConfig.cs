@@ -15,7 +15,7 @@ namespace Math6Companion.Core
     public static class AppConfig
     {
         // >>>>> [ĐỔI LINK WEB APP TẠI ĐÂY] <<<<<
-        public const string APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4nIX1jBnTk9zpTql8lg784yImNF4e4sPKcBhK8EZWvr2HLBsdQppj-sPo5ecjkxc/exec";
+        public const string APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-bJW7UO3gh2SR31mm_H3AcOGZDqa6ujOHJlZELe4SLCdCCF1NQmpO15rnbsn_XzcX/exec";
 
         // Khóa lưu tạm nếu muốn ghi đè qua Editor/Runtime
         private const string PREFS_BACKEND_URL_KEY = "Math6_Custom_Backend_URL";
