@@ -301,7 +301,7 @@ namespace Math6Companion.UI
 
                                 if (AudioManager.Instance != null)
                                 {
-                                    if (iWon) AudioManager.Instance.PlayVictory();
+                                    if (iWon) AudioManager.Instance.PlayCorrect();
                                     else AudioManager.Instance.PlayWrong();
                                 }
                             }

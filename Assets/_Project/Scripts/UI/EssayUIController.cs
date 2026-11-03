@@ -1781,7 +1781,7 @@ namespace Math6Companion.UI
 
         private static byte[] DownloadImageBytesViaHttpWebRequest(string url, int timeoutMs)
         {
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
             System.Net.ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
 
             var req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);

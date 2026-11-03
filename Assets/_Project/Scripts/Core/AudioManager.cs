@@ -144,6 +144,7 @@ namespace Math6Companion.Core
         }
 
         public void PlayCorrect() => PlayCorrectSound();
+        public void PlayVictory() => PlayCorrectSound();
 
         public void PlayWrongSound()
         {
