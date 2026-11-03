@@ -228,6 +228,37 @@ namespace Math6Companion.Core.Contracts
         public int firstWrongStepIndex = -1;
         public string correctStepsPrefix;
     }
+
+    [Serializable]
+    public class VersusQueueResponse
+    {
+        public bool success;
+        public string status; // "WAITING", "MATCHED", "CANCELLED", "ERROR"
+        public string message;
+        public string roomId;
+        public string opponentId;
+        public string opponentNickname;
+        public string mode; // "MCQ" or "ESSAY"
+        public List<string> questionIds = new List<string>();
+    }
+
+    [Serializable]
+    public class VersusRoomResultResponse
+    {
+        public bool success;
+        public string roomId;
+        public string player1Id;
+        public string player1Name;
+        public int player1Score;
+        public bool player1Done;
+        public string player2Id;
+        public string player2Name;
+        public int player2Score;
+        public bool player2Done;
+        public bool isFinished;
+        public string winnerId; // "DRAW", or specific userId
+        public string message;
+    }
     #endregion
 
     #region Service Interfaces
@@ -239,6 +270,13 @@ namespace Math6Companion.Core.Contracts
         void SaveResult(ResultSubmission submission, Action<bool, List<BadgeData>, string> callback);
         void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback);
         void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback);
+
+        // Hệ thống Đấu kháng 1v1 Realtime qua Google Sheets
+        void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback);
+        void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback);
+        void CancelVersusQueue(string userId, Action<bool, string> callback);
+        void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback);
+        void PollVersusRoomResult(string roomId, string userId, Action<bool, VersusRoomResultResponse, string> callback);
     }
 
     public interface IAITutorService
