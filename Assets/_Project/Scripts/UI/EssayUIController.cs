@@ -621,7 +621,7 @@ namespace Math6Companion.UI
                     if (photoStatusText != null)
                     {
                         string reason = !string.IsNullOrEmpty(msg) ? msg : "Ảnh phong cảnh / con vật hoặc không rõ nét.";
-                        photoStatusText.text = $"<color=#e74c3c>[!] Không nhận diện được bài làm toán từ ảnh ({reason})! Vui lòng chụp rõ trang vở hoặc gõ bài làm vào ô bên phải.</color>";
+                        photoStatusText.text = MathTextSanitizer.SanitizeForDisplay($"<color=#e74c3c>[!] Không nhận diện được bài làm toán từ ảnh ({reason})! Vui lòng chụp rõ trang vở hoặc gõ bài làm vào ô bên phải.</color>");
                     }
                     return;
                 }
@@ -1420,7 +1420,10 @@ namespace Math6Companion.UI
             }
             else
             {
-                var modalGo = new GameObject("QuestionImageZoomModal", typeof(RectTransform), typeof(Image));
+                var modalGo = new GameObject("QuestionImageZoomModal", typeof(RectTransform), typeof(Image), typeof(Canvas), typeof(GraphicRaycaster));
+                var zmCanvas = modalGo.GetComponent<Canvas>();
+                zmCanvas.overrideSorting = true;
+                zmCanvas.sortingOrder = 9998;
                 modalGo.transform.SetParent(canvasTr, false);
                 questionZoomModal = modalGo;
                 var mRt = modalGo.GetComponent<RectTransform>();
@@ -2828,6 +2831,7 @@ namespace Math6Companion.UI
             rt.sizeDelta = size;
             var img = go.GetComponent<Image>();
             img.color = new Color(0.06f, 0.09f, 0.15f, 0.95f);
+            img.raycastTarget = true;
 
             var inputField = go.GetComponent<TMP_InputField>();
 
@@ -2847,6 +2851,7 @@ namespace Math6Companion.UI
             phText.fontSize = 15;
             phText.fontStyle = FontStyles.Italic;
             phText.color = new Color(0.5f, 0.55f, 0.65f, 0.6f);
+            phText.raycastTarget = false;
 
             var txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
             txtGo.transform.SetParent(textArea.transform, false);
@@ -2856,34 +2861,84 @@ namespace Math6Companion.UI
             var mainText = txtGo.GetComponent<TextMeshProUGUI>();
             mainText.fontSize = 15;
             mainText.color = Color.white;
+            mainText.raycastTarget = false;
 
             inputField.textViewport = taRt;
             inputField.textComponent = mainText;
             inputField.placeholder = phText;
             inputField.targetGraphic = img;
+            inputField.interactable = true;
+
+            inputField.onValueChanged.AddListener(val =>
+            {
+                if (phGo != null) phGo.SetActive(string.IsNullOrEmpty(val));
+            });
 
             return inputField;
         }
 
         public void ShowGeminiKeyModal()
         {
+            // Hủy focus khỏi ô nhập bài giải tự luận để không bị gõ nhầm vào ô bài giải phía sau
+            if (solutionInputField != null)
+            {
+                solutionInputField.DeactivateInputField();
+            }
+
             if (geminiKeyModal != null)
             {
+                geminiKeyModal.transform.SetAsLastSibling();
                 geminiKeyModal.SetActive(true);
+
+                var existingInput = geminiKeyModal.GetComponentInChildren<TMP_InputField>();
+                if (existingInput != null)
+                {
+                    existingInput.Select();
+                    existingInput.ActivateInputField();
+                }
                 return;
             }
 
-            var canvas = FindAnyObjectByType<Canvas>();
+            // Tìm Canvas chính của Scene EssayPractice (tránh nhầm GlobalScreenDimmer không có GraphicRaycaster)
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                var mainCanvasGo = GameObject.Find("06_EssayPracticeCanvas");
+                if (mainCanvasGo != null) canvas = mainCanvasGo.GetComponent<Canvas>();
+            }
+            if (canvas == null)
+            {
+                var allCanvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+                foreach (var c in allCanvases)
+                {
+                    if (c.GetComponent<GraphicRaycaster>() != null && !c.name.Contains("Dimmer"))
+                    {
+                        canvas = c;
+                        break;
+                    }
+                }
+            }
+            if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
-            geminiKeyModal = new GameObject("Modal_GeminiKeyConfig", typeof(RectTransform), typeof(Image));
+            geminiKeyModal = new GameObject("Modal_GeminiKeyConfig", typeof(RectTransform), typeof(Image), typeof(Canvas), typeof(GraphicRaycaster));
             geminiKeyModal.transform.SetParent(canvas.transform, false);
+            geminiKeyModal.transform.SetAsLastSibling();
+
+            // Đặt Canvas riêng với sortingOrder cao nhất và GraphicRaycaster riêng để tương tác 100% độc lập
+            var modalCanvas = geminiKeyModal.GetComponent<Canvas>();
+            modalCanvas.overrideSorting = true;
+            modalCanvas.sortingOrder = 10000;
+
             var rtModal = geminiKeyModal.GetComponent<RectTransform>();
             rtModal.anchorMin = Vector2.zero;
             rtModal.anchorMax = Vector2.one;
             rtModal.offsetMin = Vector2.zero;
             rtModal.offsetMax = Vector2.zero;
-            geminiKeyModal.GetComponent<Image>().color = new Color(0.04f, 0.07f, 0.12f, 0.90f);
+
+            var modalImg = geminiKeyModal.GetComponent<Image>();
+            modalImg.color = new Color(0.04f, 0.07f, 0.12f, 0.92f);
+            modalImg.raycastTarget = true; // Chặn triệt để mọi click xuyên xuống các ô nhập / nút phía sau
 
             var panelGo = new GameObject("Panel", typeof(RectTransform), typeof(Image));
             panelGo.transform.SetParent(geminiKeyModal.transform, false);
@@ -2891,7 +2946,9 @@ namespace Math6Companion.UI
             rtPanel.anchorMin = new Vector2(0.5f, 0.5f);
             rtPanel.anchorMax = new Vector2(0.5f, 0.5f);
             rtPanel.sizeDelta = new Vector2(680, 420);
-            panelGo.GetComponent<Image>().color = new Color(0.11f, 0.15f, 0.22f);
+            var panelImg = panelGo.GetComponent<Image>();
+            panelImg.color = new Color(0.11f, 0.15f, 0.22f, 0.98f);
+            panelImg.raycastTarget = true;
 
             var titleGo = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
             titleGo.transform.SetParent(panelGo.transform, false);
@@ -2977,7 +3034,15 @@ namespace Math6Companion.UI
             tmpClose.alignment = TextAlignmentOptions.Center;
             tmpClose.color = Color.white;
 
-            closeBtn.onClick.AddListener(() => geminiKeyModal.SetActive(false));
+            closeBtn.onClick.AddListener(() =>
+            {
+                if (inputField != null) inputField.DeactivateInputField();
+                geminiKeyModal.SetActive(false);
+            });
+
+            // Focus ngay vào ô nhập Key khi mở modal
+            inputField.Select();
+            inputField.ActivateInputField();
         }
 
 }

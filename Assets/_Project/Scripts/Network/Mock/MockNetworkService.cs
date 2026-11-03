@@ -315,7 +315,7 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = true,
                             state = "STEP_PASSED",
-                            tutorDialogue = "ChÃ­nh xÃ¡c! Ta Æ°u tiÃªn tÃ­nh trong ngoáº·c (3 + 2) trÆ°á»›c. Káº¿t quáº£ (3 + 2) báº±ng máº¥y?",
+                            tutorDialogue = "Chính xác! Ta ưu tiên tính trong ngoặc (3 + 2) trước. Kết quả (3 + 2) bằng mấy?",
                             hint = "PhÃ©p cá»™ng Ä‘Æ¡n giáº£n 3 + 2",
                             highlightFormula = "(3 + 2) = ?",
                             nextStepIndex = 2,
@@ -328,7 +328,7 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = false,
                             state = "WAITING_INPUT",
-                            tutorDialogue = "ChÆ°a Ä‘Ãºng rá»“i! HÃ£y nhá»› quy táº¯c thá»© tá»± phÃ©p tÃ­nh: trong ngoáº·c hay ngoÃ i ngoáº·c lÃ m trÆ°á»›c?",
+                            tutorDialogue = "Chưa đúng rồi! Hãy nhớ quy tắc thứ tự phép tính: trong ngoặc hay ngoài ngoặc làm trước?",
                             hint = "NhÃ¬n vÃ o dáº¥u ngoáº·c trÃ²n nhÃ©.",
                             nextStepIndex = 1,
                             shouldWaitForStudent = true
@@ -356,7 +356,7 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = false,
                             state = "WAITING_INPUT",
-                            tutorDialogue = "TÃ­nh láº¡i giÃºp tháº§y: 3 + 2 báº±ng máº¥y nÃ o?",
+                            tutorDialogue = "Tính lại giúp thầy: 3 + 2 bằng mấy nào?",
                             hint = "3 cá»™ng thÃªm 2 Ä‘Æ¡n vá»‹.",
                             nextStepIndex = 2,
                             shouldWaitForStudent = true
@@ -369,7 +369,7 @@ namespace Math6Companion.Core.Mock
                     {
                         isCorrect = true,
                         state = "TUTOR_COMPLETED",
-                        tutorDialogue = "Xuáº¥t sáº¯c! Em Ä‘Ã£ hoÃ n thÃ nh bÃ i toÃ¡n tá»«ng bÆ°á»›c má»™t cÃ¡ch Ä‘á»™c láº­p!",
+                        tutorDialogue = "Xuất sắc! Em đã hoàn thành bài toán từng bước một cách độc lập!",
                         isLessonCompleted = true
                     }, "Success");
                 }
@@ -413,7 +413,7 @@ namespace Math6Companion.Core.Mock
             {
                 if (string.IsNullOrEmpty(imageBase64))
                 {
-                    callback?.Invoke(false, "", "áº¢nh rá»—ng");
+                    callback?.Invoke(false, "", "Ảnh rỗng");
                     return;
                 }
 
