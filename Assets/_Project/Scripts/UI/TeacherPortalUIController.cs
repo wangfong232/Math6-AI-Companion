@@ -1162,6 +1162,21 @@ namespace Math6Companion.UI
             editLessonModalGo.SetActive(false);
         }
 
+                private void SyncLessonPlaceholders()
+        {
+            void SyncOne(TMP_InputField f)
+            {
+                if (f != null && f.placeholder != null)
+                {
+                    f.placeholder.gameObject.SetActive(string.IsNullOrEmpty(f.text));
+                }
+            }
+            SyncOne(editLessonTitleInput);
+            SyncOne(editLessonTopicInput);
+            SyncOne(editLessonSummaryInput);
+            SyncOne(editLessonVideoInput);
+        }
+
         private void OpenEditLessonModal(TeacherConfigManager.TeacherLessonConfig les)
         {
             if (editLessonModalGo == null) return;
@@ -1171,6 +1186,7 @@ namespace Math6Companion.UI
             if (editLessonTopicInput != null) editLessonTopicInput.text = les.topic;
             if (editLessonSummaryInput != null) editLessonSummaryInput.text = les.summaryText;
             if (editLessonVideoInput != null) editLessonVideoInput.text = les.videoUrl;
+            SyncLessonPlaceholders();
             editLessonModalGo.transform.SetAsLastSibling();
             editLessonModalGo.SetActive(true);
         }
@@ -1185,6 +1201,7 @@ namespace Math6Companion.UI
             if (editLessonTopicInput != null) editLessonTopicInput.text = "Số học 6";
             if (editLessonSummaryInput != null) editLessonSummaryInput.text = "• Lý thuyết cốt lõi cần ghi nhớ...";
             if (editLessonVideoInput != null) editLessonVideoInput.text = "https://youtube.com/mock_video";
+            SyncLessonPlaceholders();
             editLessonModalGo.transform.SetAsLastSibling();
             editLessonModalGo.SetActive(true);
         }
@@ -1277,6 +1294,15 @@ namespace Math6Companion.UI
             {
                 input.lineType = TMP_InputField.LineType.MultiLineNewline;
             }
+
+            input.onValueChanged.AddListener(val =>
+            {
+                if (phGo != null)
+                {
+                    phGo.SetActive(string.IsNullOrEmpty(val));
+                }
+            });
+
             return input;
         }
         #endregion

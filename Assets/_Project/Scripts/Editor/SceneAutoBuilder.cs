@@ -615,6 +615,14 @@ namespace Math6Companion.EditorTools
             input.placeholder = phTmp;
             input.richText = false;
 
+            input.onValueChanged.AddListener(val =>
+            {
+                if (phGo != null)
+                {
+                    phGo.SetActive(string.IsNullOrEmpty(val));
+                }
+            });
+
             return input;
         }
 

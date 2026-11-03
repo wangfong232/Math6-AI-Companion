@@ -35,10 +35,18 @@ namespace Math6Companion.UI
             {
                 usernameInput.richText = false;
                 if (usernameInput.textComponent != null) usernameInput.textComponent.richText = false;
-                usernameInput.onValueChanged.AddListener(val =>
+
+                void SyncUserPlaceholder(string val)
                 {
+                    if (usernameInput.placeholder != null)
+                    {
+                        usernameInput.placeholder.gameObject.SetActive(string.IsNullOrEmpty(val));
+                    }
                     if (statusText != null && statusText.color == Color.red) statusText.text = string.Empty;
-                });
+                }
+
+                usernameInput.onValueChanged.AddListener(SyncUserPlaceholder);
+                SyncUserPlaceholder(usernameInput.text);
             }
 
             if (passwordInput != null)
@@ -46,10 +54,18 @@ namespace Math6Companion.UI
                 passwordInput.richText = false;
                 if (passwordInput.textComponent != null) passwordInput.textComponent.richText = false;
                 passwordInput.contentType = TMP_InputField.ContentType.Password;
-                passwordInput.onValueChanged.AddListener(val =>
+
+                void SyncPassPlaceholder(string val)
                 {
+                    if (passwordInput.placeholder != null)
+                    {
+                        passwordInput.placeholder.gameObject.SetActive(string.IsNullOrEmpty(val));
+                    }
                     if (statusText != null && statusText.color == Color.red) statusText.text = string.Empty;
-                });
+                }
+
+                passwordInput.onValueChanged.AddListener(SyncPassPlaceholder);
+                SyncPassPlaceholder(passwordInput.text);
             }
 
             if (statusText != null)

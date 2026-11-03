@@ -250,8 +250,10 @@ namespace Math6Companion.UI
                 matchModal.SetActive(true);
                 if (matchFoundText != null)
                 {
-                    string tag = isReal ? "<color=#2ecc71>[NGƯỜI CHƠI THẬT]</color>" : "<color=#f39c12>[BẠN HỌC ẢO]</color>";
-                    matchFoundText.text = $"ĐÃ TÌM THẤY ĐỐI THỦ!\n{tag}\n\n<color=#f39c12><b>{matchedOpponentNickname}</b></color>\n\nBạn có chấp nhận thi đấu đối kháng?";
+                    string tag = isReal 
+                        ? "<color=#2ecc71><b>[NGƯỜI CHƠI THẬT]</b></color>" 
+                        : "<color=#f39c12><b>[BẠN HỌC ẢO]</b></color>";
+                    matchFoundText.text = $"{tag}\n<size=26><color=#f1c40f><b>{matchedOpponentNickname}</b></color></size>\n<size=16><color=#ecf0f1>Bạn có chấp nhận thi đấu đối kháng?</color></size>";
                 }
 
                 if (acceptTimerCoroutine != null) StopCoroutine(acceptTimerCoroutine);
