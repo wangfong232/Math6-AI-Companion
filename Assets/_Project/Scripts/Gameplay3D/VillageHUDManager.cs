@@ -283,7 +283,7 @@ namespace Math6Companion.Gameplay3D
                 case WorldInteractable.InteractableType.PhoShop:
                     OpenPanel(panelPhoMinigame);
                     _currentQuizType = QuizType.Pho;
-                    LoadAndStartMinigame("PhanSo", "🍲 QUÁN PHỞ CỤ BA - THỬ THÁCH PHÂN SỐ",
+                    LoadAndStartMinigame("PhanSo", "QUÁN PHỞ CỤ BA - THỬ THÁCH PHÂN SỐ",
                         "Cụ Ba vừa nấu xong nồi nước phở gia truyền thơm nức mũi! Hôm nay quán đông khách, cụ cần sĩ tử phụ tính toán chia bánh phở, nước dùng và thanh toán theo phân số để phục vụ dân làng.",
                         PHO_QUESTIONS);
                     break;
@@ -291,7 +291,7 @@ namespace Math6Companion.Gameplay3D
                 case WorldInteractable.InteractableType.TerraceFields:
                     OpenPanel(panelTerraceFields);
                     _currentQuizType = QuizType.Terrace;
-                    LoadAndStartMinigame("SoNguyen", "🌾 RUỘNG BẬC THANG - THỬ THÁCH SỐ NGUYÊN & TRỤC SỐ",
+                    LoadAndStartMinigame("SoNguyen", "RUỘNG BẬC THANG - THỬ THÁCH SỐ NGUYÊN & TRỤC SỐ",
                         "Ruộng bậc thang Làng Sen trải dài từ đáy hồ sâu (-5m) lên đỉnh đồi dương (+5m). Hãy cùng bác nông dân đo đạc mực nước, nhiệt độ và độ cao bằng số nguyên!",
                         TERRACE_QUESTIONS);
                     break;
@@ -299,7 +299,7 @@ namespace Math6Companion.Gameplay3D
                 case WorldInteractable.InteractableType.PagodaSymmetry:
                     OpenPanel(panelPagodaSymmetry);
                     _currentQuizType = QuizType.Pagoda;
-                    LoadAndStartMinigame("HinhHoc", "🏛️ CHÙA MỘT CỘT - THỬ THÁCH HÌNH HỌC TRỰC QUAN",
+                    LoadAndStartMinigame("HinhHoc", "CHÙA MỘT CỘT - THỬ THÁCH HÌNH HỌC TRỰC QUAN",
                         "Chùa Một Cột cổ kính ngự giữa hồ sen hình vuông. Trụ đá là trục đối xứng thẳng đứng, mái ngói 4 góc đối xứng tâm. Thầy đồ đố sĩ tử tìm ra các quy luật hình học và tính đối xứng!",
                         PAGODA_QUESTIONS);
                     break;

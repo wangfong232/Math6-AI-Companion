@@ -49,7 +49,7 @@ namespace Math6Companion.UI
 
         private void Awake()
         {
-            // Tự động liên kết TextMeshProUGUI bên trong nút nếu chưa kéo thả
+            // Tá»± Ä‘á»™ng liÃªn káº¿t TextMeshProUGUI bÃªn trong nÃºt náº¿u chÆ°a kÃ©o tháº£
             if (optionTexts == null || optionTexts.Length != optionButtons.Length)
             {
                 optionTexts = new TextMeshProUGUI[optionButtons.Length];
@@ -62,7 +62,7 @@ namespace Math6Companion.UI
                 {
                     optionButtons[i].onClick.AddListener(() => OnOptionSelected(index));
 
-                    // Tắt Navigation tránh EventSystem tự chọn làm trắng đáp án đầu tiên
+                    // Táº¯t Navigation trÃ¡nh EventSystem tá»± chá»n lÃ m tráº¯ng Ä‘Ã¡p Ã¡n Ä‘áº§u tiÃªn
                     var nav = optionButtons[i].navigation;
                     nav.mode = Navigation.Mode.None;
                     optionButtons[i].navigation = nav;
@@ -210,13 +210,17 @@ namespace Math6Companion.UI
 
             currentQuestionIndex = 0;
             correctCount = 0;
-            isAnswering = true; // Khóa tương tác tạm thời khi đang tải câu hỏi
+            isAnswering = true; // KhÃ³a tÆ°Æ¡ng tÃ¡c táº¡m thá»i khi Ä‘ang táº£i cÃ¢u há»i
             LockAllOptions();
             
-            // Bảo toàn cờ Versus nếu đi từ sảnh đối kháng sang
+            // Báº£o toÃ n cá» Versus náº¿u Ä‘i tá»« sáº£nh Ä‘á»‘i khÃ¡ng sang
             bool wasVersus = ScoreSessionContext.IsVersusMode;
             string oppNick = ScoreSessionContext.OpponentNickname;
             int oppScore = ScoreSessionContext.OpponentScore;
+            string vsRoomId = ScoreSessionContext.VersusRoomId;
+            string oppUid = ScoreSessionContext.OpponentUserId;
+            bool isRealMp = ScoreSessionContext.IsRealMultiplayer;
+            List<string> vsQIds = new List<string>(ScoreSessionContext.VersusQuestionIds ?? new List<string>());
 
             ScoreSessionContext.Reset();
             ScoreSessionContext.ActivityType = "MCQ";
@@ -225,12 +229,16 @@ namespace Math6Companion.UI
                 ScoreSessionContext.IsVersusMode = true;
                 ScoreSessionContext.OpponentNickname = oppNick;
                 ScoreSessionContext.OpponentScore = oppScore;
+                ScoreSessionContext.VersusRoomId = vsRoomId;
+                ScoreSessionContext.OpponentUserId = oppUid;
+                ScoreSessionContext.IsRealMultiplayer = isRealMp;
+                ScoreSessionContext.VersusQuestionIds = vsQIds;
             }
 
             bool isWrongReviewMode = PlayerPrefs.GetInt("Quiz_IsWrongReviewMode", 0) == 1;
             if (isWrongReviewMode)
             {
-                if (promptText != null) promptText.text = "Đang nạp danh sách các câu làm sai (Chế độ Ôn tập Spaced Repetition)...";
+                if (promptText != null) promptText.text = "Äang náº¡p danh sÃ¡ch cÃ¡c cÃ¢u lÃ m sai (Cháº¿ Ä‘á»™ Ã”n táº­p Spaced Repetition)...";
                 var wrongQs = WrongQuestionBankManager.GetWrongMCQQuestions();
                 if (wrongQs != null && wrongQs.Count > 0)
                 {
@@ -240,19 +248,19 @@ namespace Math6Companion.UI
                 }
                 else
                 {
-                    Debug.Log("[QuizUIController] Không có câu sai nào trong ngân hàng, chuyển về chế độ luyện tập thông thường.");
+                    Debug.Log("[QuizUIController] KhÃ´ng cÃ³ cÃ¢u sai nÃ o trong ngÃ¢n hÃ ng, chuyá»ƒn vá» cháº¿ Ä‘á»™ luyá»‡n táº­p thÃ´ng thÆ°á»ng.");
                     PlayerPrefs.SetInt("Quiz_IsWrongReviewMode", 0);
                 }
             }
 
-            if (promptText != null) promptText.text = "Đang chuẩn bị bộ câu hỏi Toán 6...";
+            if (promptText != null) promptText.text = "Äang chuáº©n bá»‹ bá»™ cÃ¢u há»i ToÃ¡n 6...";
 
             string currentLessonId = PlayerPrefs.GetString("Current_Lesson_ID", "");
             string currentLessonTitle = PlayerPrefs.GetString("Current_Lesson_Title", "");
 
             if (networkService != null)
             {
-                // Luôn yêu cầu toàn bộ ngân hàng câu hỏi để có thể lọc chính xác theo LessonID, Tiêu đề hoặc Topic
+                // LuÃ´n yÃªu cáº§u toÃ n bá»™ ngÃ¢n hÃ ng cÃ¢u há»i Ä‘á»ƒ cÃ³ thá»ƒ lá»c chÃ­nh xÃ¡c theo LessonID, TiÃªu Ä‘á» hoáº·c Topic
                 networkService.GetQuestions("ALL", grade, (success, questions, msg) =>
                 {
                     if (this == null || gameObject == null) return;
@@ -268,7 +276,14 @@ namespace Math6Companion.UI
                                 allQ.InsertRange(0, customMCQs);
                             }
                         }
-                        questionList = SelectAndShuffleQuizQuestions(allQ, currentLessonId, currentLessonTitle, topic, difficulty, 10);
+                        if (ScoreSessionContext.IsVersusMode && ScoreSessionContext.VersusQuestionIds != null && ScoreSessionContext.VersusQuestionIds.Count > 0)
+                        {
+                            questionList = FilterQuestionsBySpecificIds(allQ, ScoreSessionContext.VersusQuestionIds);
+                        }
+                        else
+                        {
+                            questionList = SelectAndShuffleQuizQuestions(allQ, currentLessonId, currentLessonTitle, topic, difficulty, 10);
+                        }
                     }
                     else
                     {
@@ -301,43 +316,43 @@ namespace Math6Companion.UI
         {
             if (q == null) return false;
 
-            // 1. KIỂM TRA CHỦ ĐỀ (TOPIC): Nếu bài học có Topic (ví dụ TapHop) và câu hỏi có Topic khác (ví dụ LuyThua, ThuTuPhepTinh) -> LOẠI BỎ NGAY LẬP TỨC
+            // 1. KIá»‚M TRA CHá»¦ Äá»€ (TOPIC): Náº¿u bÃ i há»c cÃ³ Topic (vÃ­ dá»¥ TapHop) vÃ  cÃ¢u há»i cÃ³ Topic khÃ¡c (vÃ­ dá»¥ LuyThua, ThuTuPhepTinh) -> LOáº I Bá»Ž NGAY Láº¬P Tá»¨C
             if (!string.IsNullOrEmpty(topic) && !topic.Equals("ALL", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(q.topic))
             {
                 if (!GoogleSheetsNetworkService.IsTopicMatch(q.topic, topic))
                 {
-                    return false; // Tuyệt đối không lấy câu hỏi khác chủ đề
+                    return false; // Tuyá»‡t Ä‘á»‘i khÃ´ng láº¥y cÃ¢u há»i khÃ¡c chá»§ Ä‘á»
                 }
             }
 
-            // 2. Khớp chính xác theo LessonID (Ví dụ: LES_CH1_01)
+            // 2. Khá»›p chÃ­nh xÃ¡c theo LessonID (VÃ­ dá»¥: LES_CH1_01)
             if (!string.IsNullOrEmpty(lessonId) && !string.IsNullOrEmpty(q.lessonId) && IsLessonIdMatch(q.lessonId, lessonId))
                 return true;
 
-            // 3. Khớp theo Topic chuẩn (Ví dụ: TapHop, LuyThua, SoNguyen...)
+            // 3. Khá»›p theo Topic chuáº©n (VÃ­ dá»¥: TapHop, LuyThua, SoNguyen...)
             if (!string.IsNullOrEmpty(topic) && !topic.Equals("ALL", StringComparison.OrdinalIgnoreCase))
             {
                 if (!string.IsNullOrEmpty(q.topic) && GoogleSheetsNetworkService.IsTopicMatch(q.topic, topic))
                     return true;
             }
 
-            // 4. Dự phòng trường hợp câu hỏi trên Sheet không điền LessonID và Topic: Khớp ngữ nghĩa chặt chẽ
+            // 4. Dá»± phÃ²ng trÆ°á»ng há»£p cÃ¢u há»i trÃªn Sheet khÃ´ng Ä‘iá»n LessonID vÃ  Topic: Khá»›p ngá»¯ nghÄ©a cháº·t cháº½
             if (string.IsNullOrEmpty(q.lessonId) && string.IsNullOrEmpty(q.topic) && !string.IsNullOrEmpty(lessonTitle))
             {
                 string lt = lessonTitle.ToLowerInvariant();
                 string qp = (q.prompt ?? "").ToLowerInvariant();
 
-                if ((lt.Contains("tập hợp") || lt.Contains("phần tử")) && (qp.Contains("tập hợp") || qp.Contains("phần tử của tập hợp")))
+                if ((lt.Contains("táº­p há»£p") || lt.Contains("pháº§n tá»­")) && (qp.Contains("táº­p há»£p") || qp.Contains("pháº§n tá»­ cá»§a táº­p há»£p")))
                     return true;
-                if ((lt.Contains("ghi số") || lt.Contains("la mã")) && (qp.Contains("chữ số la mã") || qp.Contains("ghi số tự nhiên")))
+                if ((lt.Contains("ghi sá»‘") || lt.Contains("la mÃ£")) && (qp.Contains("chá»¯ sá»‘ la mÃ£") || qp.Contains("ghi sá»‘ tá»± nhiÃªn")))
                     return true;
-                if ((lt.Contains("luỹ thừa") || lt.Contains("lũy thừa")) && (qp.Contains("luỹ thừa") || qp.Contains("lũy thừa") || qp.Contains("số mũ")))
+                if ((lt.Contains("luá»¹ thá»«a") || lt.Contains("lÅ©y thá»«a")) && (qp.Contains("luá»¹ thá»«a") || qp.Contains("lÅ©y thá»«a") || qp.Contains("sá»‘ mÅ©")))
                     return true;
-                if ((lt.Contains("chia hết") || lt.Contains("ước") || lt.Contains("bội")) && (qp.Contains("chia hết") || qp.Contains("ước chung") || qp.Contains("bội chung") || qp.Contains("số nguyên tố")))
+                if ((lt.Contains("chia háº¿t") || lt.Contains("Æ°á»›c") || lt.Contains("bá»™i")) && (qp.Contains("chia háº¿t") || qp.Contains("Æ°á»›c chung") || qp.Contains("bá»™i chung") || qp.Contains("sá»‘ nguyÃªn tá»‘")))
                     return true;
-                if (lt.Contains("số nguyên") && (qp.Contains("số nguyên") || qp.Contains("nguyên âm") || qp.Contains("trục số")))
+                if (lt.Contains("sá»‘ nguyÃªn") && (qp.Contains("sá»‘ nguyÃªn") || qp.Contains("nguyÃªn Ã¢m") || qp.Contains("trá»¥c sá»‘")))
                     return true;
-                if (lt.Contains("phân số") && qp.Contains("phân số"))
+                if (lt.Contains("phÃ¢n sá»‘") && qp.Contains("phÃ¢n sá»‘"))
                     return true;
             }
 
@@ -357,6 +372,40 @@ namespace Math6Companion.UI
             }
         }
 
+        private List<QuestionData> FilterQuestionsBySpecificIds(List<QuestionData> allQuestions, List<string> targetIds)
+        {
+            var result = new List<QuestionData>();
+            if (allQuestions == null || targetIds == null || targetIds.Count == 0) return result;
+
+            var dict = new Dictionary<string, QuestionData>(StringComparer.OrdinalIgnoreCase);
+            foreach (var q in allQuestions)
+            {
+                if (q != null && !string.IsNullOrEmpty(q.questionId) && !dict.ContainsKey(q.questionId))
+                {
+                    dict[q.questionId] = q;
+                }
+            }
+
+            foreach (var id in targetIds)
+            {
+                if (dict.TryGetValue(id.Trim(), out var matchedQ))
+                {
+                    result.Add(matchedQ);
+                }
+            }
+
+            // Nếu câu hỏi trên Sheet không khớp ID hoặc thiếu, lấy thêm từ danh sách chung
+            if (result.Count < 5)
+            {
+                var fallback = SelectAndShuffleQuizQuestions(allQuestions, "", "", "ALL", "MEDIUM", 10);
+                foreach (var f in fallback)
+                {
+                    if (!result.Contains(f) && result.Count < 10) result.Add(f);
+                }
+            }
+            return result;
+        }
+
         private List<QuestionData> SelectAndShuffleQuizQuestions(List<QuestionData> allQuestions, string targetLessonId, string targetLessonTitle, string targetTopic, string targetDifficulty, int maxCount)
         {
             if (allQuestions == null || allQuestions.Count == 0)
@@ -367,7 +416,7 @@ namespace Math6Companion.UI
             bool isSpecificLesson = !string.IsNullOrEmpty(targetLessonId) || !string.IsNullOrEmpty(targetLessonTitle);
             bool isSpecificTopic = !string.IsNullOrEmpty(targetTopic) && !targetTopic.Equals("ALL", StringComparison.OrdinalIgnoreCase);
 
-            // 1. Nếu có bài học cụ thể (từ danh sách bài học): Lọc theo LessonID, Tiêu đề hoặc Topic bài đó
+            // 1. Náº¿u cÃ³ bÃ i há»c cá»¥ thá»ƒ (tá»« danh sÃ¡ch bÃ i há»c): Lá»c theo LessonID, TiÃªu Ä‘á» hoáº·c Topic bÃ i Ä‘Ã³
             if (isSpecificLesson)
             {
                 foreach (var q in allQuestions)
@@ -381,7 +430,7 @@ namespace Math6Companion.UI
                     }
                 }
             }
-            // 2. Nếu có Topic cụ thể (nhưng không chọn bài cụ thể):
+            // 2. Náº¿u cÃ³ Topic cá»¥ thá»ƒ (nhÆ°ng khÃ´ng chá»n bÃ i cá»¥ thá»ƒ):
             else if (isSpecificTopic)
             {
                 foreach (var q in allQuestions)
@@ -395,7 +444,7 @@ namespace Math6Companion.UI
                     }
                 }
             }
-            // 3. Nếu vào từ Mục 2 / Luyện tập tổng hợp (Topic = ALL hoặc không chọn bài): Lấy toàn bộ câu hỏi từ sheet để trộn ngẫu nhiên!
+            // 3. Náº¿u vÃ o tá»« Má»¥c 2 / Luyá»‡n táº­p tá»•ng há»£p (Topic = ALL hoáº·c khÃ´ng chá»n bÃ i): Láº¥y toÃ n bá»™ cÃ¢u há»i tá»« sheet Ä‘á»ƒ trá»™n ngáº«u nhiÃªn!
             else
             {
                 foreach (var q in allQuestions)
@@ -407,12 +456,12 @@ namespace Math6Companion.UI
                 }
             }
 
-            // 4. Lọc theo Mức độ khó (Difficulty) trên tập câu hỏi đã khớp
+            // 4. Lá»c theo Má»©c Ä‘á»™ khÃ³ (Difficulty) trÃªn táº­p cÃ¢u há»i Ä‘Ã£ khá»›p
             List<QuestionData> finalPool = new List<QuestionData>();
 
             if (matchedLessonQuestions.Count > 0)
             {
-                // Ưu tiên: Câu hỏi đúng độ khó yêu cầu
+                // Æ¯u tiÃªn: CÃ¢u há»i Ä‘Ãºng Ä‘á»™ khÃ³ yÃªu cáº§u
                 foreach (var q in matchedLessonQuestions)
                 {
                     if (GoogleSheetsNetworkService.IsDifficultyMatch(q.difficulty, targetDifficulty))
@@ -421,7 +470,7 @@ namespace Math6Companion.UI
                     }
                 }
 
-                // Nếu số câu đúng độ khó < 3 hoặc trống, bổ sung thêm các câu khác trong tập đã lọc
+                // Náº¿u sá»‘ cÃ¢u Ä‘Ãºng Ä‘á»™ khÃ³ < 3 hoáº·c trá»‘ng, bá»• sung thÃªm cÃ¡c cÃ¢u khÃ¡c trong táº­p Ä‘Ã£ lá»c
                 if (finalPool.Count < 3)
                 {
                     foreach (var q in matchedLessonQuestions)
@@ -434,7 +483,7 @@ namespace Math6Companion.UI
                 }
             }
 
-            // 5. Nếu vẫn trống (ví dụ bài mới chưa nhập trên Google Sheet): Nạp ngân hàng mặc định
+            // 5. Náº¿u váº«n trá»‘ng (vÃ­ dá»¥ bÃ i má»›i chÆ°a nháº­p trÃªn Google Sheet): Náº¡p ngÃ¢n hÃ ng máº·c Ä‘á»‹nh
             if (finalPool.Count == 0)
             {
                 finalPool = LoadTopicDefaultQuestions(targetTopic, targetLessonTitle);
@@ -448,8 +497,8 @@ namespace Math6Companion.UI
         {
             string lt = (lessonTitle ?? "").ToLowerInvariant();
 
-            // Luỹ thừa với số mũ tự nhiên
-            if (lt.Contains("luỹ thừa") || lt.Contains("lũy thừa") || lt.Contains("số mũ") || GoogleSheetsNetworkService.IsTopicMatch(topic, "luythua"))
+            // Luá»¹ thá»«a vá»›i sá»‘ mÅ© tá»± nhiÃªn
+            if (lt.Contains("luá»¹ thá»«a") || lt.Contains("lÅ©y thá»«a") || lt.Contains("sá»‘ mÅ©") || GoogleSheetsNetworkService.IsTopicMatch(topic, "luythua"))
             {
                 return new List<QuestionData>
                 {
@@ -459,10 +508,10 @@ namespace Math6Companion.UI
                         topic = "LuyThua",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Viết kết quả phép tính sau dưới dạng một luỹ thừa: 2^4 . 2^5 = ?",
+                        prompt = "Viáº¿t káº¿t quáº£ phÃ©p tÃ­nh sau dÆ°á»›i dáº¡ng má»™t luá»¹ thá»«a: 2^4 . 2^5 = ?",
                         options = new QuestionOptionMap { A = "2^9", B = "4^9", C = "2^20", D = "4^20" },
                         correctAnswer = "A",
-                        explanation = "Khi nhân hai luỹ thừa cùng cơ số, ta giữ nguyên cơ số và cộng các số mũ: 4 + 5 = 9. Kết quả: 2^9."
+                        explanation = "Khi nhÃ¢n hai luá»¹ thá»«a cÃ¹ng cÆ¡ sá»‘, ta giá»¯ nguyÃªn cÆ¡ sá»‘ vÃ  cá»™ng cÃ¡c sá»‘ mÅ©: 4 + 5 = 9. Káº¿t quáº£: 2^9."
                     },
                     new QuestionData
                     {
@@ -470,10 +519,10 @@ namespace Math6Companion.UI
                         topic = "LuyThua",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Viết kết quả phép tính sau dưới dạng một luỹ thừa: 7^6 : 7^4 = ?",
+                        prompt = "Viáº¿t káº¿t quáº£ phÃ©p tÃ­nh sau dÆ°á»›i dáº¡ng má»™t luá»¹ thá»«a: 7^6 : 7^4 = ?",
                         options = new QuestionOptionMap { A = "7^10", B = "7^2", C = "1^2", D = "14" },
                         correctAnswer = "B",
-                        explanation = "Khi chia hai luỹ thừa cùng cơ số (khác 0), ta giữ nguyên cơ số và trừ các số mũ: 6 - 4 = 2. Kết quả: 7^2."
+                        explanation = "Khi chia hai luá»¹ thá»«a cÃ¹ng cÆ¡ sá»‘ (khÃ¡c 0), ta giá»¯ nguyÃªn cÆ¡ sá»‘ vÃ  trá»« cÃ¡c sá»‘ mÅ©: 6 - 4 = 2. Káº¿t quáº£: 7^2."
                     },
                     new QuestionData
                     {
@@ -481,10 +530,10 @@ namespace Math6Companion.UI
                         topic = "LuyThua",
                         type = "MCQ",
                         difficulty = "HARD",
-                        prompt = "Giá trị của biểu thức 3^3 + 2^3 là:",
+                        prompt = "GiÃ¡ trá»‹ cá»§a biá»ƒu thá»©c 3^3 + 2^3 lÃ :",
                         options = new QuestionOptionMap { A = "35", B = "25", C = "125", D = "5^3" },
                         correctAnswer = "A",
-                        explanation = "Ta tính giá trị từng luỹ thừa: 3^3 = 27 và 2^3 = 8. Sau đó cộng lại: 27 + 8 = 35."
+                        explanation = "Ta tÃ­nh giÃ¡ trá»‹ tá»«ng luá»¹ thá»«a: 3^3 = 27 vÃ  2^3 = 8. Sau Ä‘Ã³ cá»™ng láº¡i: 27 + 8 = 35."
                     },
                     new QuestionData
                     {
@@ -492,16 +541,16 @@ namespace Math6Companion.UI
                         topic = "LuyThua",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Trong luỹ thừa 5^3, cơ số và số mũ lần lượt là:",
-                        options = new QuestionOptionMap { A = "Cơ số 5, số mũ 3", B = "Cơ số 3, số mũ 5", C = "Cơ số 15, số mũ 1", D = "Cơ số 5, số mũ 15" },
+                        prompt = "Trong luá»¹ thá»«a 5^3, cÆ¡ sá»‘ vÃ  sá»‘ mÅ© láº§n lÆ°á»£t lÃ :",
+                        options = new QuestionOptionMap { A = "CÆ¡ sá»‘ 5, sá»‘ mÅ© 3", B = "CÆ¡ sá»‘ 3, sá»‘ mÅ© 5", C = "CÆ¡ sá»‘ 15, sá»‘ mÅ© 1", D = "CÆ¡ sá»‘ 5, sá»‘ mÅ© 15" },
                         correctAnswer = "A",
-                        explanation = "Số viết ở dưới (5) là cơ số, số viết ở trên (3) là số mũ."
+                        explanation = "Sá»‘ viáº¿t á»Ÿ dÆ°á»›i (5) lÃ  cÆ¡ sá»‘, sá»‘ viáº¿t á»Ÿ trÃªn (3) lÃ  sá»‘ mÅ©."
                     }
                 };
             }
 
-            // Thứ tự thực hiện phép tính
-            if (lt.Contains("thứ tự") || lt.Contains("phép tính") || GoogleSheetsNetworkService.IsTopicMatch(topic, "thutupheptinh"))
+            // Thá»© tá»± thá»±c hiá»‡n phÃ©p tÃ­nh
+            if (lt.Contains("thá»© tá»±") || lt.Contains("phÃ©p tÃ­nh") || GoogleSheetsNetworkService.IsTopicMatch(topic, "thutupheptinh"))
             {
                 return new List<QuestionData>
                 {
@@ -511,10 +560,10 @@ namespace Math6Companion.UI
                         topic = "ThuTuPhepTinh",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Tính giá trị của biểu thức: 14 + 2 . 8^2 = ?",
+                        prompt = "TÃ­nh giÃ¡ trá»‹ cá»§a biá»ƒu thá»©c: 14 + 2 . 8^2 = ?",
                         options = new QuestionOptionMap { A = "142", B = "1024", C = "130", D = "140" },
                         correctAnswer = "A",
-                        explanation = "Ưu tiên luỹ thừa trước: 8^2 = 64. Sau đó nhân: 2 . 64 = 128. Cuối cùng cộng: 14 + 128 = 142."
+                        explanation = "Æ¯u tiÃªn luá»¹ thá»«a trÆ°á»›c: 8^2 = 64. Sau Ä‘Ã³ nhÃ¢n: 2 . 64 = 128. Cuá»‘i cÃ¹ng cá»™ng: 14 + 128 = 142."
                     },
                     new QuestionData
                     {
@@ -522,16 +571,16 @@ namespace Math6Companion.UI
                         topic = "ThuTuPhepTinh",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Tính giá trị của biểu thức: 8 + 36 : 3 . 2 = ?",
+                        prompt = "TÃ­nh giÃ¡ trá»‹ cá»§a biá»ƒu thá»©c: 8 + 36 : 3 . 2 = ?",
                         options = new QuestionOptionMap { A = "32", B = "14", C = "44", D = "20" },
                         correctAnswer = "A",
-                        explanation = "Thực hiện nhân chia từ trái sang phải: 36 : 3 = 12, tiếp tục 12 . 2 = 24. Cuối cùng cộng: 8 + 24 = 32."
+                        explanation = "Thá»±c hiá»‡n nhÃ¢n chia tá»« trÃ¡i sang pháº£i: 36 : 3 = 12, tiáº¿p tá»¥c 12 . 2 = 24. Cuá»‘i cÃ¹ng cá»™ng: 8 + 24 = 32."
                     }
                 };
             }
 
-            // Tính chia hết / Dấu hiệu chia hết
-            if (lt.Contains("chia hết") || GoogleSheetsNetworkService.IsTopicMatch(topic, "tinhchiahet"))
+            // TÃ­nh chia háº¿t / Dáº¥u hiá»‡u chia háº¿t
+            if (lt.Contains("chia háº¿t") || GoogleSheetsNetworkService.IsTopicMatch(topic, "tinhchiahet"))
             {
                 return new List<QuestionData>
                 {
@@ -541,10 +590,10 @@ namespace Math6Companion.UI
                         topic = "TinhChiaHet",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Trong các số sau, số nào là ước của 15?",
+                        prompt = "Trong cÃ¡c sá»‘ sau, sá»‘ nÃ o lÃ  Æ°á»›c cá»§a 15?",
                         options = new QuestionOptionMap { A = "2", B = "5", C = "6", D = "30" },
                         correctAnswer = "B",
-                        explanation = "Ta có 15 : 5 = 3 nên 5 là ước của 15."
+                        explanation = "Ta cÃ³ 15 : 5 = 3 nÃªn 5 lÃ  Æ°á»›c cá»§a 15."
                     },
                     new QuestionData
                     {
@@ -552,16 +601,16 @@ namespace Math6Companion.UI
                         topic = "TinhChiaHet",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Số nào sau đây là bội của 4?",
+                        prompt = "Sá»‘ nÃ o sau Ä‘Ã¢y lÃ  bá»™i cá»§a 4?",
                         options = new QuestionOptionMap { A = "14", B = "24", C = "34", D = "42" },
                         correctAnswer = "B",
-                        explanation = "Ta có 24 chia hết cho 4 (24 : 4 = 6) nên 24 là bội của 4."
+                        explanation = "Ta cÃ³ 24 chia háº¿t cho 4 (24 : 4 = 6) nÃªn 24 lÃ  bá»™i cá»§a 4."
                     }
                 };
             }
 
-            // Tập hợp
-            if (lt.Contains("tập hợp") || GoogleSheetsNetworkService.IsTopicMatch(topic, "TapHop"))
+            // Táº­p há»£p
+            if (lt.Contains("táº­p há»£p") || GoogleSheetsNetworkService.IsTopicMatch(topic, "TapHop"))
             {
                 return new List<QuestionData>
                 {
@@ -571,10 +620,10 @@ namespace Math6Companion.UI
                         topic = "TapHop",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Cho tập hợp A = {1; 2; 3; 4; 5}. Khẳng định nào sau đây là ĐÚNG?",
-                        options = new QuestionOptionMap { A = "3 thuộc A", B = "6 thuộc A", C = "0 thuộc A", D = "7 thuộc A" },
+                        prompt = "Cho táº­p há»£p A = {1; 2; 3; 4; 5}. Kháº³ng Ä‘á»‹nh nÃ o sau Ä‘Ã¢y lÃ  ÄÃšNG?",
+                        options = new QuestionOptionMap { A = "3 thuá»™c A", B = "6 thuá»™c A", C = "0 thuá»™c A", D = "7 thuá»™c A" },
                         correctAnswer = "A",
-                        explanation = "Phần tử 3 nằm trong tập hợp A nên 3 thuộc A."
+                        explanation = "Pháº§n tá»­ 3 náº±m trong táº­p há»£p A nÃªn 3 thuá»™c A."
                     },
                     new QuestionData
                     {
@@ -582,16 +631,16 @@ namespace Math6Companion.UI
                         topic = "TapHop",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Viết tập hợp B các số tự nhiên x sao cho 5 < x <= 9 bằng cách liệt kê phần tử:",
+                        prompt = "Viáº¿t táº­p há»£p B cÃ¡c sá»‘ tá»± nhiÃªn x sao cho 5 < x <= 9 báº±ng cÃ¡ch liá»‡t kÃª pháº§n tá»­:",
                         options = new QuestionOptionMap { A = "B = {6; 7; 8; 9}", B = "B = {5; 6; 7; 8; 9}", C = "B = {6; 7; 8}", D = "B = {5; 6; 7; 8}" },
                         correctAnswer = "A",
-                        explanation = "Vì x lớn hơn 5 và nhỏ hơn hoặc bằng 9 nên các phần tử gồm: 6, 7, 8, 9."
+                        explanation = "VÃ¬ x lá»›n hÆ¡n 5 vÃ  nhá» hÆ¡n hoáº·c báº±ng 9 nÃªn cÃ¡c pháº§n tá»­ gá»“m: 6, 7, 8, 9."
                     }
                 };
             }
 
-            // Phân số
-            if (lt.Contains("phân số") || GoogleSheetsNetworkService.IsTopicMatch(topic, "PhanSo"))
+            // PhÃ¢n sá»‘
+            if (lt.Contains("phÃ¢n sá»‘") || GoogleSheetsNetworkService.IsTopicMatch(topic, "PhanSo"))
             {
                 return new List<QuestionData>
                 {
@@ -601,10 +650,10 @@ namespace Math6Companion.UI
                         topic = "PhanSo",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Rút gọn phân số 18/24 về phân số tối giản:",
+                        prompt = "RÃºt gá»n phÃ¢n sá»‘ 18/24 vá» phÃ¢n sá»‘ tá»‘i giáº£n:",
                         options = new QuestionOptionMap { A = "3/4", B = "6/8", C = "9/12", D = "2/3" },
                         correctAnswer = "A",
-                        explanation = "Chia cả tử và mẫu cho ƯCLN(18, 24) = 6: 18:6 / 24:6 = 3/4."
+                        explanation = "Chia cáº£ tá»­ vÃ  máº«u cho Æ¯CLN(18, 24) = 6: 18:6 / 24:6 = 3/4."
                     },
                     new QuestionData
                     {
@@ -612,16 +661,16 @@ namespace Math6Companion.UI
                         topic = "PhanSo",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Tính giá trị của phép tính: 1/4 + 2/3 = ?",
+                        prompt = "TÃ­nh giÃ¡ trá»‹ cá»§a phÃ©p tÃ­nh: 1/4 + 2/3 = ?",
                         options = new QuestionOptionMap { A = "11/12", B = "3/7", C = "3/12", D = "2/12" },
                         correctAnswer = "A",
-                        explanation = "Quy đồng mẫu chung 12: 3/12 + 8/12 = 11/12."
+                        explanation = "Quy Ä‘á»“ng máº«u chung 12: 3/12 + 8/12 = 11/12."
                     }
                 };
             }
 
-            // Hình học
-            if (lt.Contains("hình") || lt.Contains("đối xứng") || GoogleSheetsNetworkService.IsTopicMatch(topic, "HinhHoc"))
+            // HÃ¬nh há»c
+            if (lt.Contains("hÃ¬nh") || lt.Contains("Ä‘á»‘i xá»©ng") || GoogleSheetsNetworkService.IsTopicMatch(topic, "HinhHoc"))
             {
                 return new List<QuestionData>
                 {
@@ -631,10 +680,10 @@ namespace Math6Companion.UI
                         topic = "HinhHoc",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Hình vuông có tất cả bao nhiêu trục đối xứng?",
-                        options = new QuestionOptionMap { A = "4", B = "2", C = "1", D = "Vô số" },
+                        prompt = "HÃ¬nh vuÃ´ng cÃ³ táº¥t cáº£ bao nhiÃªu trá»¥c Ä‘á»‘i xá»©ng?",
+                        options = new QuestionOptionMap { A = "4", B = "2", C = "1", D = "VÃ´ sá»‘" },
                         correctAnswer = "A",
-                        explanation = "Hình vuông có 4 trục đối xứng: 2 đường chéo và 2 đường trung trực của các cạnh đối diện."
+                        explanation = "HÃ¬nh vuÃ´ng cÃ³ 4 trá»¥c Ä‘á»‘i xá»©ng: 2 Ä‘Æ°á»ng chÃ©o vÃ  2 Ä‘Æ°á»ng trung trá»±c cá»§a cÃ¡c cáº¡nh Ä‘á»‘i diá»‡n."
                     },
                     new QuestionData
                     {
@@ -642,15 +691,15 @@ namespace Math6Companion.UI
                         topic = "HinhHoc",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Hình tam giác đều có bao nhiêu trục đối xứng?",
+                        prompt = "HÃ¬nh tam giÃ¡c Ä‘á»u cÃ³ bao nhiÃªu trá»¥c Ä‘á»‘i xá»©ng?",
                         options = new QuestionOptionMap { A = "3", B = "1", C = "2", D = "0" },
                         correctAnswer = "A",
-                        explanation = "Hình tam giác đều có 3 trục đối xứng là 3 đường trung trực của 3 cạnh."
+                        explanation = "HÃ¬nh tam giÃ¡c Ä‘á»u cÃ³ 3 trá»¥c Ä‘á»‘i xá»©ng lÃ  3 Ä‘Æ°á»ng trung trá»±c cá»§a 3 cáº¡nh."
                     }
                 };
             }
 
-            // Mặc định Số nguyên (Integers)
+            // Máº·c Ä‘á»‹nh Sá»‘ nguyÃªn (Integers)
             return new List<QuestionData>
             {
                 new QuestionData
@@ -659,10 +708,10 @@ namespace Math6Companion.UI
                     topic = "Integers",
                     type = "MCQ",
                     difficulty = "EASY",
-                    prompt = "Tính giá trị của phép tính: (-15) + (-8) = ?",
+                    prompt = "TÃ­nh giÃ¡ trá»‹ cá»§a phÃ©p tÃ­nh: (-15) + (-8) = ?",
                     options = new QuestionOptionMap { A = "-23", B = "23", C = "-7", D = "7" },
                     correctAnswer = "A",
-                    explanation = "Cộng hai số nguyên cùng dấu âm: -(15 + 8) = -23."
+                    explanation = "Cá»™ng hai sá»‘ nguyÃªn cÃ¹ng dáº¥u Ã¢m: -(15 + 8) = -23."
                 },
                 new QuestionData
                 {
@@ -670,10 +719,10 @@ namespace Math6Companion.UI
                     topic = "Integers",
                     type = "MCQ",
                     difficulty = "MEDIUM",
-                    prompt = "Tính giá trị biểu thức: 12 - (-5) = ?",
+                    prompt = "TÃ­nh giÃ¡ trá»‹ biá»ƒu thá»©c: 12 - (-5) = ?",
                     options = new QuestionOptionMap { A = "7", B = "-17", C = "17", D = "-7" },
                     correctAnswer = "C",
-                    explanation = "Trừ cho số âm tương đương với cộng số đối: 12 - (-5) = 12 + 5 = 17."
+                    explanation = "Trá»« cho sá»‘ Ã¢m tÆ°Æ¡ng Ä‘Æ°Æ¡ng vá»›i cá»™ng sá»‘ Ä‘á»‘i: 12 - (-5) = 12 + 5 = 17."
                 }
             };
         }
@@ -703,34 +752,34 @@ namespace Math6Companion.UI
                 bool isWrongReviewMode = PlayerPrefs.GetInt("Quiz_IsWrongReviewMode", 0) == 1;
                 if (isWrongReviewMode)
                 {
-                    topicTitleText.text = "<b>[🔥] SỔ TAY CÂU SAI • ANKI SPACED REPETITION</b>";
+                    topicTitleText.text = "<b>[Sá»” TAY CÃ‚U SAI] ANKI SPACED REPETITION</b>";
                 }
                 else
                 {
-                    string topicDisplay = "Toán Học Lớp 6";
+                    string topicDisplay = "ToÃ¡n Há»c Lá»›p 6";
                     if (!string.IsNullOrEmpty(q.topic))
                     {
-                        if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "HinhHoc")) topicDisplay = "Hình học trực quan & Tính đối xứng";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "PhanSo")) topicDisplay = "Phân số & Số thập phân";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "SoNguyen")) topicDisplay = "Số nguyên & Trục số";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "TapHop")) topicDisplay = "Tập hợp & Số tự nhiên";
+                        if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "HinhHoc")) topicDisplay = "HÃ¬nh há»c trá»±c quan & TÃ­nh Ä‘á»‘i xá»©ng";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "PhanSo")) topicDisplay = "PhÃ¢n sá»‘ & Sá»‘ tháº­p phÃ¢n";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "SoNguyen")) topicDisplay = "Sá»‘ nguyÃªn & Trá»¥c sá»‘";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "TapHop")) topicDisplay = "Táº­p há»£p & Sá»‘ tá»± nhiÃªn";
                         else topicDisplay = q.topic;
                     }
 
                     string lessonTitle = PlayerPrefs.GetString("Current_Lesson_Title", "");
                     if (!string.IsNullOrEmpty(lessonTitle))
                     {
-                        topicTitleText.text = $"Trắc nghiệm: {lessonTitle}";
+                        topicTitleText.text = $"Tráº¯c nghiá»‡m: {lessonTitle}";
                     }
                     else
                     {
-                        topicTitleText.text = $"Chủ đề: {topicDisplay}";
+                        topicTitleText.text = $"Chá»§ Ä‘á»: {topicDisplay}";
                     }
                 }
             }
 
             if (progressText != null)
-                progressText.text = $"Câu {index + 1} / {questionList.Count}";
+                progressText.text = $"CÃ¢u {index + 1} / {questionList.Count}";
 
             if (promptText != null)
                 promptText.text = FormatMathString(q.prompt);
@@ -783,7 +832,7 @@ namespace Math6Companion.UI
                 remainingTime -= Time.deltaTime;
                 if (timerText != null)
                 {
-                    timerText.text = $"Thời gian: {Mathf.CeilToInt(remainingTime)}s";
+                    timerText.text = $"Thá»i gian: {Mathf.CeilToInt(remainingTime)}s";
                 }
                 yield return null;
             }
@@ -801,7 +850,7 @@ namespace Math6Companion.UI
 
             if (feedbackText != null)
             {
-                feedbackText.text = "Hết giờ! " + FormatMathString(questionList[currentQuestionIndex].explanation);
+                feedbackText.text = "Háº¿t giá»! " + FormatMathString(questionList[currentQuestionIndex].explanation);
                 feedbackText.color = Color.yellow;
             }
 
@@ -826,25 +875,25 @@ namespace Math6Companion.UI
             if (chosen == correct)
             {
                 correctCount++;
-                optionButtons[index].image.color = new Color(0.4f, 0.9f, 0.4f); // Xanh lá
+                optionButtons[index].image.color = new Color(0.4f, 0.9f, 0.4f); // Xanh lÃ¡
                 if (feedbackText != null)
                 {
-                    feedbackText.text = "Chính xác! " + FormatMathString(questionList[currentQuestionIndex].explanation);
+                    feedbackText.text = "ChÃ­nh xÃ¡c! " + FormatMathString(questionList[currentQuestionIndex].explanation);
                     feedbackText.color = Color.green;
                 }
 
-                // Ghi nhận ôn tập thành công nếu đang trong ngân hàng câu sai
+                // Ghi nháº­n Ã´n táº­p thÃ nh cÃ´ng náº¿u Ä‘ang trong ngÃ¢n hÃ ng cÃ¢u sai
                 WrongQuestionBankManager.RecordCorrectReview(questionList[currentQuestionIndex].questionId);
             }
             else
             {
-                optionButtons[index].image.color = new Color(1f, 0.4f, 0.4f); // Đỏ
+                optionButtons[index].image.color = new Color(1f, 0.4f, 0.4f); // Äá»
                 HighlightCorrectButton(correct);
 
-                // Ghi nhận câu sai vào Sổ tay câu sai (Anki/Quizlet)
+                // Ghi nháº­n cÃ¢u sai vÃ o Sá»• tay cÃ¢u sai (Anki/Quizlet)
                 WrongQuestionBankManager.RecordWrongMCQ(questionList[currentQuestionIndex], chosen);
 
-                // Ghi nhận câu sai vào Session để AI Thầy Minh phân tích trong Scene 08_AIFeedback
+                // Ghi nháº­n cÃ¢u sai vÃ o Session Ä‘á»ƒ AI Tháº§y Minh phÃ¢n tÃ­ch trong Scene 08_AIFeedback
                 ScoreSessionContext.WrongQuestionPrompts.Add(questionList[currentQuestionIndex].prompt);
                 ScoreSessionContext.WrongAnswers.Add(chosen);
                 ScoreSessionContext.CorrectAnswers.Add(correct);
@@ -852,7 +901,7 @@ namespace Math6Companion.UI
 
                 if (feedbackText != null)
                 {
-                    feedbackText.text = $"Sai rồi! {FormatMathString(questionList[currentQuestionIndex].explanation)}";
+                    feedbackText.text = $"Sai rá»“i! {FormatMathString(questionList[currentQuestionIndex].explanation)}";
                     feedbackText.color = Color.red;
                 }
             }
@@ -919,10 +968,10 @@ namespace Math6Companion.UI
             if (resultPanel != null) resultPanel.SetActive(true);
             if (resultScoreText != null)
             {
-                resultScoreText.text = $"Hoàn thành bài tập!\nĐiểm số: {correctCount}/{questionList.Count}";
+                resultScoreText.text = $"HoÃ n thÃ nh bÃ i táº­p!\nÄiá»ƒm sá»‘: {correctCount}/{questionList.Count}";
             }
 
-            // Ghi dữ liệu vào Session Score dùng chung
+            // Ghi dá»¯ liá»‡u vÃ o Session Score dÃ¹ng chung
             int totalQ = (questionList != null && questionList.Count > 0) ? questionList.Count : 3;
             int final10Scale = Mathf.RoundToInt((float)correctCount / Mathf.Max(1, totalQ) * 10f);
 
@@ -938,7 +987,7 @@ namespace Math6Companion.UI
                 ScoreSessionContext.IsWinner = (ScoreSessionContext.Score >= ScoreSessionContext.OpponentScore);
             }
 
-            // Gửi kết quả lên Google Sheets (chuẩn hóa thang điểm 10 & Múi giờ Việt Nam GMT+7)
+            // Gá»­i káº¿t quáº£ lÃªn Google Sheets (chuáº©n hÃ³a thang Ä‘iá»ƒm 10 & MÃºi giá» Viá»‡t Nam GMT+7)
             string curLesId = PlayerPrefs.GetString("Current_Lesson_ID", "");
             if (!string.IsNullOrEmpty(curLesId))
             {
@@ -971,15 +1020,30 @@ namespace Math6Companion.UI
             {
                 if (navigated) return;
                 navigated = true;
-                Debug.Log("[QuizUIController] Nộp bài thành công! Đang chuyển sang Scene 07_Score...");
+                Debug.Log("[QuizUIController] Ná»™p bÃ i thÃ nh cÃ´ng! Äang chuyá»ƒn sang Scene 07_Score...");
                 SceneManager.LoadScene("07_Score");
             }
 
-            // Fallback an toàn: Dù mạng phản hồi hay không, tối đa 0.4s sẽ chuyển sang Scene Điểm
+            // Fallback an toÃ n: DÃ¹ máº¡ng pháº£n há»“i hay khÃ´ng, tá»‘i Ä‘a 0.4s sáº½ chuyá»ƒn sang Scene Äiá»ƒm
             StartCoroutine(SafetyScoreTransition(NavigateToScore));
 
             if (networkService != null)
             {
+                if (ScoreSessionContext.IsVersusMode && ScoreSessionContext.IsRealMultiplayer && !string.IsNullOrEmpty(ScoreSessionContext.VersusRoomId))
+                {
+                    try
+                    {
+                        networkService.SubmitVersusScore(ScoreSessionContext.VersusRoomId, submission.userId, final10Scale, (ok, r, m) =>
+                        {
+                            Debug.Log($"[QuizUIController] SubmitVersusScore: {ok} -> {m}");
+                        });
+                    }
+                    catch (System.Exception exVs)
+                    {
+                        Debug.LogWarning("[QuizUIController] SubmitVersusScore exception: " + exVs.Message);
+                    }
+                }
+
                 try
                 {
                     networkService.SaveResult(submission, (success, badges, msg) =>
@@ -1007,12 +1071,12 @@ namespace Math6Companion.UI
 
         public void CloseQuiz()
         {
-            // Nộp bài sớm: Lập tức dừng làm bài, hiển thị trạng thái và chuyển sang Scene 07_Score
+            // Ná»™p bÃ i sá»›m: Láº­p tá»©c dá»«ng lÃ m bÃ i, hiá»ƒn thá»‹ tráº¡ng thÃ¡i vÃ  chuyá»ƒn sang Scene 07_Score
             if (closeQuizButton != null)
             {
                 closeQuizButton.interactable = false;
                 var btnTxt = closeQuizButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (btnTxt != null) btnTxt.text = "Đang nộp...";
+                if (btnTxt != null) btnTxt.text = "Äang ná»™p...";
             }
 
             CompleteQuiz();

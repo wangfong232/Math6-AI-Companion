@@ -5,12 +5,14 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Math6Companion.Core;
+using Math6Companion.Core.Contracts;
 
 namespace Math6Companion.UI
 {
     /// <summary>
     /// Điều khiển Sảnh thi đấu đối kháng (09_VersusLobby.unity).
-    /// Quét danh sách online, ghép cặp ngẫu nhiên, đợi Accept và chọn thể thức (TN/TL).
+    /// Hỗ trợ ghép trận Realtime 2 học sinh thật qua Google Sheets REST Polling,
+    /// đồng thời giữ fallback đấu với Bạn học ảo (Bot) khi thử nghiệm 1 mình.
     /// </summary>
     public class VersusLobbyUIController : MonoBehaviour
     {
@@ -35,12 +37,41 @@ namespace Math6Companion.UI
         [SerializeField] private Button chooseMcqModeButton;
         [SerializeField] private Button chooseEssayModeButton;
 
+        private INetworkService networkService;
         private string matchedOpponentNickname = "BảoToánHọc";
         private int matchedOpponentScore = 8;
+        private Coroutine matchmakingCoroutine;
         private Coroutine acceptTimerCoroutine;
+        private bool isSearching = false;
+        private bool isRealMatch = false;
+        private string currentUserId = "STU_001";
+        private string currentNickname = "Học sinh";
+        private VersusQueueResponse currentMatchInfo;
 
         private void Start()
         {
+            networkService = Math6Companion.Core.Services.NetworkServiceProvider.NetworkService;
+
+            // Lấy thông tin tài khoản hiện tại
+            if (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null)
+            {
+                currentUserId = SessionManager.Instance.CurrentUser.userId ?? "STU_001";
+                currentNickname = SessionManager.Instance.CurrentNickname;
+            }
+            else
+            {
+                currentUserId = PlayerPrefs.GetString("User_ID", "STU_001");
+                currentNickname = PlayerPrefs.GetString("User_Nickname", "Học sinh");
+            }
+
+            // Cập nhật tên học sinh lên thẻ người chơi (PlayerCard)
+            var pNameGo = GameObject.Find("PName");
+            if (pNameGo != null)
+            {
+                var pNameText = pNameGo.GetComponent<TextMeshProUGUI>();
+                if (pNameText != null) pNameText.text = currentNickname;
+            }
+
             if (backToMenuButton != null)
                 backToMenuButton.onClick.AddListener(OnBackToMenuClicked);
 
@@ -62,42 +93,165 @@ namespace Math6Companion.UI
             if (matchModal != null) matchModal.SetActive(false);
             if (modeSelectionModal != null) modeSelectionModal.SetActive(false);
 
-            StartCoroutine(ScanOnlineUsersRoutine());
+            if (statusText != null)
+                statusText.text = "Sảnh trực tuyến sẵn sàng. Bấm [BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN] để tìm bạn thi đấu!";
+
+            if (scanningIndicatorText != null)
+                scanningIndicatorText.text = "🔍 Sẵn sàng tìm đối thủ...";
         }
 
-        private IEnumerator ScanOnlineUsersRoutine()
+        private void OnDestroy()
         {
-            if (scanningIndicatorText != null)
-                scanningIndicatorText.text = "Đang quét danh sách tài khoản học sinh trực tuyến...";
+            CancelQueueIfSearching();
+        }
 
-            yield return new WaitForSeconds(1.0f);
-
-            if (scanningIndicatorText != null)
-                scanningIndicatorText.text = "[ONLINE] Tìm thấy 4 học sinh trực tuyến sẵn sàng thi đấu!";
+        private void CancelQueueIfSearching()
+        {
+            if (isSearching)
+            {
+                isSearching = false;
+                if (matchmakingCoroutine != null) StopCoroutine(matchmakingCoroutine);
+                if (networkService != null)
+                {
+                    networkService.CancelVersusQueue(currentUserId, (ok, msg) => { });
+                }
+            }
         }
 
         private void OnRandomMatchClicked()
         {
             PlayClick();
-            if (statusText != null) statusText.text = "Đang ghép cặp ngẫu nhiên với đối thủ...";
-            if (randomMatchButton != null) randomMatchButton.interactable = false;
 
-            StartCoroutine(MatchmakingRoutine());
+            if (isSearching)
+            {
+                CancelQueueIfSearching();
+                ResetSearchUI("Đã hủy tìm kiếm.");
+                return;
+            }
+
+            isSearching = true;
+            if (randomMatchButton != null)
+            {
+                var btnTxt = randomMatchButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnTxt != null) btnTxt.text = "  HỦY TÌM KIẾM TRẬN ĐẤU  ";
+            }
+
+            matchmakingCoroutine = StartCoroutine(MatchmakingRoutine());
         }
 
         private IEnumerator MatchmakingRoutine()
         {
-            yield return new WaitForSeconds(1.5f);
+            if (statusText != null) statusText.text = "Đang kết nối đến máy chủ Google Sheets để tìm bạn học...";
+            if (scanningIndicatorText != null) scanningIndicatorText.text = "🔍 Đang gửi yêu cầu vào hàng đợi...";
+
+            bool joinCompleted = false;
+            VersusQueueResponse joinResult = null;
+
+            networkService.JoinVersusQueue(currentUserId, currentNickname, "MCQ", (success, resp, msg) =>
+            {
+                joinCompleted = true;
+                joinResult = resp;
+            });
+
+            while (!joinCompleted) yield return null;
+
+            if (joinResult != null && joinResult.status == "MATCHED")
+            {
+                // Tìm thấy đối thủ ngay lập tức (đã có bạn học đợi sẵn)
+                HandleMatchSuccess(joinResult);
+                yield break;
+            }
+
+            // Nếu đang WAITING: Bắt đầu vòng lặp Polling mỗi 2s
+            int waitSeconds = 0;
+            int maxWaitSeconds = 25; // 25s trước khi gợi ý đấu Bot ảo
+
+            while (isSearching && waitSeconds < maxWaitSeconds)
+            {
+                waitSeconds += 2;
+                yield return new WaitForSeconds(2.0f);
+
+                if (!isSearching) yield break;
+
+                if (statusText != null)
+                    statusText.text = $"Đang tìm bạn học trên máy chủ Google Sheets... ({waitSeconds}s)";
+                if (scanningIndicatorText != null)
+                    scanningIndicatorText.text = $"⏳ Đang chờ học sinh khác bấm ghép trận... ({waitSeconds}s)";
+
+                bool pollCompleted = false;
+                VersusQueueResponse pollResult = null;
+
+                networkService.PollVersusQueue(currentUserId, (success, resp, msg) =>
+                {
+                    pollCompleted = true;
+                    pollResult = resp;
+                });
+
+                while (!pollCompleted) yield return null;
+
+                if (pollResult != null && pollResult.status == "MATCHED")
+                {
+                    HandleMatchSuccess(pollResult);
+                    yield break;
+                }
+            }
+
+            // Quá 25s chưa có người chơi khác -> Đề xuất đấu với Bot hoặc tiếp tục chờ
+            if (isSearching)
+            {
+                if (statusText != null)
+                    statusText.text = "Chưa có học sinh khác online. Hệ thống kết nối với Bạn Học Ảo (BảoToánHọc)...";
+
+                yield return new WaitForSeconds(1.5f);
+                HandleBotMatch();
+            }
+        }
+
+        private void HandleMatchSuccess(VersusQueueResponse matchResp)
+        {
+            isSearching = false;
+            isRealMatch = true;
+            currentMatchInfo = matchResp;
+
+            matchedOpponentNickname = !string.IsNullOrEmpty(matchResp.opponentNickname) ? matchResp.opponentNickname : "Học sinh đối thủ";
+            matchedOpponentScore = 8; // Sẽ được cập nhật sau trận khi đối thủ nộp bài
+
+            if (statusText != null)
+                statusText.text = $"<color=#2ecc71>ĐÃ GHÉP CẶP VỚI: {matchedOpponentNickname}!</color>";
+
+            if (scanningIndicatorText != null)
+                scanningIndicatorText.text = $"⚔️ Sẵn sàng: {matchedOpponentNickname}";
+
+            ShowMatchFoundModal(true);
+        }
+
+        private void HandleBotMatch()
+        {
+            isSearching = false;
+            isRealMatch = false;
+            currentMatchInfo = null;
 
             matchedOpponentNickname = "BảoToánHọc (Lớp 6A2)";
             matchedOpponentScore = Random.Range(6, 10);
 
+            if (statusText != null)
+                statusText.text = $"Ghép cặp với Bạn Học Ảo: {matchedOpponentNickname}";
+
+            if (scanningIndicatorText != null)
+                scanningIndicatorText.text = $"⚔️ Đối thủ: {matchedOpponentNickname}";
+
+            ShowMatchFoundModal(false);
+        }
+
+        private void ShowMatchFoundModal(bool isReal)
+        {
             if (matchModal != null)
             {
                 matchModal.SetActive(true);
                 if (matchFoundText != null)
                 {
-                    matchFoundText.text = $"ĐÃ TÌM THẤY ĐỐI THỦ!\n\n<color=#f39c12>{matchedOpponentNickname}</color>\n\nBạn có chấp nhận thi đấu đối kháng?";
+                    string tag = isReal ? "<color=#2ecc71>[NGƯỜI CHƠI THẬT]</color>" : "<color=#f39c12>[BẠN HỌC ẢO]</color>";
+                    matchFoundText.text = $"ĐÃ TÌM THẤY ĐỐI THỦ!\n{tag}\n\n<color=#f39c12><b>{matchedOpponentNickname}</b></color>\n\nBạn có chấp nhận thi đấu đối kháng?";
                 }
 
                 if (acceptTimerCoroutine != null) StopCoroutine(acceptTimerCoroutine);
@@ -110,11 +264,11 @@ namespace Math6Companion.UI
             int remaining = seconds;
             while (remaining > 0)
             {
-                if (countdownAcceptText != null) countdownAcceptText.text = $"Tự động từ chối sau: {remaining}s";
+                if (countdownAcceptText != null) countdownAcceptText.text = $"Tự động bắt đầu sau: {remaining}s";
                 yield return new WaitForSeconds(1.0f);
                 remaining--;
             }
-            OnDeclineMatchClicked();
+            OnAcceptMatchClicked();
         }
 
         private void OnAcceptMatchClicked()
@@ -123,11 +277,8 @@ namespace Math6Companion.UI
             if (acceptTimerCoroutine != null) StopCoroutine(acceptTimerCoroutine);
             if (matchModal != null) matchModal.SetActive(false);
 
-            // Mở popup chọn thể thức thi đấu
-            if (modeSelectionModal != null)
-            {
-                modeSelectionModal.SetActive(true);
-            }
+            // Bắt đầu ngay thể thức Trắc nghiệm tốc độ (MCQ)
+            StartMatch("MCQ");
         }
 
         private void OnDeclineMatchClicked()
@@ -135,19 +286,46 @@ namespace Math6Companion.UI
             PlayClick();
             if (acceptTimerCoroutine != null) StopCoroutine(acceptTimerCoroutine);
             if (matchModal != null) matchModal.SetActive(false);
-            if (randomMatchButton != null) randomMatchButton.interactable = true;
-            if (statusText != null) statusText.text = "Đã hủy ghép cặp. Bấm [Ghép cặp ngẫu nhiên] để tìm lại.";
+            CancelQueueIfSearching();
+            ResetSearchUI("Đã từ chối trận đấu.");
+        }
+
+        private void ResetSearchUI(string msg)
+        {
+            isSearching = false;
+            if (randomMatchButton != null)
+            {
+                randomMatchButton.interactable = true;
+                var btnTxt = randomMatchButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnTxt != null) btnTxt.text = "  BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN  >";
+            }
+            if (statusText != null) statusText.text = msg;
+            if (scanningIndicatorText != null) scanningIndicatorText.text = "🔍 Sẵn sàng tìm đối thủ...";
         }
 
         private void StartMatch(string mode)
         {
             PlayClick();
 
-            // Cấu hình cờ Đối kháng cho Scene Điểm
+            // Cấu hình cờ Đối kháng cho Session chung
             ScoreSessionContext.IsVersusMode = true;
+            ScoreSessionContext.IsRealMultiplayer = isRealMatch;
             ScoreSessionContext.OpponentNickname = matchedOpponentNickname;
             ScoreSessionContext.OpponentScore = matchedOpponentScore;
             ScoreSessionContext.TimeSpentSeconds = (TeacherConfigManager.Instance != null) ? TeacherConfigManager.Instance.PvPDurationSeconds : 180;
+
+            if (isRealMatch && currentMatchInfo != null)
+            {
+                ScoreSessionContext.VersusRoomId = currentMatchInfo.roomId;
+                ScoreSessionContext.OpponentUserId = currentMatchInfo.opponentId;
+                ScoreSessionContext.VersusQuestionIds = currentMatchInfo.questionIds ?? new List<string>();
+            }
+            else
+            {
+                ScoreSessionContext.VersusRoomId = "";
+                ScoreSessionContext.OpponentUserId = "";
+                ScoreSessionContext.VersusQuestionIds.Clear();
+            }
 
             if (mode == "MCQ")
             {
@@ -162,6 +340,7 @@ namespace Math6Companion.UI
         private void OnBackToMenuClicked()
         {
             PlayClick();
+            CancelQueueIfSearching();
             string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
             SceneManager.LoadScene(target);
         }

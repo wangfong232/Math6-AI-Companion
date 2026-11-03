@@ -1,6 +1,6 @@
 // =========================================================================
-// GOOGLE APPS SCRIPT BACKEND CHUẨN HOÁ CHO MATH6-AI-COMPANION
-// Khớp 100% với cấu trúc 8 bảng:
+// GOOGLE APPS SCRIPT BACKEND CHUáº¨N HOÃ CHO MATH6-AI-COMPANION
+// Khá»›p 100% vá»›i cáº¥u trÃºc 8 báº£ng:
 // 1. Users (UserID, Username, Password, Role, FullName, Grade, ClassID, CreatedAt)
 // 2. Lessons (LessonID, Topic, Title, Grade, OrderIndex, Summary, Objectives, VideoUrl, ContentText)
 // 3. Questions_Math6 (QuestionID, LessonID, Topic, Type, Difficulty, Prompt, OptA, OptB, OptC, OptD, CorrectAnswer, RubricJSON, Explanation, ImgUrl, Status)
@@ -38,8 +38,24 @@ function doGet(e) {
       case "getStudentAnalytics":
         return handleGetStudentAnalytics(params.userId);
 
+      // --- HỆ THỐNG ĐẤU KHÁNG 1V1 REALTIME ---
+      case "joinVersusQueue":
+        return handleJoinVersusQueue(params.userId, params.nickname, params.mode);
+
+      case "pollVersusQueue":
+        return handlePollVersusQueue(params.userId);
+
+      case "cancelVersusQueue":
+        return handleCancelVersusQueue(params.userId);
+
+      case "submitVersusScore":
+        return handleSubmitVersusScore(params.roomId, params.userId, params.score);
+
+      case "pollVersusRoomResult":
+        return handlePollVersusRoomResult(params.roomId, params.userId);
+
       default:
-        return createJsonResponse({ success: false, error: "Action GET không hợp lệ: " + action });
+        return createJsonResponse({ success: false, error: "Action GET khÃ´ng há»£p lá»‡: " + action });
     }
   } catch (err) {
     return createJsonResponse({ success: false, error: err.toString() });
@@ -73,8 +89,24 @@ function doPost(e) {
       case "logAITutor":
         return handleLogAITutor(postData);
 
+      // --- HỆ THỐNG ĐẤU KHÁNG 1V1 REALTIME ---
+      case "joinVersusQueue":
+        return handleJoinVersusQueue(postData.userId || params.userId, postData.nickname || params.nickname, postData.mode || params.mode);
+
+      case "pollVersusQueue":
+        return handlePollVersusQueue(postData.userId || params.userId);
+
+      case "cancelVersusQueue":
+        return handleCancelVersusQueue(postData.userId || params.userId);
+
+      case "submitVersusScore":
+        return handleSubmitVersusScore(postData.roomId || params.roomId, postData.userId || params.userId, postData.score || params.score);
+
+      case "pollVersusRoomResult":
+        return handlePollVersusRoomResult(postData.roomId || params.roomId, postData.userId || params.userId);
+
       default:
-        return createJsonResponse({ success: false, error: "Action POST không hợp lệ: " + action });
+        return createJsonResponse({ success: false, error: "Action POST khÃ´ng há»£p lá»‡: " + action });
     }
   } catch (err) {
     return createJsonResponse({ success: false, error: err.toString() });
@@ -82,12 +114,12 @@ function doPost(e) {
 }
 
 // -------------------------------------------------------------------------
-// 1. ĐĂNG NHẬP / LẤY THÔNG TIN HỌC SINH (Users)
-// Cột: UserID | Username | Password | Role | FullName | Grade | ClassID | CreatedAt
+// 1. ÄÄ‚NG NHáº¬P / Láº¤Y THÃ”NG TIN Há»ŒC SINH (Users)
+// Cá»™t: UserID | Username | Password | Role | FullName | Grade | ClassID | CreatedAt
 // -------------------------------------------------------------------------
 function handleLogin(username, password) {
   if (!username) {
-    return createJsonResponse({ success: false, message: "Tên đăng nhập không được để trống!" });
+    return createJsonResponse({ success: false, message: "TÃªn Ä‘Äƒng nháº­p khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng!" });
   }
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -108,14 +140,14 @@ function handleLogin(username, password) {
 
     if (rowUname === uname || rowUid === uname) {
       const dbPassword = String(data[i][2] || "").trim();
-      // Nếu có mật khẩu thì kiểm tra khớp (hoặc cho phép nếu chưa đặt)
+      // Náº¿u cÃ³ máº­t kháº©u thÃ¬ kiá»ƒm tra khá»›p (hoáº·c cho phÃ©p náº¿u chÆ°a Ä‘áº·t)
       if (pwd && dbPassword && pwd !== dbPassword) {
-        return createJsonResponse({ success: false, message: "Mật khẩu không chính xác!" });
+        return createJsonResponse({ success: false, message: "Máº­t kháº©u khÃ´ng chÃ­nh xÃ¡c!" });
       }
 
       return createJsonResponse({
         success: true,
-        message: "Đăng nhập thành công!",
+        message: "ÄÄƒng nháº­p thÃ nh cÃ´ng!",
         data: {
           userId: data[i][0] || ("USR_" + i),
           username: data[i][1],
@@ -129,14 +161,14 @@ function handleLogin(username, password) {
     }
   }
 
-  // Nếu tài khoản mới chưa có trong Users -> Tự động đăng ký
+  // Náº¿u tÃ i khoáº£n má»›i chÆ°a cÃ³ trong Users -> Tá»± Ä‘á»™ng Ä‘Äƒng kÃ½
   const newUserId = "STU_" + Date.now().toString().slice(-4);
   const nowStr = new Date().toISOString().split("T")[0];
   sheet.appendRow([newUserId, username, pwd || "123", "STUDENT", username, 6, "6A1", nowStr]);
 
   return createJsonResponse({
     success: true,
-    message: "Tạo tài khoản học sinh mới thành công!",
+    message: "Táº¡o tÃ i khoáº£n há»c sinh má»›i thÃ nh cÃ´ng!",
     data: {
       userId: newUserId,
       username: username,
@@ -150,14 +182,14 @@ function handleLogin(username, password) {
 }
 
 // -------------------------------------------------------------------------
-// 2. LẤY DANH SÁCH CÂU HỎI (Questions_Math6)
-// Cột: QuestionID | LessonID | Topic | Type | Difficulty | Prompt | OptA | OptB | OptC | OptD | CorrectAnswer | RubricJSON | Explanation | ImgUrl | Status
+// 2. Láº¤Y DANH SÃCH CÃ‚U Há»ŽI (Questions_Math6)
+// Cá»™t: QuestionID | LessonID | Topic | Type | Difficulty | Prompt | OptA | OptB | OptC | OptD | CorrectAnswer | RubricJSON | Explanation | ImgUrl | Status
 // -------------------------------------------------------------------------
 function handleGetQuestions(topic, grade, limit) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("Questions_Math6");
   if (!sheet) {
-    return createJsonResponse({ success: false, error: "Không tìm thấy sheet: Questions_Math6" });
+    return createJsonResponse({ success: false, error: "KhÃ´ng tÃ¬m tháº¥y sheet: Questions_Math6" });
   }
 
   const data = sheet.getDataRange().getDisplayValues();
@@ -180,7 +212,7 @@ function handleGetQuestions(topic, grade, limit) {
     ans: headers.indexOf("correctanswer"),
     rubric: headers.indexOf("rubricjson"),
     exp: headers.indexOf("explanation"),
-    // Tự động nhận diện nhiều biến thể tên cột ảnh (ImgUrl, ImageUrl, Img, Image, HinhAnh, HinhVe...)
+    // Tá»± Ä‘á»™ng nháº­n diá»‡n nhiá»u biáº¿n thá»ƒ tÃªn cá»™t áº£nh (ImgUrl, ImageUrl, Img, Image, HinhAnh, HinhVe...)
     img: (function() {
       const candidates = ["imgurl", "imageurl", "img", "image", "hinhanh", "hinhve", "photo"];
       for (let c of candidates) {
@@ -233,14 +265,14 @@ function handleGetQuestions(topic, grade, limit) {
 }
 
 // -------------------------------------------------------------------------
-// 3. LẤY DANH SÁCH BÀI HỌC (Lessons)
-// Cột: LessonID | Topic | Title | Grade | OrderIndex | Summary | Objectives | VideoUrl | ContentText
+// 3. Láº¤Y DANH SÃCH BÃ€I Há»ŒC (Lessons)
+// Cá»™t: LessonID | Topic | Title | Grade | OrderIndex | Summary | Objectives | VideoUrl | ContentText
 // -------------------------------------------------------------------------
 function handleGetLessons(topic) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("Lessons");
   if (!sheet) {
-    return createJsonResponse({ success: false, error: "Không tìm thấy sheet: Lessons" });
+    return createJsonResponse({ success: false, error: "KhÃ´ng tÃ¬m tháº¥y sheet: Lessons" });
   }
 
   const data = sheet.getDataRange().getDisplayValues();
@@ -282,7 +314,7 @@ function handleGetLessons(topic) {
       objectives: idx.obj >= 0 ? row[idx.obj] : "",
       videoUrl: idx.video >= 0 ? row[idx.video] : "",
       description: idx.content >= 0 ? row[idx.content] : (idx.summary >= 0 ? row[idx.summary] : ""),
-      topStudentNickname: "Trạng Tí",
+      topStudentNickname: "Tráº¡ng TÃ­",
       topStudentAttempts: 1,
       userHighestScore: 0
     });
@@ -292,14 +324,14 @@ function handleGetLessons(topic) {
 }
 
 // -------------------------------------------------------------------------
-// 4. LƯU KẾT QUẢ VÀ TỰ ĐỘNG ĐỒNG BỘ TIẾN ĐỘ (Results & Progress)
+// 4. LÆ¯U Káº¾T QUáº¢ VÃ€ Tá»° Äá»˜NG Äá»’NG Bá»˜ TIáº¾N Äá»˜ (Results & Progress)
 // Results:  ResultID | UserID | LessonID | ActivityType | Score | MaxScore | TimeSpentSec | MistakesCount | SubmittedAt
 // Progress: ProgressID | UserID | LessonID | Attempts | HighestScore | LastScore | Completed | LastAttemptDate
 // -------------------------------------------------------------------------
 function handleSaveResult(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  // 4.1 Ghi bảng Results
+  // 4.1 Ghi báº£ng Results
   let resSheet = ss.getSheetByName("Results");
   if (!resSheet) {
     resSheet = ss.insertSheet("Results");
@@ -327,7 +359,7 @@ function handleSaveResult(payload) {
     nowFormatted
   ]);
 
-  // 4.2 Cập nhật bảng Progress
+  // 4.2 Cáº­p nháº­t báº£ng Progress
   let progSheet = ss.getSheetByName("Progress");
   if (!progSheet) {
     progSheet = ss.insertSheet("Progress");
@@ -370,11 +402,11 @@ function handleSaveResult(payload) {
     ]);
   }
 
-  return createJsonResponse({ success: true, message: "Đã lưu kết quả bài làm thành công!", unlockedBadges: [] });
+  return createJsonResponse({ success: true, message: "ÄÃ£ lÆ°u káº¿t quáº£ bÃ i lÃ m thÃ nh cÃ´ng!", unlockedBadges: [] });
 }
 
 // -------------------------------------------------------------------------
-// 5. LẤY TIẾN ĐỘ HỌC TẬP (Progress)
+// 5. Láº¤Y TIáº¾N Äá»˜ Há»ŒC Táº¬P (Progress)
 // -------------------------------------------------------------------------
 function handleGetProgress(userId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -406,7 +438,7 @@ function handleGetProgress(userId) {
 }
 
 // -------------------------------------------------------------------------
-// 6. LẤY LỊCH SỬ KẾT QUẢ (Results)
+// 6. Láº¤Y Lá»ŠCH Sá»¬ Káº¾T QUáº¢ (Results)
 // -------------------------------------------------------------------------
 function handleGetResults(userId, limit) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -440,7 +472,7 @@ function handleGetResults(userId, limit) {
 }
 
 // -------------------------------------------------------------------------
-// 7. LẤY DANH HIỆU (Badges)
+// 7. Láº¤Y DANH HIá»†U (Badges)
 // -------------------------------------------------------------------------
 function handleGetBadges() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -469,8 +501,8 @@ function handleGetBadges() {
 }
 
 // -------------------------------------------------------------------------
-// 8. GHI LOG AI TUTOR (AI_Tutor_Logs - Đúng chuẩn 11 cột)
-// Cột: LogID | UserID | QuestionID | StepIndex | StudentInput | AIResponseJSON | Timestamp | DetectedMistake | Score | MaxScore | Note
+// 8. GHI LOG AI TUTOR (AI_Tutor_Logs - ÄÃºng chuáº©n 11 cá»™t)
+// Cá»™t: LogID | UserID | QuestionID | StepIndex | StudentInput | AIResponseJSON | Timestamp | DetectedMistake | Score | MaxScore | Note
 // -------------------------------------------------------------------------
 function handleLogAITutor(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -488,7 +520,7 @@ function handleLogAITutor(payload) {
     payload.userId || "STU_001",
     payload.questionId || "",
     payload.stepIndex || 1,
-    payload.studentAnswer || payload.studentPrompt || payload.studentInput || "(Học sinh nộp bài giải)",
+    payload.studentAnswer || payload.studentPrompt || payload.studentInput || "(Há»c sinh ná»™p bÃ i giáº£i)",
     payload.aiFeedback || (typeof payload.aiResponse === "object" ? JSON.stringify(payload.aiResponse) : payload.aiResponse) || "",
     payload.timestamp || nowFormatted,
     payload.detectedMistake || "NONE",
@@ -497,11 +529,11 @@ function handleLogAITutor(payload) {
     payload.sessionType || payload.note || ""
   ]);
 
-  return createJsonResponse({ success: true, message: "Đã lưu AI Tutor log thành công!" });
+  return createJsonResponse({ success: true, message: "ÄÃ£ lÆ°u AI Tutor log thÃ nh cÃ´ng!" });
 }
 
 // -------------------------------------------------------------------------
-// 9. PHÂN TÍCH HỌC TẬP (Student Analytics)
+// 9. PHÃ‚N TÃCH Há»ŒC Táº¬P (Student Analytics)
 // -------------------------------------------------------------------------
 function handleGetStudentAnalytics(userId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -541,4 +573,398 @@ function handleGetStudentAnalytics(userId) {
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =========================================================================
+// 10. HỆ THỐNG ĐẤU KHÁNG 1V1 REALTIME (Match_Queue & Match_Rooms)
+// =========================================================================
+
+function handleJoinVersusQueue(userId, nickname, mode) {
+  if (!userId) return createJsonResponse({ success: false, message: "Thiếu userId" });
+  nickname = nickname || "Học sinh";
+  mode = (mode || "MCQ").toUpperCase();
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return createJsonResponse({ success: false, message: "Hệ thống đang bận, vui lòng thử lại!" });
+  }
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let qSheet = ss.getSheetByName("Match_Queue");
+    if (!qSheet) {
+      qSheet = ss.insertSheet("Match_Queue");
+      qSheet.appendRow(["UserID", "Nickname", "Mode", "Status", "MatchedRoomID", "LastPingTime"]);
+    }
+
+    let rSheet = ss.getSheetByName("Match_Rooms");
+    if (!rSheet) {
+      rSheet = ss.insertSheet("Match_Rooms");
+      rSheet.appendRow(["RoomID", "Player1_ID", "Player1_Name", "Player2_ID", "Player2_Name", "Mode", "QuestionIDs", "Player1_Score", "Player2_Score", "Player1_Done", "Player2_Done", "WinnerID", "Status", "CreatedAt"]);
+    }
+
+    const now = Date.now();
+    const qData = qSheet.getDataRange().getValues();
+
+    // 1. Kiểm tra xem người chơi này đã có phòng MATCHED chưa
+    for (let i = 1; i < qData.length; i++) {
+      if (String(qData[i][0]) === String(userId)) {
+        if (qData[i][3] === "MATCHED" && qData[i][4]) {
+          const roomId = String(qData[i][4]);
+          const roomInfo = getRoomDetails(rSheet, roomId, userId);
+          if (roomInfo) {
+            lock.releaseLock();
+            return createJsonResponse({
+              success: true,
+              status: "MATCHED",
+              roomId: roomId,
+              opponentId: roomInfo.opponentId,
+              opponentNickname: roomInfo.opponentNickname,
+              mode: roomInfo.mode,
+              questionIds: roomInfo.questionIds
+            });
+          }
+        }
+      }
+    }
+
+    // 2. Tìm người chơi khác đang WAITING cùng thể thức (ping trong vòng 60s)
+    let matchedRowIndex = -1;
+    let opponent = null;
+
+    for (let i = 1; i < qData.length; i++) {
+      const uId = String(qData[i][0]);
+      const uMode = String(qData[i][2]);
+      const uStatus = String(qData[i][3]);
+      const lastPing = Number(qData[i][5]) || 0;
+
+      if (uId !== String(userId) && uMode === mode && uStatus === "WAITING") {
+        if (now - lastPing < 60000) {
+          matchedRowIndex = i + 1;
+          opponent = {
+            userId: uId,
+            nickname: String(qData[i][1])
+          };
+          break;
+        } else {
+          qSheet.getRange(i + 1, 4).setValue("EXPIRED");
+        }
+      }
+    }
+
+    if (opponent && matchedRowIndex > 0) {
+      // Ghép cặp thành công -> Tạo phòng đấu mới!
+      const roomId = "ROOM_" + now;
+      const questionIds = pickRandomQuestionIds(ss, mode, 10);
+      const qIdsStr = questionIds.join(",");
+
+      rSheet.appendRow([
+        roomId,
+        opponent.userId, opponent.nickname,
+        userId, nickname,
+        mode,
+        qIdsStr,
+        -1, -1,
+        false, false,
+        "",
+        "PLAYING",
+        new Date().toISOString()
+      ]);
+
+      // Cập nhật người đợi thành MATCHED
+      qSheet.getRange(matchedRowIndex, 4).setValue("MATCHED");
+      qSheet.getRange(matchedRowIndex, 5).setValue(roomId);
+      qSheet.getRange(matchedRowIndex, 6).setValue(now);
+
+      // Cập nhật người hiện tại thành MATCHED
+      upsertQueueUser(qSheet, userId, nickname, mode, "MATCHED", roomId, now);
+
+      lock.releaseLock();
+
+      return createJsonResponse({
+        success: true,
+        status: "MATCHED",
+        roomId: roomId,
+        opponentId: opponent.userId,
+        opponentNickname: opponent.nickname,
+        mode: mode,
+        questionIds: questionIds
+      });
+    }
+
+    // 3. Chưa có ai đợi -> Đưa người chơi vào hàng đợi WAITING
+    upsertQueueUser(qSheet, userId, nickname, mode, "WAITING", "", now);
+
+    lock.releaseLock();
+
+    return createJsonResponse({
+      success: true,
+      status: "WAITING",
+      message: "Đang xếp hàng tìm bạn học..."
+    });
+
+  } catch (err) {
+    if (lock) lock.releaseLock();
+    return createJsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function handlePollVersusQueue(userId) {
+  if (!userId) return createJsonResponse({ success: false, message: "Thiếu userId" });
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const qSheet = ss.getSheetByName("Match_Queue");
+  if (!qSheet) return createJsonResponse({ success: false, status: "NOT_IN_QUEUE" });
+
+  const qData = qSheet.getDataRange().getValues();
+  const now = Date.now();
+
+  for (let i = 1; i < qData.length; i++) {
+    if (String(qData[i][0]) === String(userId)) {
+      qSheet.getRange(i + 1, 6).setValue(now);
+
+      const status = String(qData[i][3]);
+      if (status === "MATCHED") {
+        const roomId = String(qData[i][4]);
+        const rSheet = ss.getSheetByName("Match_Rooms");
+        const roomInfo = getRoomDetails(rSheet, roomId, userId);
+        if (roomInfo) {
+          return createJsonResponse({
+            success: true,
+            status: "MATCHED",
+            roomId: roomId,
+            opponentId: roomInfo.opponentId,
+            opponentNickname: roomInfo.opponentNickname,
+            mode: roomInfo.mode,
+            questionIds: roomInfo.questionIds
+          });
+        }
+      }
+      return createJsonResponse({ success: true, status: status });
+    }
+  }
+
+  return createJsonResponse({ success: false, status: "NOT_IN_QUEUE" });
+}
+
+function handleCancelVersusQueue(userId) {
+  if (!userId) return createJsonResponse({ success: false });
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const qSheet = ss.getSheetByName("Match_Queue");
+  if (!qSheet) return createJsonResponse({ success: true });
+
+  const qData = qSheet.getDataRange().getValues();
+  for (let i = 1; i < qData.length; i++) {
+    if (String(qData[i][0]) === String(userId)) {
+      qSheet.getRange(i + 1, 4).setValue("CANCELLED");
+      break;
+    }
+  }
+  return createJsonResponse({ success: true, message: "Đã hủy tìm trận" });
+}
+
+function handleSubmitVersusScore(roomId, userId, score) {
+  if (!roomId || !userId) return createJsonResponse({ success: false, message: "Thiếu tham số" });
+  score = parseInt(score) || 0;
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return createJsonResponse({ success: false, message: "Hệ thống đang bận" });
+  }
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const rSheet = ss.getSheetByName("Match_Rooms");
+    if (!rSheet) {
+      lock.releaseLock();
+      return createJsonResponse({ success: false, message: "Không tìm thấy Match_Rooms" });
+    }
+
+    const rData = rSheet.getDataRange().getValues();
+    let rowIdx = -1;
+    for (let i = 1; i < rData.length; i++) {
+      if (String(rData[i][0]) === String(roomId)) {
+        rowIdx = i + 1;
+        break;
+      }
+    }
+
+    if (rowIdx === -1) {
+      lock.releaseLock();
+      return createJsonResponse({ success: false, message: "Phòng không tồn tại" });
+    }
+
+    const row = rData[rowIdx - 1];
+    const p1Id = String(row[1]);
+    const p1Name = String(row[2]);
+    let p1Score = parseInt(row[7]);
+    let p1Done = String(row[9]).toLowerCase() === "true" || row[9] === true;
+
+    const p2Id = String(row[3]);
+    const p2Name = String(row[4]);
+    let p2Score = parseInt(row[8]);
+    let p2Done = String(row[10]).toLowerCase() === "true" || row[10] === true;
+
+    if (userId === p1Id) {
+      p1Score = score;
+      p1Done = true;
+      rSheet.getRange(rowIdx, 8).setValue(score);
+      rSheet.getRange(rowIdx, 10).setValue(true);
+    } else if (userId === p2Id) {
+      p2Score = score;
+      p2Done = true;
+      rSheet.getRange(rowIdx, 9).setValue(score);
+      rSheet.getRange(rowIdx, 11).setValue(true);
+    }
+
+    const isFinished = p1Done && p2Done;
+    let winnerId = "";
+    if (isFinished) {
+      rSheet.getRange(rowIdx, 13).setValue("FINISHED");
+      if (p1Score > p2Score) winnerId = p1Id;
+      else if (p2Score > p1Score) winnerId = p2Id;
+      else winnerId = "DRAW";
+      rSheet.getRange(rowIdx, 12).setValue(winnerId);
+    }
+
+    lock.releaseLock();
+
+    return createJsonResponse({
+      success: true,
+      roomId: roomId,
+      player1Id: p1Id,
+      player1Name: p1Name,
+      player1Score: p1Score,
+      player1Done: p1Done,
+      player2Id: p2Id,
+      player2Name: p2Name,
+      player2Score: p2Score,
+      player2Done: p2Done,
+      isFinished: isFinished,
+      winnerId: winnerId
+    });
+
+  } catch (err) {
+    if (lock) lock.releaseLock();
+    return createJsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function handlePollVersusRoomResult(roomId, userId) {
+  if (!roomId) return createJsonResponse({ success: false, message: "Thiếu roomId" });
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const rSheet = ss.getSheetByName("Match_Rooms");
+  if (!rSheet) return createJsonResponse({ success: false, message: "Không tìm thấy Match_Rooms" });
+
+  const rData = rSheet.getDataRange().getValues();
+  for (let i = 1; i < rData.length; i++) {
+    if (String(rData[i][0]) === String(roomId)) {
+      const row = rData[i];
+      const p1Id = String(row[1]);
+      const p1Name = String(row[2]);
+      const p1Score = parseInt(row[7]);
+      const p1Done = String(row[9]).toLowerCase() === "true" || row[9] === true;
+
+      const p2Id = String(row[3]);
+      const p2Name = String(row[4]);
+      const p2Score = parseInt(row[8]);
+      const p2Done = String(row[10]).toLowerCase() === "true" || row[10] === true;
+
+      const isFinished = p1Done && p2Done;
+      const winnerId = String(row[11]);
+
+      return createJsonResponse({
+        success: true,
+        roomId: roomId,
+        player1Id: p1Id,
+        player1Name: p1Name,
+        player1Score: p1Score,
+        player1Done: p1Done,
+        player2Id: p2Id,
+        player2Name: p2Name,
+        player2Score: p2Score,
+        player2Done: p2Done,
+        isFinished: isFinished,
+        winnerId: winnerId
+      });
+    }
+  }
+
+  return createJsonResponse({ success: false, message: "Không tìm thấy phòng" });
+}
+
+function upsertQueueUser(qSheet, userId, nickname, mode, status, roomId, pingTime) {
+  const data = qSheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(userId)) {
+      qSheet.getRange(i + 1, 2).setValue(nickname);
+      qSheet.getRange(i + 1, 3).setValue(mode);
+      qSheet.getRange(i + 1, 4).setValue(status);
+      qSheet.getRange(i + 1, 5).setValue(roomId);
+      qSheet.getRange(i + 1, 6).setValue(pingTime);
+      return;
+    }
+  }
+  qSheet.appendRow([userId, nickname, mode, status, roomId, pingTime]);
+}
+
+function getRoomDetails(rSheet, roomId, currentUserId) {
+  if (!rSheet) return null;
+  const data = rSheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(roomId)) {
+      const p1Id = String(data[i][1]);
+      const p1Name = String(data[i][2]);
+      const p2Id = String(data[i][3]);
+      const p2Name = String(data[i][4]);
+      const mode = String(data[i][5]);
+      const qIdsStr = String(data[i][6] || "");
+      const questionIds = qIdsStr ? qIdsStr.split(",") : [];
+
+      const isP1 = String(currentUserId) === p1Id;
+      return {
+        roomId: roomId,
+        opponentId: isP1 ? p2Id : p1Id,
+        opponentNickname: isP1 ? p2Name : p1Name,
+        mode: mode,
+        questionIds: questionIds
+      };
+    }
+  }
+  return null;
+}
+
+function pickRandomQuestionIds(ss, mode, count) {
+  const qSheet = ss.getSheetByName("Questions_Math6");
+  if (!qSheet) return [];
+  const data = qSheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+
+  const headers = data[0].map(h => String(h).trim().toLowerCase());
+  const qidIdx = headers.indexOf("questionid");
+  const typeIdx = headers.indexOf("type");
+
+  const pool = [];
+  for (let i = 1; i < data.length; i++) {
+    const qid = String(data[i][qidIdx >= 0 ? qidIdx : 0]);
+    const qType = typeIdx >= 0 ? String(data[i][typeIdx]).toUpperCase() : "MCQ";
+    if (mode === "ALL" || qType === mode || (mode === "MCQ" && (!qType || qType === "MCQ"))) {
+      if (qid) pool.push(qid);
+    }
+  }
+
+  // Shuffle pool
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = pool[i];
+    pool[i] = pool[j];
+    pool[j] = temp;
+  }
+
+  return pool.slice(0, count);
 }

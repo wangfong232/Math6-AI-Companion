@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -26,6 +26,10 @@ namespace Math6Companion.UI
         public static bool IsWinner = true;
         public static string OpponentNickname = "BảoToánHọc";
         public static int OpponentScore = 6;
+        public static string VersusRoomId = "";
+        public static string OpponentUserId = "";
+        public static bool IsRealMultiplayer = false;
+        public static List<string> VersusQuestionIds = new List<string>();
         public static string EssayFeedback = "";
         public static string CurrentQuestionId = "";
         public static string CurrentQuestionPrompt = "";
@@ -53,6 +57,10 @@ namespace Math6Companion.UI
             IsWinner = false;
             OpponentNickname = "";
             OpponentScore = 0;
+            VersusRoomId = "";
+            OpponentUserId = "";
+            IsRealMultiplayer = false;
+            VersusQuestionIds.Clear();
             EssayFeedback = "";
             CurrentQuestionId = "";
             CurrentQuestionPrompt = "";
@@ -153,15 +161,22 @@ namespace Math6Companion.UI
                 versusBannerPanel.SetActive(ScoreSessionContext.IsVersusMode);
                 if (ScoreSessionContext.IsVersusMode)
                 {
-                    if (versusResultText != null)
+                    if (ScoreSessionContext.IsRealMultiplayer && !string.IsNullOrEmpty(ScoreSessionContext.VersusRoomId))
                     {
-                        versusResultText.text = ScoreSessionContext.IsWinner ? "CHIẾN THẮNG (WINNER)!" : "THẤT BẠI (DEFEAT)";
-                        versusResultText.color = ScoreSessionContext.IsWinner ? Color.green : Color.red;
+                        StartCoroutine(WaitForOpponentResultRoutine());
                     }
-
-                    if (versusCompareText != null)
+                    else
                     {
-                        versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: {ScoreSessionContext.OpponentScore} điểm";
+                        if (versusResultText != null)
+                        {
+                            versusResultText.text = ScoreSessionContext.IsWinner ? "CHIẾN THẮNG (WINNER)!" : "THẤT BẠI (DEFEAT)";
+                            versusResultText.color = ScoreSessionContext.IsWinner ? Color.green : Color.red;
+                        }
+
+                        if (versusCompareText != null)
+                        {
+                            versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: {ScoreSessionContext.OpponentScore} điểm";
+                        }
                     }
                 }
             }
@@ -222,6 +237,100 @@ namespace Math6Companion.UI
             PlayClick();
             string target = SessionManager.Instance != null ? SessionManager.Instance.ReturnSceneName : "02_VillageWorld";
             SceneManager.LoadScene(target);
+        }
+
+        private System.Collections.IEnumerator WaitForOpponentResultRoutine()
+        {
+            string roomId = ScoreSessionContext.VersusRoomId;
+            string myUserId = PlayerPrefs.GetString("User_ID", "STU_001");
+
+            if (versusResultText != null)
+            {
+                versusResultText.text = "ĐANG CHỜ ĐỐI THỦ HOÀN THÀNH...";
+                versusResultText.color = new Color(0.95f, 0.77f, 0.05f); // Vàng
+            }
+
+            if (versusCompareText != null)
+            {
+                versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: (Đang làm bài...)";
+            }
+
+            var netService = Math6Companion.Core.Services.NetworkServiceProvider.NetworkService;
+            bool isResolved = false;
+            int maxPolls = 45; // 45 * 2s = 90s tối đa
+
+            while (!isResolved && maxPolls > 0)
+            {
+                yield return new WaitForSeconds(2.0f);
+                maxPolls--;
+
+                if (netService == null) break;
+
+                bool pollDone = false;
+                netService.PollVersusRoomResult(roomId, myUserId, (success, result, msg) =>
+                {
+                    if (success && result != null)
+                    {
+                        bool isP1 = (result.player1Id == myUserId);
+                        bool oppDone = isP1 ? result.player2Done : result.player1Done;
+                        int oppScore = isP1 ? result.player2Score : result.player1Score;
+
+                        if (oppDone || result.isFinished)
+                        {
+                            isResolved = true;
+                            ScoreSessionContext.OpponentScore = oppScore;
+
+                            if (result.winnerId == "DRAW" || ScoreSessionContext.Score == oppScore)
+                            {
+                                ScoreSessionContext.IsWinner = false;
+                                if (versusResultText != null)
+                                {
+                                    versusResultText.text = "KẾT QUẢ: HÒA NHAU!";
+                                    versusResultText.color = Color.yellow;
+                                }
+                            }
+                            else
+                            {
+                                bool iWon = (result.winnerId == myUserId) || (ScoreSessionContext.Score > oppScore);
+                                ScoreSessionContext.IsWinner = iWon;
+                                if (versusResultText != null)
+                                {
+                                    versusResultText.text = iWon ? "CHIẾN THẮNG (WINNER)!" : "THẤT BẠI (DEFEAT)";
+                                    versusResultText.color = iWon ? Color.green : Color.red;
+                                }
+
+                                if (AudioManager.Instance != null)
+                                {
+                                    if (iWon) AudioManager.Instance.PlayVictory();
+                                    else AudioManager.Instance.PlayWrong();
+                                }
+                            }
+
+                            if (versusCompareText != null)
+                            {
+                                versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: {oppScore} điểm";
+                            }
+                        }
+                    }
+                    pollDone = true;
+                });
+
+                while (!pollDone) yield return null;
+            }
+
+            if (!isResolved)
+            {
+                // Hết thời gian chờ (đối thủ thoát game hoặc mất mạng)
+                if (versusResultText != null)
+                {
+                    versusResultText.text = "ĐỐI THỦ MẤT KẾT NỐI - BẠN THẮNG!";
+                    versusResultText.color = Color.green;
+                }
+                if (versusCompareText != null)
+                {
+                    versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: (Không nộp bài)";
+                }
+            }
         }
 
         private void PlayClick()

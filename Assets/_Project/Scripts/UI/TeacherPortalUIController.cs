@@ -864,7 +864,7 @@ namespace Math6Companion.UI
                 keyInput.text = currentKey;
             }
 
-            var btnKey = CreateLeftButton(panel, "Btn_SetKey", "💾 Lưu & Kích Hoạt AI Vision", 830, -130, new Vector2(330, 44), ColorEmeraldGreen);
+            var btnKey = CreateLeftButton(panel, "Btn_SetKey", "Lưu & Kích Hoạt AI Vision", 830, -130, new Vector2(330, 44), ColorEmeraldGreen);
             
             string statusStr = !string.IsNullOrEmpty(currentKey) 
                 ? "<color=#2ecc71>● Đã kết nối Gemini API Key: Gia sư AI Gemini Vision đã sẵn sàng 'nhìn' ảnh bài giải.</color>" 

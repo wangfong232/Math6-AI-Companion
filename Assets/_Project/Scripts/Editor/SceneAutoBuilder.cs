@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -926,8 +926,8 @@ namespace Math6Companion.EditorTools
             var btnText = CreateButton(card, "Btn_TextLesson", "Xem Tóm Tắt Lý Thuyết (SGK)", new Vector2(0, 105), new Vector2(540, 54), ColorPrimaryBlue, null, null, null, 18);
             var btnVideo = CreateButton(card, "Btn_VideoLesson", "Xem Video Bài Giảng Trực Quan", new Vector2(0, 35), new Vector2(540, 54), ColorCoralRed, null, null, null, 18);
             var btnMCQ = CreateButton(card, "Btn_MCQPractice", "Luyện Tập Trắc Nghiệm Thông Minh", new Vector2(0, -35), new Vector2(540, 54), ColorEmeraldGreen, null, null, null, 18);
-            var btnEssay = CreateButton(card, "Btn_EssayPractice", "📝  Luyện Tự Luận & Nhờ AI Chấm", new Vector2(0, -105), new Vector2(540, 54), ColorPurpleViolet, null, null, null, 18);
-            var btnLog = CreateButton(card, "Btn_PracticeLog", "📊  Xem Lịch Sử Điểm Của Bài Này", new Vector2(0, -175), new Vector2(540, 54), ColorCyanTeal, null, null, null, 18);
+            var btnEssay = CreateButton(card, "Btn_EssayPractice", "Luyện Tự Luận & Nhờ AI Chấm", new Vector2(0, -105), new Vector2(540, 54), ColorPurpleViolet, null, null, null, 18);
+            var btnLog = CreateButton(card, "Btn_PracticeLog", "Xem Lịch Sử Điểm Của Bài Này", new Vector2(0, -175), new Vector2(540, 54), ColorCyanTeal, null, null, null, 18);
             var btnClose = CreateButton(card, "Btn_CloseModal", "[X]", new Vector2(290, 250), new Vector2(44, 44), ColorSlateSecondary, null, null, null, 20, s_circle);
 
             var manager = new GameObject("_LessonListManager").AddComponent<LessonListUIController>();
@@ -969,8 +969,8 @@ namespace Math6Companion.EditorTools
             var playVidBtn = CreateButton(vidPanel, "Btn_PlayExternalVideo", ">   MỞ XEM VIDEO BÀI GIẢNG FULL HD", new Vector2(0, -40), new Vector2(450, 65), ColorCoralRed, null, null, null, 19);
 
             // Bottom CTA Buttons
-            var btnStartMCQ = CreateButton(canvas, "Btn_StartMCQ", "🎯  Làm Bài Trắc Nghiệm Này", new Vector2(-190, 32), new Vector2(350, 56), ColorEmeraldGreen, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
-            var btnStartEssay = CreateButton(canvas, "Btn_StartEssay", "📝  Làm Bài Tự Luận Này", new Vector2(190, 32), new Vector2(350, 56), ColorPurpleViolet, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
+            var btnStartMCQ = CreateButton(canvas, "Btn_StartMCQ", "Làm Bài Trắc Nghiệm Này", new Vector2(-190, 32), new Vector2(350, 56), ColorEmeraldGreen, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
+            var btnStartEssay = CreateButton(canvas, "Btn_StartEssay", "Làm Bài Tự Luận Này", new Vector2(190, 32), new Vector2(350, 56), ColorPurpleViolet, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), 18);
 
             var manager = new GameObject("_LessonContentManager").AddComponent<LessonContentUIController>();
             SetField(manager, "lessonTitleText", title);
@@ -1095,7 +1095,7 @@ namespace Math6Companion.EditorTools
             inputField.lineType = TMP_InputField.LineType.MultiLineNewline;
 
             var photoStatus = CreateText(canvas, "PhotoStatusText", "Hãy chụp ảnh bài làm, chọn ảnh từ máy hoặc bấm xem vở mẫu để AI nhận diện chữ", 16, new Vector2(0, 75), new Vector2(1200, 30), ColorAmberGold, TextAlignmentOptions.Center, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-            var submitBtn = CreateBottomCenterButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ GIA SƯ AI CHẤM NGAY  🤖", new Vector2(580, 50), ColorEmeraldGreen, 20, 18);
+            var submitBtn = CreateBottomCenterButton(canvas, "SubmitButton", "GỬI BÀI GIẢI ĐỂ GIA SƯ AI CHẤM NGAY  >>", new Vector2(580, 50), ColorEmeraldGreen, 20, 18);
 
             var manager = new GameObject("_EssayManager").AddComponent<EssayUIController>();
             SetField(manager, "problemTitleText", title);
@@ -1228,7 +1228,7 @@ namespace Math6Companion.EditorTools
             // Opponent Card
             var oCard = CreateCard(card, "OpponentCard", new Vector2(220, 35), new Vector2(280, 180), new Color(0.25f, 0.12f, 0.15f));
             CreateBadge(oCard, "OBadge", "ĐỐI THỦ", new Vector2(0, 60), new Vector2(90, 26), ColorCoralRed, 12);
-            var scanningText = CreateText(oCard, "ScanningIndicatorText", "🔍 Đang tìm đối thủ...", 19, new Vector2(0, 0), new Vector2(260, 60), ColorAmberGold);
+            var scanningText = CreateText(oCard, "ScanningIndicatorText", "Đang tìm đối thủ...", 19, new Vector2(0, 0), new Vector2(260, 60), ColorAmberGold);
 
             var matchBtn = CreateButton(card, "Btn_RandomMatch", "  BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN  >", new Vector2(0, -115), new Vector2(480, 64), new Color(0.88f, 0.42f, 0.12f), null, null, null, 20);
 

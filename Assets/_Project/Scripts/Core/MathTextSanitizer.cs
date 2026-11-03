@@ -82,7 +82,24 @@ namespace Math6Companion.Core
                  .Replace("🖼️", "")
                  .Replace("🖼", "")
                  .Replace("🏡", "[3D]")
-                 .Replace("•", "-");
+                 .Replace("•", "-")
+                 .Replace("📊", "")
+                 .Replace("📝", "")
+                 .Replace("🤖", "")
+                 .Replace("🎯", "")
+                 .Replace("🔥", "")
+                 .Replace("💾", "")
+                 .Replace("🍲", "")
+                 .Replace("🌾", "")
+                 .Replace("🏛️", "")
+                 .Replace("🏛", "")
+                 .Replace("🚀", "")
+                 .Replace("🗑️", "")
+                 .Replace("🗑", "")
+                 .Replace("➕", "+");
+
+            // Loại bỏ hoàn toàn mọi ký tự emoji ngoài BMP (Surrogate pairs) font TMP LiberationSans SDF không hỗ trợ
+            s = Regex.Replace(s, @"[\uD83C-\uDBFF\uDC00-\uDFFF]", "");
 
             // 5. Chuẩn hóa khoảng trắng để câu hiển thị gọn gàng, tự nhiên
             s = Regex.Replace(s, @"[ ]{2,}", " ");

@@ -10,9 +10,9 @@ using Math6Companion.Core.Mock;
 namespace Math6Companion.Core.Services
 {
     /// <summary>
-    /// Module 1: Dịch vụ kết nối Google Sheets qua Google Apps Script Web App REST API.
-    /// Xử lý Đăng nhập, Danh sách bài học, Ngân hàng câu hỏi, Lưu kết quả thi đấu & Thống kê học sinh.
-    /// Tự động đồng bộ topic Tiếng Anh <-> Tiếng Việt, cache bộ nhớ đệm và chống nghẽn request kép.
+    /// Module 1: Dá»‹ch vá»¥ káº¿t ná»‘i Google Sheets qua Google Apps Script Web App REST API.
+    /// Xá»­ lÃ½ ÄÄƒng nháº­p, Danh sÃ¡ch bÃ i há»c, NgÃ¢n hÃ ng cÃ¢u há»i, LÆ°u káº¿t quáº£ thi Ä‘áº¥u & Thá»‘ng kÃª há»c sinh.
+    /// Tá»± Ä‘á»™ng Ä‘á»“ng bá»™ topic Tiáº¿ng Anh <-> Tiáº¿ng Viá»‡t, cache bá»™ nhá»› Ä‘á»‡m vÃ  chá»‘ng ngháº½n request kÃ©p.
     /// </summary>
     public class GoogleSheetsNetworkService : MonoBehaviour, INetworkService
     {
@@ -52,15 +52,15 @@ namespace Math6Companion.Core.Services
 
         public static string ACTIVE_APPS_SCRIPT_URL => AppConfig.GetActiveBackendUrl();
 
-        // Cookie jar dùng chung — duy trì cookie qua redirect chain của Google
+        // Cookie jar dÃ¹ng chung â€” duy trÃ¬ cookie qua redirect chain cá»§a Google
         private static readonly System.Net.CookieContainer sharedCookieJar = new System.Net.CookieContainer();
 
-        // Bộ nhớ đệm toàn cục (In-Memory Cache)
+        // Bá»™ nhá»› Ä‘á»‡m toÃ n cá»¥c (In-Memory Cache)
         private static List<LessonData> cachedLessons = new List<LessonData>();
         private static List<QuestionData> cachedAllQuestions = new List<QuestionData>();
         private static Dictionary<string, List<QuestionData>> cachedTopicQuestions = new Dictionary<string, List<QuestionData>>();
 
-        // Quản lý chống trùng lặp request (Deduplication / In-Flight Request Coordinator)
+        // Quáº£n lÃ½ chá»‘ng trÃ¹ng láº·p request (Deduplication / In-Flight Request Coordinator)
         private static bool isFetchingLessons = false;
         private static readonly List<Action<bool, List<LessonData>, string>> pendingLessonCallbacks = new List<Action<bool, List<LessonData>, string>>();
 
@@ -74,7 +74,7 @@ namespace Math6Companion.Core.Services
                 instance = this;
                 DontDestroyOnLoad(gameObject);
 
-                // Cấu hình TLS & Connection
+                // Cáº¥u hÃ¬nh TLS & Connection
                 try
                 {
                     System.Net.ServicePointManager.SecurityProtocol =
@@ -88,12 +88,12 @@ namespace Math6Companion.Core.Services
                     Debug.LogWarning($"[GoogleSheetsNetworkService] TLS config warning: {e.Message}");
                 }
 
-                // Kích hoạt warm-up thông minh (dùng chung pipeline GetLessons, không gửi request trùng lặp)
+                // KÃ­ch hoáº¡t warm-up thÃ´ng minh (dÃ¹ng chung pipeline GetLessons, khÃ´ng gá»­i request trÃ¹ng láº·p)
                 GetLessons("ALL", (success, lessons, msg) =>
                 {
                     if (success && lessons != null && lessons.Count > 0)
                     {
-                        Debug.Log($"[NET-DIAG] ✅ SERVER SẴN SÀNG! Đã nạp trước {lessons.Count} bài học từ Google Sheet.");
+                        Debug.Log($"[NET-DIAG] âœ… SERVER Sáº´N SÃ€NG! ÄÃ£ náº¡p trÆ°á»›c {lessons.Count} bÃ i há»c tá»« Google Sheet.");
                     }
                 });
             }
@@ -111,7 +111,7 @@ namespace Math6Companion.Core.Services
         #region Core HTTP Methods
 
         /// <summary>
-        /// Gửi HTTP GET chuẩn Postman — bypass proxy, duy trì cookie, auto redirect.
+        /// Gá»­i HTTP GET chuáº©n Postman â€” bypass proxy, duy trÃ¬ cookie, auto redirect.
         /// </summary>
         private static string DoHttpGet(string url, int timeoutMs)
         {
@@ -138,7 +138,7 @@ namespace Math6Companion.Core.Services
         }
 
         /// <summary>
-        /// Gửi HTTP POST chuẩn Postman — bypass proxy, duy trì cookie, auto redirect.
+        /// Gá»­i HTTP POST chuáº©n Postman â€” bypass proxy, duy trÃ¬ cookie, auto redirect.
         /// </summary>
         private static string DoHttpPost(string url, string jsonBody, int timeoutMs)
         {
@@ -183,7 +183,7 @@ namespace Math6Companion.Core.Services
             {
                 if (success && resp != null && resp.success && resp.data != null)
                 {
-                    callback?.Invoke(true, resp.data, resp.message ?? "Đăng nhập thành công!");
+                    callback?.Invoke(true, resp.data, resp.message ?? "ÄÄƒng nháº­p thÃ nh cÃ´ng!");
                 }
                 else
                 {
@@ -194,7 +194,7 @@ namespace Math6Companion.Core.Services
                     }
                     else
                     {
-                        callback?.Invoke(false, null, resp?.message ?? "Không thể kết nối đến máy chủ Google Sheets!");
+                        callback?.Invoke(false, null, resp?.message ?? "KhÃ´ng thá»ƒ káº¿t ná»‘i Ä‘áº¿n mÃ¡y chá»§ Google Sheets!");
                     }
                 }
             }));
@@ -202,16 +202,16 @@ namespace Math6Companion.Core.Services
 
         public void GetLessons(string topic, Action<bool, List<LessonData>, string> callback)
         {
-            // 1. Nếu đã có trong Cache, lọc theo topic và trả về ngay tức thì (0ms)!
+            // 1. Náº¿u Ä‘Ã£ cÃ³ trong Cache, lá»c theo topic vÃ  tráº£ vá» ngay tá»©c thÃ¬ (0ms)!
             if (cachedLessons != null && cachedLessons.Count > 0)
             {
                 var filtered = FilterLessonsByTopic(cachedLessons, topic);
                 var returnList = (filtered != null && filtered.Count > 0) ? filtered : cachedLessons;
-                callback?.Invoke(true, returnList, "Nạp bài học từ bộ nhớ đệm thành công!");
+                callback?.Invoke(true, returnList, "Náº¡p bÃ i há»c tá»« bá»™ nhá»› Ä‘á»‡m thÃ nh cÃ´ng!");
                 return;
             }
 
-            // 2. Nếu đang có một request lấy bài học đang chạy, đăng ký nhận chung kết quả (chống gửi request trùng lặp)
+            // 2. Náº¿u Ä‘ang cÃ³ má»™t request láº¥y bÃ i há»c Ä‘ang cháº¡y, Ä‘Äƒng kÃ½ nháº­n chung káº¿t quáº£ (chá»‘ng gá»­i request trÃ¹ng láº·p)
             if (callback != null)
             {
                 pendingLessonCallbacks.Add((success, lessons, msg) =>
@@ -230,10 +230,10 @@ namespace Math6Companion.Core.Services
 
             if (isFetchingLessons)
             {
-                return; // Đã có request đang chạy, chỉ cần đợi nhận callback chung
+                return; // ÄÃ£ cÃ³ request Ä‘ang cháº¡y, chá»‰ cáº§n Ä‘á»£i nháº­n callback chung
             }
 
-            // 3. Bắt đầu gửi HTTP request lấy danh sách bài học
+            // 3. Báº¯t Ä‘áº§u gá»­i HTTP request láº¥y danh sÃ¡ch bÃ i há»c
             isFetchingLessons = true;
             string url = $"{appsScriptUrl}?action=getLessons";
 
@@ -248,7 +248,7 @@ namespace Math6Companion.Core.Services
                     cachedLessons = resp.lessons;
                     foreach (var cb in callbacksToInvoke)
                     {
-                        cb?.Invoke(true, cachedLessons, "Tải bài học thành công!");
+                        cb?.Invoke(true, cachedLessons, "Táº£i bÃ i há»c thÃ nh cÃ´ng!");
                     }
                 }
                 else
@@ -257,12 +257,12 @@ namespace Math6Companion.Core.Services
                     {
                         foreach (var cb in callbacksToInvoke)
                         {
-                            cb?.Invoke(true, cachedLessons, "Nạp từ bộ nhớ đệm thành công!");
+                            cb?.Invoke(true, cachedLessons, "Náº¡p tá»« bá»™ nhá»› Ä‘á»‡m thÃ nh cÃ´ng!");
                         }
                     }
                     else if (fallbackToMockOnError)
                     {
-                        Debug.LogWarning($"[GoogleSheetsNetworkService] GetLessons không thành công, sử dụng dữ liệu cục bộ.");
+                        Debug.LogWarning($"[GoogleSheetsNetworkService] GetLessons khÃ´ng thÃ nh cÃ´ng, sá»­ dá»¥ng dá»¯ liá»‡u cá»¥c bá»™.");
                         MockNetworkService.Instance.GetLessons(topic, (mockOk, mockList, mockMsg) =>
                         {
                             foreach (var cb in callbacksToInvoke)
@@ -275,7 +275,7 @@ namespace Math6Companion.Core.Services
                     {
                         foreach (var cb in callbacksToInvoke)
                         {
-                            cb?.Invoke(false, null, "Không thể tải danh sách bài học từ Google Sheets!");
+                            cb?.Invoke(false, null, "KhÃ´ng thá»ƒ táº£i danh sÃ¡ch bÃ i há»c tá»« Google Sheets!");
                         }
                     }
                 }
@@ -286,30 +286,30 @@ namespace Math6Companion.Core.Services
         {
             string cacheKey = $"{topic ?? "ALL"}_{grade ?? "6"}";
 
-            // 1. Kiểm tra cache câu hỏi theo topic
+            // 1. Kiá»ƒm tra cache cÃ¢u há»i theo topic
             if (cachedTopicQuestions.TryGetValue(cacheKey, out var topicList) && topicList.Count > 0)
             {
-                callback?.Invoke(true, topicList, "Nạp câu hỏi từ bộ nhớ đệm thành công!");
+                callback?.Invoke(true, topicList, "Náº¡p cÃ¢u há»i tá»« bá»™ nhá»› Ä‘á»‡m thÃ nh cÃ´ng!");
                 return;
             }
 
-            // 2. Nếu đã có toàn bộ câu hỏi trong RAM, lọc ngay
+            // 2. Náº¿u Ä‘Ã£ cÃ³ toÃ n bá»™ cÃ¢u há»i trong RAM, lá»c ngay
             if (cachedAllQuestions != null && cachedAllQuestions.Count > 0)
             {
                 var filtered = FilterQuestionsByTopic(cachedAllQuestions, topic);
                 if (filtered != null && filtered.Count > 0)
                 {
                     cachedTopicQuestions[cacheKey] = filtered;
-                    callback?.Invoke(true, filtered, "Nạp câu hỏi theo chủ đề thành công!");
+                    callback?.Invoke(true, filtered, "Náº¡p cÃ¢u há»i theo chá»§ Ä‘á» thÃ nh cÃ´ng!");
                 }
                 else
                 {
-                    callback?.Invoke(true, new List<QuestionData>(), "Chưa có câu hỏi cho chủ đề này trên máy chủ.");
+                    callback?.Invoke(true, new List<QuestionData>(), "ChÆ°a cÃ³ cÃ¢u há»i cho chá»§ Ä‘á» nÃ y trÃªn mÃ¡y chá»§.");
                 }
                 return;
             }
 
-            // 3. Đăng ký nhận chung kết quả nếu đang có request tải câu hỏi
+            // 3. ÄÄƒng kÃ½ nháº­n chung káº¿t quáº£ náº¿u Ä‘ang cÃ³ request táº£i cÃ¢u há»i
             if (callback != null)
             {
                 pendingQuestionCallbacks.Add((success, questions, msg) =>
@@ -336,10 +336,10 @@ namespace Math6Companion.Core.Services
 
             if (isFetchingQuestions)
             {
-                return; // Đợi request đang chạy
+                return; // Äá»£i request Ä‘ang cháº¡y
             }
 
-            // 4. Tải toàn bộ kho câu hỏi từ Google Sheet (tối đa 1000 câu để nạp trọn vẹn ngân hàng đề)
+            // 4. Táº£i toÃ n bá»™ kho cÃ¢u há»i tá»« Google Sheet (tá»‘i Ä‘a 1000 cÃ¢u Ä‘á»ƒ náº¡p trá»n váº¹n ngÃ¢n hÃ ng Ä‘á»)
             isFetchingQuestions = true;
             string url = $"{appsScriptUrl}?action=getQuestions&limit=1000";
 
@@ -374,7 +374,7 @@ namespace Math6Companion.Core.Services
 
                     foreach (var cb in callbacksToInvoke)
                     {
-                        cb?.Invoke(true, cachedAllQuestions, "Tải câu hỏi thành công!");
+                        cb?.Invoke(true, cachedAllQuestions, "Táº£i cÃ¢u há»i thÃ nh cÃ´ng!");
                     }
                 }
                 else
@@ -383,12 +383,12 @@ namespace Math6Companion.Core.Services
                     {
                         foreach (var cb in callbacksToInvoke)
                         {
-                            cb?.Invoke(true, cachedAllQuestions, "Nạp câu hỏi từ bộ nhớ đệm!");
+                            cb?.Invoke(true, cachedAllQuestions, "Náº¡p cÃ¢u há»i tá»« bá»™ nhá»› Ä‘á»‡m!");
                         }
                     }
                     else if (fallbackToMockOnError)
                     {
-                        Debug.LogWarning($"[GoogleSheetsNetworkService] GetQuestions không thành công, sử dụng ngân hàng câu hỏi cục bộ.");
+                        Debug.LogWarning($"[GoogleSheetsNetworkService] GetQuestions khÃ´ng thÃ nh cÃ´ng, sá»­ dá»¥ng ngÃ¢n hÃ ng cÃ¢u há»i cá»¥c bá»™.");
                         MockNetworkService.Instance.GetQuestions(topic, grade, (mockOk, mockList, mockMsg) =>
                         {
                             foreach (var cb in callbacksToInvoke)
@@ -401,7 +401,7 @@ namespace Math6Companion.Core.Services
                     {
                         foreach (var cb in callbacksToInvoke)
                         {
-                            cb?.Invoke(false, null, "Không thể tải câu hỏi từ Google Sheets!");
+                            cb?.Invoke(false, null, "KhÃ´ng thá»ƒ táº£i cÃ¢u há»i tá»« Google Sheets!");
                         }
                     }
                 }
@@ -419,7 +419,7 @@ namespace Math6Companion.Core.Services
 
                 if (success && resp != null && resp.success)
                 {
-                    callback?.Invoke(true, resp.unlockedBadges ?? new List<BadgeData>(), "Đã lưu kết quả thành công!");
+                    callback?.Invoke(true, resp.unlockedBadges ?? new List<BadgeData>(), "ÄÃ£ lÆ°u káº¿t quáº£ thÃ nh cÃ´ng!");
                 }
                 else
                 {
@@ -430,7 +430,7 @@ namespace Math6Companion.Core.Services
                     }
                     else
                     {
-                        callback?.Invoke(false, null, "Không thể lưu kết quả vào Google Sheets!");
+                        callback?.Invoke(false, null, "KhÃ´ng thá»ƒ lÆ°u káº¿t quáº£ vÃ o Google Sheets!");
                     }
                 }
             }));
@@ -450,7 +450,7 @@ namespace Math6Companion.Core.Services
             {
                 if (success && resp != null && resp.success)
                 {
-                    callback?.Invoke(true, resp.message ?? "Đã ghi nhận AI Tutor log lên Google Sheets!");
+                    callback?.Invoke(true, resp.message ?? "ÄÃ£ ghi nháº­n AI Tutor log lÃªn Google Sheets!");
                 }
                 else
                 {
@@ -460,7 +460,7 @@ namespace Math6Companion.Core.Services
                     }
                     else
                     {
-                        callback?.Invoke(false, "Không thể ghi log AI lên Google Sheets");
+                        callback?.Invoke(false, "KhÃ´ng thá»ƒ ghi log AI lÃªn Google Sheets");
                     }
                 }
             }));
@@ -480,7 +480,7 @@ namespace Math6Companion.Core.Services
             {
                 if (success && resp != null && resp.success && resp.analytics != null)
                 {
-                    callback?.Invoke(true, resp.analytics, "Tải báo cáo phân tích thành công!");
+                    callback?.Invoke(true, resp.analytics, "Táº£i bÃ¡o cÃ¡o phÃ¢n tÃ­ch thÃ nh cÃ´ng!");
                 }
                 else
                 {
@@ -490,7 +490,108 @@ namespace Math6Companion.Core.Services
                     }
                     else
                     {
-                        callback?.Invoke(false, null, "Không thể tải phân tích từ Google Sheets!");
+                        callback?.Invoke(false, null, "KhÃ´ng thá»ƒ táº£i phÃ¢n tÃ­ch tá»« Google Sheets!");
+                    }
+                }
+            }));
+        }
+
+        public void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback)
+        {
+            string url = $"{appsScriptUrl}?action=joinVersusQueue&userId={Uri.EscapeDataString(userId ?? "")}&nickname={Uri.EscapeDataString(nickname ?? "")}&mode={Uri.EscapeDataString(mode ?? "MCQ")}";
+            StartCoroutine(RunGetRequest<VersusQueueResponse>(url, (success, resp, raw) =>
+            {
+                if (success && resp != null && resp.success)
+                {
+                    callback?.Invoke(true, resp, resp.message ?? "OK");
+                }
+                else
+                {
+                    if (fallbackToMockOnError)
+                    {
+                        MockNetworkService.Instance.JoinVersusQueue(userId, nickname, mode, callback);
+                    }
+                    else
+                    {
+                        callback?.Invoke(false, null, raw ?? "Lỗi ghép trận!");
+                    }
+                }
+            }));
+        }
+
+        public void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback)
+        {
+            string url = $"{appsScriptUrl}?action=pollVersusQueue&userId={Uri.EscapeDataString(userId ?? "")}";
+            StartCoroutine(RunGetRequest<VersusQueueResponse>(url, (success, resp, raw) =>
+            {
+                if (success && resp != null && resp.success)
+                {
+                    callback?.Invoke(true, resp, resp.message ?? "OK");
+                }
+                else
+                {
+                    if (fallbackToMockOnError)
+                    {
+                        MockNetworkService.Instance.PollVersusQueue(userId, callback);
+                    }
+                    else
+                    {
+                        callback?.Invoke(false, null, raw ?? "Lỗi poll queue!");
+                    }
+                }
+            }));
+        }
+
+        public void CancelVersusQueue(string userId, Action<bool, string> callback)
+        {
+            string url = $"{appsScriptUrl}?action=cancelVersusQueue&userId={Uri.EscapeDataString(userId ?? "")}";
+            StartCoroutine(RunGetRequest<BaseResponseWrapper>(url, (success, resp, raw) =>
+            {
+                callback?.Invoke(success, raw);
+            }));
+        }
+
+        public void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback)
+        {
+            string url = $"{appsScriptUrl}?action=submitVersusScore&roomId={Uri.EscapeDataString(roomId ?? "")}&userId={Uri.EscapeDataString(userId ?? "")}&score={score}";
+            StartCoroutine(RunGetRequest<VersusRoomResultResponse>(url, (success, resp, raw) =>
+            {
+                if (success && resp != null && resp.success)
+                {
+                    callback?.Invoke(true, resp, resp.message ?? "OK");
+                }
+                else
+                {
+                    if (fallbackToMockOnError)
+                    {
+                        MockNetworkService.Instance.SubmitVersusScore(roomId, userId, score, callback);
+                    }
+                    else
+                    {
+                        callback?.Invoke(false, null, raw ?? "Lỗi nộp điểm!");
+                    }
+                }
+            }));
+        }
+
+        public void PollVersusRoomResult(string roomId, string userId, Action<bool, VersusRoomResultResponse, string> callback)
+        {
+            string url = $"{appsScriptUrl}?action=pollVersusRoomResult&roomId={Uri.EscapeDataString(roomId ?? "")}&userId={Uri.EscapeDataString(userId ?? "")}";
+            StartCoroutine(RunGetRequest<VersusRoomResultResponse>(url, (success, resp, raw) =>
+            {
+                if (success && resp != null && resp.success)
+                {
+                    callback?.Invoke(true, resp, resp.message ?? "OK");
+                }
+                else
+                {
+                    if (fallbackToMockOnError)
+                    {
+                        MockNetworkService.Instance.PollVersusRoomResult(roomId, userId, callback);
+                    }
+                    else
+                    {
+                        callback?.Invoke(false, null, raw ?? "Lỗi poll kết quả phòng!");
                     }
                 }
             }));
@@ -501,8 +602,8 @@ namespace Math6Companion.Core.Services
         #region Topic Mapping & Filtering Logic
 
         /// <summary>
-        /// Kiểm tra độ khớp chủ đề giữa câu hỏi/bài học với chủ đề được yêu cầu.
-        /// Hỗ trợ map linh hoạt cả tiếng Anh và tiếng Việt:
+        /// Kiá»ƒm tra Ä‘á»™ khá»›p chá»§ Ä‘á» giá»¯a cÃ¢u há»i/bÃ i há»c vá»›i chá»§ Ä‘á» Ä‘Æ°á»£c yÃªu cáº§u.
+        /// Há»— trá»£ map linh hoáº¡t cáº£ tiáº¿ng Anh vÃ  tiáº¿ng Viá»‡t:
         /// Integers <-> SoNguyen, Fractions <-> PhanSo, Sets <-> TapHop, Decimals <-> SoThapPhan.
         /// </summary>
         public static bool IsTopicMatch(string itemTopic, string requestedTopic)
@@ -530,39 +631,39 @@ namespace Math6Companion.Core.Services
             string t = topic.Trim().ToLowerInvariant()
                 .Replace(" ", "").Replace("_", "").Replace("-", "");
 
-            // 1. Thứ tự thực hiện phép tính vs Thứ tự số tự nhiên vs Phép tính thông thường
-            if (t.Contains("thutupheptinh") || t.Contains("thứtựphéptính") || t.Contains("thutupheptoan") || t.Contains("bieuthuc") || t.Contains("biểuthức")) return "thutupheptinh";
-            if (t.Contains("thutu") || t.Contains("thứtự")) return "thutu";
-            if (t.Contains("pheptinh") || t.Contains("phéptính") || t.Contains("phepcong") || t.Contains("phepnhan") || t.Contains("phepchia") || t.Contains("pheptru")) return "pheptinh";
+            // 1. Thá»© tá»± thá»±c hiá»‡n phÃ©p tÃ­nh vs Thá»© tá»± sá»‘ tá»± nhiÃªn vs PhÃ©p tÃ­nh thÃ´ng thÆ°á»ng
+            if (t.Contains("thutupheptinh") || t.Contains("thá»©tá»±phÃ©ptÃ­nh") || t.Contains("thutupheptoan") || t.Contains("bieuthuc") || t.Contains("biá»ƒuthá»©c")) return "thutupheptinh";
+            if (t.Contains("thutu") || t.Contains("thá»©tá»±")) return "thutu";
+            if (t.Contains("pheptinh") || t.Contains("phÃ©ptÃ­nh") || t.Contains("phepcong") || t.Contains("phepnhan") || t.Contains("phepchia") || t.Contains("pheptru")) return "pheptinh";
 
-            // 2. Ghi số & Chữ số La Mã
-            if (t.Contains("ghiso") || t.Contains("ghisố") || t.Contains("chuso") || t.Contains("chữsố") || t.Contains("lama") || t.Contains("lamã")) return "ghiso";
+            // 2. Ghi sá»‘ & Chá»¯ sá»‘ La MÃ£
+            if (t.Contains("ghiso") || t.Contains("ghisá»‘") || t.Contains("chuso") || t.Contains("chá»¯sá»‘") || t.Contains("lama") || t.Contains("lamÃ£")) return "ghiso";
 
-            // 3. Luỹ thừa
-            if (t.Contains("luythua") || t.Contains("luỹthừa") || t.Contains("lũythừa") || t.Contains("somu") || t.Contains("sốmũ") || t.Contains("power")) return "luythua";
+            // 3. Luá»¹ thá»«a
+            if (t.Contains("luythua") || t.Contains("luá»¹thá»«a") || t.Contains("lÅ©ythá»«a") || t.Contains("somu") || t.Contains("sá»‘mÅ©") || t.Contains("power")) return "luythua";
 
-            // 4. Tính chia hết (Ước, bội, số nguyên tố, hợp số, ƯCLN, BCNN)
-            if (t.Contains("tinhchiahet") || t.Contains("chiahet") || t.Contains("chiahết") || t.Contains("dauhieu") || t.Contains("dấuhiệu") || t.Contains("uocvaboi") || t.Contains("ướcvàbội") || t.Contains("ucln") || t.Contains("bcnn") || t.Contains("uoc") || t.Contains("ước") || t.Contains("boi") || t.Contains("bội") || t.Contains("songuyento") || t.Contains("sốnguyêntố") || t.Contains("nguyento") || t.Contains("nguyêntố") || t.Contains("hopso") || t.Contains("hợpsố")) return "tinhchiahet";
+            // 4. TÃ­nh chia háº¿t (Æ¯á»›c, bá»™i, sá»‘ nguyÃªn tá»‘, há»£p sá»‘, Æ¯CLN, BCNN)
+            if (t.Contains("tinhchiahet") || t.Contains("chiahet") || t.Contains("chiaháº¿t") || t.Contains("dauhieu") || t.Contains("dáº¥uhiá»‡u") || t.Contains("uocvaboi") || t.Contains("Æ°á»›cvÃ bá»™i") || t.Contains("ucln") || t.Contains("bcnn") || t.Contains("uoc") || t.Contains("Æ°á»›c") || t.Contains("boi") || t.Contains("bá»™i") || t.Contains("songuyento") || t.Contains("sá»‘nguyÃªntá»‘") || t.Contains("nguyento") || t.Contains("nguyÃªntá»‘") || t.Contains("hopso") || t.Contains("há»£psá»‘")) return "tinhchiahet";
 
-            // 5. Số nguyên
-            if (t.Contains("integer") || t.Contains("songuyen") || t.Contains("sốnguyên") || t.Contains("nguyenam") || t.Contains("nguyênâm") || t.Contains("trucso") || t.Contains("trụcsố")) return "songuyen";
+            // 5. Sá»‘ nguyÃªn
+            if (t.Contains("integer") || t.Contains("songuyen") || t.Contains("sá»‘nguyÃªn") || t.Contains("nguyenam") || t.Contains("nguyÃªnÃ¢m") || t.Contains("trucso") || t.Contains("trá»¥csá»‘")) return "songuyen";
 
-            // 6. Tập hợp
-            if (t.Contains("set") || t.Contains("taphop") || t.Contains("tậphợp") || t.Contains("phantu") || t.Contains("phầntử") || t.Contains("sotunhien") || t.Contains("sốtựnhiên")) return "taphop";
+            // 6. Táº­p há»£p
+            if (t.Contains("set") || t.Contains("taphop") || t.Contains("táº­phá»£p") || t.Contains("phantu") || t.Contains("pháº§ntá»­") || t.Contains("sotunhien") || t.Contains("sá»‘tá»±nhiÃªn")) return "taphop";
 
-            // 7. Hình phẳng & Tính đối xứng & Hình học trực quan
-            if (t.Contains("tinhdoixung") || t.Contains("doixung") || t.Contains("đốixứng") || t.Contains("trucdoixung") || t.Contains("tamdoixung")) return "tinhdoixung";
-            if (t.Contains("hinhphang") || t.Contains("hìnhphẳng") || t.Contains("tamgiac") || t.Contains("tamgiác") || t.Contains("hinhvuong") || t.Contains("hìnhvuông") || t.Contains("hinhchunhat") || t.Contains("hìnhchữnhật") || t.Contains("hinhthoi") || t.Contains("hìnhthoi") || t.Contains("hinhbinhhanh") || t.Contains("hìnhbìnhhành") || t.Contains("hinhthang") || t.Contains("hìnhthang") || t.Contains("lucgiac") || t.Contains("lụcgiác")) return "hinhphang";
-            if (t.Contains("geometry") || t.Contains("hinhhoc") || t.Contains("hìnhhọc") || t.Contains("doanthang") || t.Contains("đoạnthẳng") || t.Contains("trungdiem") || t.Contains("trungđiểm") || t.Contains("goc") || t.Contains("góc") || t.Contains("duongthang") || t.Contains("đườngthẳng") || t.Contains("diem") || t.Contains("điểm")) return "hinhhoc";
+            // 7. HÃ¬nh pháº³ng & TÃ­nh Ä‘á»‘i xá»©ng & HÃ¬nh há»c trá»±c quan
+            if (t.Contains("tinhdoixung") || t.Contains("doixung") || t.Contains("Ä‘á»‘ixá»©ng") || t.Contains("trucdoixung") || t.Contains("tamdoixung")) return "tinhdoixung";
+            if (t.Contains("hinhphang") || t.Contains("hÃ¬nhpháº³ng") || t.Contains("tamgiac") || t.Contains("tamgiÃ¡c") || t.Contains("hinhvuong") || t.Contains("hÃ¬nhvuÃ´ng") || t.Contains("hinhchunhat") || t.Contains("hÃ¬nhchá»¯nháº­t") || t.Contains("hinhthoi") || t.Contains("hÃ¬nhthoi") || t.Contains("hinhbinhhanh") || t.Contains("hÃ¬nhbÃ¬nhhÃ nh") || t.Contains("hinhthang") || t.Contains("hÃ¬nhthang") || t.Contains("lucgiac") || t.Contains("lá»¥cgiÃ¡c")) return "hinhphang";
+            if (t.Contains("geometry") || t.Contains("hinhhoc") || t.Contains("hÃ¬nhhá»c") || t.Contains("doanthang") || t.Contains("Ä‘oáº¡ntháº³ng") || t.Contains("trungdiem") || t.Contains("trungÄ‘iá»ƒm") || t.Contains("goc") || t.Contains("gÃ³c") || t.Contains("duongthang") || t.Contains("Ä‘Æ°á»ngtháº³ng") || t.Contains("diem") || t.Contains("Ä‘iá»ƒm")) return "hinhhoc";
 
-            // 8. Phân số & Số thập phân
-            if (t.Contains("fraction") || t.Contains("phanso") || t.Contains("phânsố") || t.Contains("honso") || t.Contains("hỗnsố")) return "phanso";
-            if (t.Contains("decimal") || t.Contains("sothapphan") || t.Contains("thapphan") || t.Contains("thậpphân") || t.Contains("phantram") || t.Contains("phầntrăm") || t.Contains("tiso") || t.Contains("tỉsố")) return "sothapphan";
+            // 8. PhÃ¢n sá»‘ & Sá»‘ tháº­p phÃ¢n
+            if (t.Contains("fraction") || t.Contains("phanso") || t.Contains("phÃ¢nsá»‘") || t.Contains("honso") || t.Contains("há»—nsá»‘")) return "phanso";
+            if (t.Contains("decimal") || t.Contains("sothapphan") || t.Contains("thapphan") || t.Contains("tháº­pphÃ¢n") || t.Contains("phantram") || t.Contains("pháº§ntrÄƒm") || t.Contains("tiso") || t.Contains("tá»‰sá»‘")) return "sothapphan";
 
-            // 9. Thống kê & Xác suất
-            if (t.Contains("thongke") || t.Contains("thốngkê") || t.Contains("xacsuat") || t.Contains("xácsuất") || t.Contains("dulieu") || t.Contains("dữliệu") || t.Contains("bieudo") || t.Contains("biểuđồ")) return "thongke";
+            // 9. Thá»‘ng kÃª & XÃ¡c suáº¥t
+            if (t.Contains("thongke") || t.Contains("thá»‘ngkÃª") || t.Contains("xacsuat") || t.Contains("xÃ¡csuáº¥t") || t.Contains("dulieu") || t.Contains("dá»¯liá»‡u") || t.Contains("bieudo") || t.Contains("biá»ƒuÄ‘á»“")) return "thongke";
 
-            if (t.Contains("equation") || t.Contains("phuongtrinh") || t.Contains("phươngtrình")) return "phuongtrinh";
+            if (t.Contains("equation") || t.Contains("phuongtrinh") || t.Contains("phÆ°Æ¡ngtrÃ¬nh")) return "phuongtrinh";
 
             return t;
         }
@@ -617,7 +718,7 @@ namespace Math6Companion.Core.Services
         {
             if (string.IsNullOrEmpty(diff)) return "EASY";
             string d = diff.Trim().ToUpperInvariant().Replace(" ", "").Replace("_", "").Replace("-", "");
-            if (d.Contains("NHANBIET") || d.Contains("EASY") || d.Contains("DE") || d.Contains("DỄ") || d.Contains("1")) return "EASY";
+            if (d.Contains("NHANBIET") || d.Contains("EASY") || d.Contains("DE") || d.Contains("Dá»„") || d.Contains("1")) return "EASY";
             if (d.Contains("THONGHIEU") || d.Contains("MEDIUM") || d.Contains("TRUNGBINH") || d.Contains("VUA") || d.Contains("2")) return "MEDIUM";
             if (d.Contains("VANDUNGCAO") || d.Contains("EXPERT") || d.Contains("VERYHARD") || d.Contains("KHO") || d.Contains("4")) return "HARD";
             if (d.Contains("VANDUNG") || d.Contains("HARD") || d.Contains("3")) return "HARD";
@@ -625,7 +726,7 @@ namespace Math6Companion.Core.Services
         }
 
         /// <summary>
-        /// Tự động khắc phục lỗi Google Sheet chuyển phân số (ví dụ 1/2, 3/2, 2/3) thành chuỗi Ngày tháng:
+        /// Tá»± Ä‘á»™ng kháº¯c phá»¥c lá»—i Google Sheet chuyá»ƒn phÃ¢n sá»‘ (vÃ­ dá»¥ 1/2, 3/2, 2/3) thÃ nh chuá»—i NgÃ y thÃ¡ng:
         /// "Sun Feb 01 2026 00:00:00 GMT+0700" -> "1/2"
         /// "Tue Feb 03 2026 00:00:00 GMT+0700" -> "3/2"
         /// "Mon Mar 02 2026 00:00:00 GMT+0700" -> "2/3"
@@ -634,7 +735,7 @@ namespace Math6Companion.Core.Services
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
 
-            if (text.Contains("GMT") || text.Contains("00:00:00") || text.Contains("Giờ Đông Dương") || text.Contains("Indochina Time"))
+            if (text.Contains("GMT") || text.Contains("00:00:00") || text.Contains("Giá» ÄÃ´ng DÆ°Æ¡ng") || text.Contains("Indochina Time"))
             {
                 if (System.DateTime.TryParse(text, out var dt))
                 {
@@ -708,14 +809,14 @@ namespace Math6Companion.Core.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogWarning($"[GoogleSheetsNetworkService] Lỗi parse JSON GET: {ex.Message}");
+                    Debug.LogWarning($"[GoogleSheetsNetworkService] Lá»—i parse JSON GET: {ex.Message}");
                     onComplete?.Invoke(false, null, responseText);
                 }
             }
             else
             {
-                Debug.LogWarning($"[GoogleSheetsNetworkService] GET Lỗi: {errorMsg} -> {url}");
-                onComplete?.Invoke(false, null, errorMsg ?? "Lỗi mạng");
+                Debug.LogWarning($"[GoogleSheetsNetworkService] GET Lá»—i: {errorMsg} -> {url}");
+                onComplete?.Invoke(false, null, errorMsg ?? "Lá»—i máº¡ng");
             }
         }
 
@@ -754,14 +855,14 @@ namespace Math6Companion.Core.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogWarning($"[GoogleSheetsNetworkService] Lỗi parse JSON POST: {ex.Message}");
+                    Debug.LogWarning($"[GoogleSheetsNetworkService] Lá»—i parse JSON POST: {ex.Message}");
                     onComplete?.Invoke(false, null, responseText);
                 }
             }
             else
             {
-                Debug.LogWarning($"[GoogleSheetsNetworkService] POST Lỗi: {errorMsg}");
-                onComplete?.Invoke(false, null, errorMsg ?? "Lỗi mạng");
+                Debug.LogWarning($"[GoogleSheetsNetworkService] POST Lá»—i: {errorMsg}");
+                onComplete?.Invoke(false, null, errorMsg ?? "Lá»—i máº¡ng");
             }
         }
 

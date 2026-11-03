@@ -54,11 +54,11 @@ namespace Math6Companion.Core.Mock
                     {
                         userId = "TEA_001",
                         username = username,
-                        fullName = "Cô Mai Toán",
+                        fullName = "CÃ´ Mai ToÃ¡n",
                         role = "TEACHER",
                         grade = 6,
                         classId = "6A1",
-                        nickname = "Cô Mai"
+                        nickname = "CÃ´ Mai"
                     }, "Success");
                 }
                 else
@@ -71,7 +71,7 @@ namespace Math6Companion.Core.Mock
                         role = "STUDENT",
                         grade = 6,
                         classId = "6A1",
-                        nickname = "AnThầnĐồng"
+                        nickname = "AnTháº§nÄá»“ng"
                     }, "Success");
                 }
             }));
@@ -87,39 +87,39 @@ namespace Math6Companion.Core.Mock
                     {
                         lessonId = "LES_INT_01",
                         topic = "Integers",
-                        title = "Bài 1: Phép cộng và trừ số nguyên",
-                        description = "Quy tắc cộng trừ số nguyên cùng dấu và khác dấu",
+                        title = "BÃ i 1: PhÃ©p cá»™ng vÃ  trá»« sá»‘ nguyÃªn",
+                        description = "Quy táº¯c cá»™ng trá»« sá»‘ nguyÃªn cÃ¹ng dáº¥u vÃ  khÃ¡c dáº¥u",
                         grade = 6,
-                        summaryText = "1. Cộng hai số nguyên cùng dấu:\n- Cộng hai phần tự nhiên rồi đặt dấu chung trước kết quả.\n\n2. Cộng hai số nguyên khác dấu:\n- Lấy số có phần tự nhiên lớn hơn trừ số có phần tự nhiên bé hơn, đặt dấu của số có phần tự nhiên lớn hơn trước hiệu tìm được.",
+                        summaryText = "1. Cá»™ng hai sá»‘ nguyÃªn cÃ¹ng dáº¥u:\n- Cá»™ng hai pháº§n tá»± nhiÃªn rá»“i Ä‘áº·t dáº¥u chung trÆ°á»›c káº¿t quáº£.\n\n2. Cá»™ng hai sá»‘ nguyÃªn khÃ¡c dáº¥u:\n- Láº¥y sá»‘ cÃ³ pháº§n tá»± nhiÃªn lá»›n hÆ¡n trá»« sá»‘ cÃ³ pháº§n tá»± nhiÃªn bÃ© hÆ¡n, Ä‘áº·t dáº¥u cá»§a sá»‘ cÃ³ pháº§n tá»± nhiÃªn lá»›n hÆ¡n trÆ°á»›c hiá»‡u tÃ¬m Ä‘Æ°á»£c.",
                         videoUrl = "https://www.youtube.com/watch?v=vcR0jey6xcI",
                         userHighestScore = 10,
-                        topStudentNickname = "BìnhToánHọc",
+                        topStudentNickname = "BÃ¬nhToÃ¡nHá»c",
                         topStudentAttempts = 16
                     },
                     new LessonData
                     {
                         lessonId = "LES_INT_02",
                         topic = "Integers",
-                        title = "Bài 2: Phép nhân và chia hai số nguyên",
-                        description = "Quy tắc nhân chia số nguyên, nhân khác dấu và cùng dấu",
+                        title = "BÃ i 2: PhÃ©p nhÃ¢n vÃ  chia hai sá»‘ nguyÃªn",
+                        description = "Quy táº¯c nhÃ¢n chia sá»‘ nguyÃªn, nhÃ¢n khÃ¡c dáº¥u vÃ  cÃ¹ng dáº¥u",
                         grade = 6,
-                        summaryText = "1. Nhân hai số nguyên cùng dấu: Kết quả luôn là số nguyên DƯƠNG (+).\n2. Nhân hai số nguyên khác dấu: Kết quả luôn là số nguyên ÂM (-).\nQuy tắc dấu: (+) * (+) = (+), (-) * (-) = (+), (+) * (-) = (-), (-) * (+) = (-).",
+                        summaryText = "1. NhÃ¢n hai sá»‘ nguyÃªn cÃ¹ng dáº¥u: Káº¿t quáº£ luÃ´n lÃ  sá»‘ nguyÃªn DÆ¯Æ NG (+).\n2. NhÃ¢n hai sá»‘ nguyÃªn khÃ¡c dáº¥u: Káº¿t quáº£ luÃ´n lÃ  sá»‘ nguyÃªn Ã‚M (-).\nQuy táº¯c dáº¥u: (+) * (+) = (+), (-) * (-) = (+), (+) * (-) = (-), (-) * (+) = (-).",
                         videoUrl = "https://www.youtube.com/watch?v=mYyUEaSUcu4",
                         userHighestScore = 8,
-                        topStudentNickname = "ChiThầnĐồng",
+                        topStudentNickname = "ChiTháº§nÄá»“ng",
                         topStudentAttempts = 12
                     },
                     new LessonData
                     {
                         lessonId = "LES_FRAC_01",
                         topic = "Fractions",
-                        title = "Bài 3: Khái niệm phân số & Rút gọn phân số",
-                        description = "Định nghĩa phân số, tử và mẫu, quy tắc rút gọn tối giản",
+                        title = "BÃ i 3: KhÃ¡i niá»‡m phÃ¢n sá»‘ & RÃºt gá»n phÃ¢n sá»‘",
+                        description = "Äá»‹nh nghÄ©a phÃ¢n sá»‘, tá»­ vÃ  máº«u, quy táº¯c rÃºt gá»n tá»‘i giáº£n",
                         grade = 6,
-                        summaryText = "Phân số có dạng a/b với a, b thuộc Z, b khác 0. a là tử số, b là mẫu số.\nRút gọn phân số: Chia cả tử và mẫu cho ước chung lớn hơn 1 để được phân số tối giản.",
+                        summaryText = "PhÃ¢n sá»‘ cÃ³ dáº¡ng a/b vá»›i a, b thuá»™c Z, b khÃ¡c 0. a lÃ  tá»­ sá»‘, b lÃ  máº«u sá»‘.\nRÃºt gá»n phÃ¢n sá»‘: Chia cáº£ tá»­ vÃ  máº«u cho Æ°á»›c chung lá»›n hÆ¡n 1 Ä‘á»ƒ Ä‘Æ°á»£c phÃ¢n sá»‘ tá»‘i giáº£n.",
                         videoUrl = "https://www.youtube.com/watch?v=ZKNbig3XpM8",
                         userHighestScore = 9,
-                        topStudentNickname = "AnThầnĐồng",
+                        topStudentNickname = "AnTháº§nÄá»“ng",
                         topStudentAttempts = 14
                     }
                 };
@@ -140,10 +140,10 @@ namespace Math6Companion.Core.Mock
                         topic = "Integers",
                         type = "MCQ",
                         difficulty = "EASY",
-                        prompt = "Tính giá trị biểu thức: (-15) + 7",
+                        prompt = "TÃ­nh giÃ¡ trá»‹ biá»ƒu thá»©c: (-15) + 7",
                         options = new QuestionOptionMap { A = "8", B = "-8", C = "22", D = "-22" },
                         correctAnswer = "B",
-                        explanation = "Cộng hai số khác dấu: 15 - 7 = 8, mang dấu của -15 nên kết quả là -8."
+                        explanation = "Cá»™ng hai sá»‘ khÃ¡c dáº¥u: 15 - 7 = 8, mang dáº¥u cá»§a -15 nÃªn káº¿t quáº£ lÃ  -8."
                     },
                     new QuestionData
                     {
@@ -152,10 +152,10 @@ namespace Math6Companion.Core.Mock
                         topic = "Integers",
                         type = "MCQ",
                         difficulty = "MEDIUM",
-                        prompt = "Kết quả của phép tính: (-4) * (-5) là:",
+                        prompt = "Káº¿t quáº£ cá»§a phÃ©p tÃ­nh: (-4) * (-5) lÃ :",
                         options = new QuestionOptionMap { A = "-20", B = "20", C = "-9", D = "9" },
                         correctAnswer = "B",
-                        explanation = "Tích của hai số nguyên cùng dấu là một số nguyên dương: (-4) * (-5) = 20."
+                        explanation = "TÃ­ch cá»§a hai sá»‘ nguyÃªn cÃ¹ng dáº¥u lÃ  má»™t sá»‘ nguyÃªn dÆ°Æ¡ng: (-4) * (-5) = 20."
                     }
                 };
                 callback(true, list, "Success");
@@ -173,8 +173,8 @@ namespace Math6Companion.Core.Mock
                     {
                         badgeId = "BADGE_PERFECT",
                         badgeCode = "PERFECT_SCORE",
-                        name = "Nhà Tính Toán Hoàn Hảo",
-                        description = "Đạt điểm tối đa trong bài kiểm tra",
+                        name = "NhÃ  TÃ­nh ToÃ¡n HoÃ n Háº£o",
+                        description = "Äáº¡t Ä‘iá»ƒm tá»‘i Ä‘a trong bÃ i kiá»ƒm tra",
                         iconUrl = "icon_badge_perfect"
                     });
                 }
@@ -187,7 +187,7 @@ namespace Math6Companion.Core.Mock
             StartCoroutine(SimulateDelay(() =>
             {
                 Debug.Log($"[MockNetworkService] AI Tutor Log saved: {logSubmission?.sessionType} | Student: {logSubmission?.studentAnswer} | Feedback: {logSubmission?.aiFeedback}");
-                callback?.Invoke(true, "Ghi nhận AI Tutor log (Mock) thành công!");
+                callback?.Invoke(true, "Ghi nháº­n AI Tutor log (Mock) thÃ nh cÃ´ng!");
             }));
         }
 
@@ -203,8 +203,96 @@ namespace Math6Companion.Core.Mock
                     averageScore = 9.5f,
                     badges = new List<BadgeData>
                     {
-                        new BadgeData { badgeCode = "FIRST_LESSON", name = "Khởi Đầu Nan" }
+                        new BadgeData { badgeCode = "FIRST_LESSON", name = "Khá»Ÿi Äáº§u Nan" }
                     }
+                }, "Success");
+            }));
+        }
+
+        public void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                callback?.Invoke(true, new VersusQueueResponse
+                {
+                    success = true,
+                    status = "MATCHED",
+                    message = "Ghép trận giả lập thành công!",
+                    roomId = "MOCK_ROOM_" + System.DateTime.Now.Ticks,
+                    opponentId = "STU_BOT_01",
+                    opponentNickname = "BảoToánHọc (Lớp 6A2)",
+                    mode = mode ?? "MCQ",
+                    questionIds = new List<string> { "Q_INT_01", "Q_INT_02", "Q_INT_03", "Q_INT_04", "Q_INT_05" }
+                }, "Success");
+            }));
+        }
+
+        public void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                callback?.Invoke(true, new VersusQueueResponse
+                {
+                    success = true,
+                    status = "MATCHED",
+                    message = "Đã tìm thấy phòng!",
+                    roomId = "MOCK_ROOM_" + System.DateTime.Now.Ticks,
+                    opponentId = "STU_BOT_01",
+                    opponentNickname = "BảoToánHọc (Lớp 6A2)",
+                    mode = "MCQ"
+                }, "Success");
+            }));
+        }
+
+        public void CancelVersusQueue(string userId, Action<bool, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                callback?.Invoke(true, "Đã hủy tìm trận (Mock)");
+            }));
+        }
+
+        public void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                int botScore = UnityEngine.Random.Range(6, 10);
+                callback?.Invoke(true, new VersusRoomResultResponse
+                {
+                    success = true,
+                    roomId = roomId,
+                    player1Id = userId,
+                    player1Score = score,
+                    player1Done = true,
+                    player2Id = "STU_BOT_01",
+                    player2Name = "BảoToánHọc (Lớp 6A2)",
+                    player2Score = botScore,
+                    player2Done = true,
+                    isFinished = true,
+                    winnerId = score >= botScore ? userId : "STU_BOT_01",
+                    message = "Mock Score Submitted"
+                }, "Success");
+            }));
+        }
+
+        public void PollVersusRoomResult(string roomId, string userId, Action<bool, VersusRoomResultResponse, string> callback)
+        {
+            StartCoroutine(SimulateDelay(() =>
+            {
+                int botScore = UnityEngine.Random.Range(6, 10);
+                callback?.Invoke(true, new VersusRoomResultResponse
+                {
+                    success = true,
+                    roomId = roomId,
+                    player1Id = userId,
+                    player1Score = 8,
+                    player1Done = true,
+                    player2Id = "STU_BOT_01",
+                    player2Name = "BảoToánHọc (Lớp 6A2)",
+                    player2Score = botScore,
+                    player2Done = true,
+                    isFinished = true,
+                    winnerId = 8 >= botScore ? userId : "STU_BOT_01"
                 }, "Success");
             }));
         }
@@ -219,14 +307,14 @@ namespace Math6Companion.Core.Mock
                 var input = payload.studentInput.Trim().ToLower();
                 if (payload.currentStepIndex == 1)
                 {
-                    if (input.Contains("ngoặc") || input.Contains("parentheses") || input.Contains("3+2") || input.Contains("5"))
+                    if (input.Contains("ngoáº·c") || input.Contains("parentheses") || input.Contains("3+2") || input.Contains("5"))
                     {
                         callback(true, new AITutorStepResponse
                         {
                             isCorrect = true,
                             state = "STEP_PASSED",
-                            tutorDialogue = "Chính xác! Ta ưu tiên tính trong ngoặc (3 + 2) trước. Kết quả (3 + 2) bằng mấy?",
-                            hint = "Phép cộng đơn giản 3 + 2",
+                            tutorDialogue = "ChÃ­nh xÃ¡c! Ta Æ°u tiÃªn tÃ­nh trong ngoáº·c (3 + 2) trÆ°á»›c. Káº¿t quáº£ (3 + 2) báº±ng máº¥y?",
+                            hint = "PhÃ©p cá»™ng Ä‘Æ¡n giáº£n 3 + 2",
                             highlightFormula = "(3 + 2) = ?",
                             nextStepIndex = 2,
                             shouldWaitForStudent = true
@@ -238,8 +326,8 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = false,
                             state = "WAITING_INPUT",
-                            tutorDialogue = "Chưa đúng rồi! Hãy nhớ quy tắc thứ tự phép tính: trong ngoặc hay ngoài ngoặc làm trước?",
-                            hint = "Nhìn vào dấu ngoặc tròn nhé.",
+                            tutorDialogue = "ChÆ°a Ä‘Ãºng rá»“i! HÃ£y nhá»› quy táº¯c thá»© tá»± phÃ©p tÃ­nh: trong ngoáº·c hay ngoÃ i ngoáº·c lÃ m trÆ°á»›c?",
+                            hint = "NhÃ¬n vÃ o dáº¥u ngoáº·c trÃ²n nhÃ©.",
                             nextStepIndex = 1,
                             shouldWaitForStudent = true
                         }, "Success");
@@ -253,8 +341,8 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = true,
                             state = "STEP_PASSED",
-                            tutorDialogue = "Rất tốt! Biểu thức trở thành 15 - 5 * 2. Bây giờ ta thực hiện phép trừ hay phép nhân trước?",
-                            hint = "Nhân chia trước, cộng trừ sau.",
+                            tutorDialogue = "Ráº¥t tá»‘t! Biá»ƒu thá»©c trá»Ÿ thÃ nh 15 - 5 * 2. BÃ¢y giá» ta thá»±c hiá»‡n phÃ©p trá»« hay phÃ©p nhÃ¢n trÆ°á»›c?",
+                            hint = "NhÃ¢n chia trÆ°á»›c, cá»™ng trá»« sau.",
                             highlightFormula = "15 - 5 * 2",
                             nextStepIndex = 3,
                             shouldWaitForStudent = true
@@ -266,8 +354,8 @@ namespace Math6Companion.Core.Mock
                         {
                             isCorrect = false,
                             state = "WAITING_INPUT",
-                            tutorDialogue = "Tính lại giúp thầy: 3 + 2 bằng mấy nào?",
-                            hint = "3 cộng thêm 2 đơn vị.",
+                            tutorDialogue = "TÃ­nh láº¡i giÃºp tháº§y: 3 + 2 báº±ng máº¥y nÃ o?",
+                            hint = "3 cá»™ng thÃªm 2 Ä‘Æ¡n vá»‹.",
                             nextStepIndex = 2,
                             shouldWaitForStudent = true
                         }, "Success");
@@ -279,7 +367,7 @@ namespace Math6Companion.Core.Mock
                     {
                         isCorrect = true,
                         state = "TUTOR_COMPLETED",
-                        tutorDialogue = "Xuất sắc! Em đã hoàn thành bài toán từng bước một cách độc lập!",
+                        tutorDialogue = "Xuáº¥t sáº¯c! Em Ä‘Ã£ hoÃ n thÃ nh bÃ i toÃ¡n tá»«ng bÆ°á»›c má»™t cÃ¡ch Ä‘á»™c láº­p!",
                         isLessonCompleted = true
                     }, "Success");
                 }
@@ -292,7 +380,7 @@ namespace Math6Companion.Core.Mock
             {
                 bool hasImage = !string.IsNullOrEmpty(payload.imageBase64);
                 string text = (payload.studentSteps ?? "").Trim();
-                bool hasText = !string.IsNullOrEmpty(text) && !text.Contains("(Không có bài làm)") && !text.Contains("(Học sinh không nhập văn bản");
+                bool hasText = !string.IsNullOrEmpty(text) && !text.Contains("(KhÃ´ng cÃ³ bÃ i lÃ m)") && !text.Contains("(Há»c sinh khÃ´ng nháº­p vÄƒn báº£n");
 
                 if (!hasImage && !hasText)
                 {
@@ -302,11 +390,11 @@ namespace Math6Companion.Core.Mock
                         maxScore = 10,
                         passed = false,
                         detectedMistakeType = "UNREADABLE_OR_IRRELEVANT_IMAGE",
-                        pedagogicalFeedback = "Học sinh chưa cung cấp bài giải hoặc ảnh bài làm không hợp lệ.",
-                        remedialExercise = "Em hãy nhập lời giải hoặc tải ảnh bài làm lên để Thầy Minh nhận xét nhé.",
+                        pedagogicalFeedback = "Há»c sinh chÆ°a cung cáº¥p bÃ i giáº£i hoáº·c áº£nh bÃ i lÃ m khÃ´ng há»£p lá»‡.",
+                        remedialExercise = "Em hÃ£y nháº­p lá»i giáº£i hoáº·c táº£i áº£nh bÃ i lÃ m lÃªn Ä‘á»ƒ Tháº§y Minh nháº­n xÃ©t nhÃ©.",
                         stepAnalysis = new List<StepAnalysisItem>
                         {
-                            new StepAnalysisItem { step = 1, isCorrect = false, comment = "Chưa có lời giải cho câu hỏi này" }
+                            new StepAnalysisItem { step = 1, isCorrect = false, comment = "ChÆ°a cÃ³ lá»i giáº£i cho cÃ¢u há»i nÃ y" }
                         }
                     }, "Success");
                     return;
@@ -323,11 +411,11 @@ namespace Math6Companion.Core.Mock
             {
                 if (string.IsNullOrEmpty(imageBase64))
                 {
-                    callback?.Invoke(false, "", "Ảnh rỗng");
+                    callback?.Invoke(false, "", "áº¢nh rá»—ng");
                     return;
                 }
 
-                // Phân tích hình ảnh cục bộ: Phân biệt ảnh tài liệu/trang vở vs ảnh phong cảnh, con vật, đồ vật
+                // PhÃ¢n tÃ­ch hÃ¬nh áº£nh cá»¥c bá»™: PhÃ¢n biá»‡t áº£nh tÃ i liá»‡u/trang vá»Ÿ vs áº£nh phong cáº£nh, con váº­t, Ä‘á»“ váº­t
                 bool isMathDocument = false;
                 bool isSampleExponentPhoto = false;
 
@@ -337,7 +425,7 @@ namespace Math6Companion.Core.Mock
                     Texture2D tex = new Texture2D(2, 2);
                     if (tex.LoadImage(bytes))
                     {
-                        // Kiểm tra nếu là file sample_math_essay.png (bài nháp luỹ thừa bị chụp ngược 180 độ)
+                        // Kiá»ƒm tra náº¿u lÃ  file sample_math_essay.png (bÃ i nhÃ¡p luá»¹ thá»«a bá»‹ chá»¥p ngÆ°á»£c 180 Ä‘á»™)
                         string samplePath = System.IO.Path.Combine(Application.dataPath, "_Project/Textures/sample_math_essay.png");
                         if (System.IO.File.Exists(samplePath))
                         {
@@ -351,7 +439,7 @@ namespace Math6Companion.Core.Mock
 
                         if (!isSampleExponentPhoto)
                         {
-                            // Lấy mẫu các điểm ảnh để đo độ sáng trung bình và độ bão hòa màu sắc
+                            // Láº¥y máº«u cÃ¡c Ä‘iá»ƒm áº£nh Ä‘á»ƒ Ä‘o Ä‘á»™ sÃ¡ng trung bÃ¬nh vÃ  Ä‘á»™ bÃ£o hÃ²a mÃ u sáº¯c
                             int w = tex.width;
                             int h = tex.height;
                             int sampleCount = 50;
@@ -376,8 +464,8 @@ namespace Math6Companion.Core.Mock
                             float avgLum = totalLum / sampleCount;
                             float avgSat = totalSat / sampleCount;
 
-                            // Giấy tập học sinh luôn có nền sáng (lum >= 0.40) và độ bão hòa thấp (sat <= 0.35)
-                            // Ảnh phong cảnh làng quê ban đêm, con vật, cỏ cây, màn hình game có lum thấp hoặc sat rất cao
+                            // Giáº¥y táº­p há»c sinh luÃ´n cÃ³ ná»n sÃ¡ng (lum >= 0.40) vÃ  Ä‘á»™ bÃ£o hÃ²a tháº¥p (sat <= 0.35)
+                            // áº¢nh phong cáº£nh lÃ ng quÃª ban Ä‘Ãªm, con váº­t, cá» cÃ¢y, mÃ n hÃ¬nh game cÃ³ lum tháº¥p hoáº·c sat ráº¥t cao
                             if (avgLum >= 0.38f && avgSat <= 0.35f)
                             {
                                 isMathDocument = true;
@@ -387,27 +475,27 @@ namespace Math6Companion.Core.Mock
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogWarning("[MockOCR] Lỗi phân tích ảnh: " + ex.Message);
+                    Debug.LogWarning("[MockOCR] Lá»—i phÃ¢n tÃ­ch áº£nh: " + ex.Message);
                 }
 
-                // TRƯỜNG HỢP 1: Ảnh không phải là tài liệu vở bài tập (ảnh phong cảnh, con vật, đồ vật...)
+                // TRÆ¯á»œNG Há»¢P 1: áº¢nh khÃ´ng pháº£i lÃ  tÃ i liá»‡u vá»Ÿ bÃ i táº­p (áº£nh phong cáº£nh, con váº­t, Ä‘á»“ váº­t...)
                 if (!isMathDocument)
                 {
-                    callback?.Invoke(false, "", "Ảnh không chứa chữ viết tay hoặc bài làm toán học hợp lệ (Hình ảnh phong cảnh / con vật / đồ vật hoặc không có phép tính)!");
+                    callback?.Invoke(false, "", "áº¢nh khÃ´ng chá»©a chá»¯ viáº¿t tay hoáº·c bÃ i lÃ m toÃ¡n há»c há»£p lá»‡ (HÃ¬nh áº£nh phong cáº£nh / con váº­t / Ä‘á»“ váº­t hoáº·c khÃ´ng cÃ³ phÃ©p tÃ­nh)!");
                     return;
                 }
 
-                // TRƯỜNG HỢP 2: Là ảnh chụp bài làm nháp sample_math_essay.png (bị chụp ngược 180 độ)
-                // OCR tự động xoay đúng chiều và trích xuất nguyên văn phép tính ghi trên ảnh đó
+                // TRÆ¯á»œNG Há»¢P 2: LÃ  áº£nh chá»¥p bÃ i lÃ m nhÃ¡p sample_math_essay.png (bá»‹ chá»¥p ngÆ°á»£c 180 Ä‘á»™)
+                // OCR tá»± Ä‘á»™ng xoay Ä‘Ãºng chiá»u vÃ  trÃ­ch xuáº¥t nguyÃªn vÄƒn phÃ©p tÃ­nh ghi trÃªn áº£nh Ä‘Ã³
                 if (isSampleExponentPhoto)
                 {
-                    string sampleExp = "= 2 × 3² + 5 × (2 + 3)\n= 2 × 9 + 5 × 5\n= 18 + 25\n= 43";
+                    string sampleExp = "= 2 Ã— 3Â² + 5 Ã— (2 + 3)\n= 2 Ã— 9 + 5 Ã— 5\n= 18 + 25\n= 43";
                     callback?.Invoke(true, sampleExp, "Success");
                     return;
                 }
 
-                // TRƯỜNG HỢP 3: Ảnh giấy tập nhưng đang ở chế độ Offline (chưa có Gemini API Key)
-                callback?.Invoke(false, "", "Chưa cấu hình GEMINI_API_KEY để OCR ảnh chữ viết tay tự do. Vui lòng bấm [🔑 Cấu hình Gemini Key] hoặc tự gõ bài giải vào ô văn bản!");
+                // TRÆ¯á»œNG Há»¢P 3: áº¢nh giáº¥y táº­p nhÆ°ng Ä‘ang á»Ÿ cháº¿ Ä‘á»™ Offline (chÆ°a cÃ³ Gemini API Key)
+                callback?.Invoke(false, "", "ChÆ°a cáº¥u hÃ¬nh GEMINI_API_KEY Ä‘á»ƒ OCR áº£nh chá»¯ viáº¿t tay tá»± do. Vui lÃ²ng báº¥m [ðŸ”‘ Cáº¥u hÃ¬nh Gemini Key] hoáº·c tá»± gÃµ bÃ i giáº£i vÃ o Ã´ vÄƒn báº£n!");
             }));
         }
 
@@ -420,7 +508,7 @@ namespace Math6Companion.Core.Mock
             string promptLower = prompt.ToLower();
             string textLower = (text ?? "").ToLower();
 
-            // 1. Xac dinh dap so ky vong — kiem tra ca correctAnswer va rubric buoc cuoi
+            // 1. Xac dinh dap so ky vong â€” kiem tra ca correctAnswer va rubric buoc cuoi
             string rubricTarget = "";
             if (payload.rubric != null && payload.rubric.Count > 0)
             {
@@ -466,13 +554,13 @@ namespace Math6Companion.Core.Mock
 
             Debug.Log($"[MockGrading] Prompt='{GetShortPrompt(prompt)}' | correctAnswer='{payload.correctAnswer}' | rubricTarget='{rubricTarget}' | expectedTarget='{expectedTarget}' | studentText='{(text != null && text.Length > 80 ? text.Substring(0, 80) : text)}'");
 
-            bool isSampleNotebook = text != null && (text.Contains("Vở bài tập mẫu") || text.Contains("Vo bai tap mau"));
+            bool isSampleNotebook = text != null && (text.Contains("Vá»Ÿ bÃ i táº­p máº«u") || text.Contains("Vo bai tap mau"));
 
             bool hasRealText = !string.IsNullOrEmpty(text) && 
                                !text.Contains("(Khong co bai lam)") && 
                                !text.Contains("(Hoc sinh khong nhap van ban") &&
-                               !text.Contains("(Học sinh không nhập văn bản") &&
-                               !text.Contains("(Không có bài làm)") &&
+                               !text.Contains("(Há»c sinh khÃ´ng nháº­p vÄƒn báº£n") &&
+                               !text.Contains("(KhÃ´ng cÃ³ bÃ i lÃ m)") &&
                                !isSampleNotebook;
 
             var resp = new AIGradingResponse();
@@ -514,7 +602,7 @@ namespace Math6Companion.Core.Mock
             bool isCorrect = false;
             if (isSampleNotebook)
             {
-                // Vở mẫu Toán 6 chuẩn luôn giải đúng bài toán
+                // Vá»Ÿ máº«u ToÃ¡n 6 chuáº©n luÃ´n giáº£i Ä‘Ãºng bÃ i toÃ¡n
                 isCorrect = true;
             }
             else if (hasRealText)
@@ -537,8 +625,8 @@ namespace Math6Companion.Core.Mock
                 resp.score = 10;
                 resp.passed = true;
                 resp.detectedMistakeType = "NONE";
-                resp.pedagogicalFeedback = $"Thầy Minh khen ngợi: Bài giải của em cho câu '{GetShortPrompt(prompt)}' rất chuẩn xác và rõ ràng. Em đã thực hiện đúng quy tắc và đạt đáp số chính xác!";
-                resp.remedialExercise = "Em đã làm chủ dạng toán này! Hãy tiếp tục rèn luyện thêm các câu tiếp theo nhé.";
+                resp.pedagogicalFeedback = $"Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em cho cÃ¢u '{GetShortPrompt(prompt)}' ráº¥t chuáº©n xÃ¡c vÃ  rÃµ rÃ ng. Em Ä‘Ã£ thá»±c hiá»‡n Ä‘Ãºng quy táº¯c vÃ  Ä‘áº¡t Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c!";
+                resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n nÃ y! HÃ£y tiáº¿p tá»¥c rÃ¨n luyá»‡n thÃªm cÃ¡c cÃ¢u tiáº¿p theo nhÃ©.";
                 resp.firstWrongStepIndex = -1;
                 resp.penaltyRuleToCopy = "";
                 resp.correctStepsPrefix = text;
@@ -552,7 +640,7 @@ namespace Math6Companion.Core.Mock
                         {
                             step = i + 1,
                             isCorrect = true,
-                            comment = $"Dòng {i + 1}: {studentLines[i].Trim()} (Chính xác)"
+                            comment = $"DÃ²ng {i + 1}: {studentLines[i].Trim()} (ChÃ­nh xÃ¡c)"
                         });
                     }
                 }
@@ -585,8 +673,8 @@ namespace Math6Companion.Core.Mock
         /// </summary>
         private void EvaluateStepsDetailed(string promptLower, string textLower, string rawText, List<RubricItem> rubrics, string expectedTarget, AIGradingResponse resp)
         {
-            string cleanText = (textLower ?? "").Replace(" ", "").Replace("×", "x").Replace("*", "x").Replace("·", "x").Replace(":", "/");
-            string normPrompt = (promptLower ?? "").Replace(" ", "").Replace("×", "x").Replace("*", "x").Replace("·", "x").Replace(":", "/");
+            string cleanText = (textLower ?? "").Replace(" ", "").Replace("Ã—", "x").Replace("*", "x").Replace("Â·", "x").Replace(":", "/");
+            string normPrompt = (promptLower ?? "").Replace(" ", "").Replace("Ã—", "x").Replace("*", "x").Replace("Â·", "x").Replace(":", "/");
 
             bool[] stepOk = new bool[rubrics.Count];
             string[] stepComments = new string[rubrics.Count];
@@ -600,20 +688,20 @@ namespace Math6Companion.Core.Mock
             {
                 bool hasStep1 = cleanText.Contains("6,32:4") || cleanText.Contains("6.32/4") || cleanText.Contains("6,32/4") || cleanText.Contains("6.32:4");
                 stepOk[0] = hasStep1;
-                stepComments[0] = hasStep1 ? "Thiết lập phép tính chia: 6,32 : 4 (Chính xác)" : "Thiết lập phép tính chia: 6,32 : 4 (Chưa thiết lập phép tính)";
+                stepComments[0] = hasStep1 ? "Thiáº¿t láº­p phÃ©p tÃ­nh chia: 6,32 : 4 (ChÃ­nh xÃ¡c)" : "Thiáº¿t láº­p phÃ©p tÃ­nh chia: 6,32 : 4 (ChÆ°a thiáº¿t láº­p phÃ©p tÃ­nh)";
 
                 bool hasStep2 = cleanText.Contains("1,58") || cleanText.Contains("1.58");
                 if (rubrics.Count > 1)
                 {
                     stepOk[1] = hasStep2;
-                    stepComments[1] = hasStep2 ? "Thực hiện phép tính chia: 6,32 : 4 = 1,58 (m) (Chính xác)" : "Thực hiện phép tính chia: 6,32 : 4 = 1,58 (m) (Chưa tính ra 1,58)";
+                    stepComments[1] = hasStep2 ? "Thá»±c hiá»‡n phÃ©p tÃ­nh chia: 6,32 : 4 = 1,58 (m) (ChÃ­nh xÃ¡c)" : "Thá»±c hiá»‡n phÃ©p tÃ­nh chia: 6,32 : 4 = 1,58 (m) (ChÆ°a tÃ­nh ra 1,58)";
                 }
 
                 bool hasStep3 = CheckStudentAnswer(cleanText, "1.6") || CheckStudentAnswer(cleanText, "1,6") || cleanText.Contains("1,6") || cleanText.Contains("1.6");
                 if (rubrics.Count > 2)
                 {
                     stepOk[2] = hasStep3;
-                    stepComments[2] = hasStep3 ? "Làm tròn đến hàng phần mười: 1,58 ≈ 1,6 (m) (Chính xác)" : "Làm tròn đến hàng phần mười: 1,58 ≈ 1,6 (m) (Chưa làm tròn đúng 1,6)";
+                    stepComments[2] = hasStep3 ? "LÃ m trÃ²n Ä‘áº¿n hÃ ng pháº§n mÆ°á»i: 1,58 â‰ˆ 1,6 (m) (ChÃ­nh xÃ¡c)" : "LÃ m trÃ²n Ä‘áº¿n hÃ ng pháº§n mÆ°á»i: 1,58 â‰ˆ 1,6 (m) (ChÆ°a lÃ m trÃ²n Ä‘Ãºng 1,6)";
                 }
 
                 if (stepOk[0] && (rubrics.Count < 2 || stepOk[1]) && (rubrics.Count < 3 || stepOk[2]))
@@ -621,8 +709,8 @@ namespace Math6Companion.Core.Mock
                     resp.score = 10;
                     resp.passed = true;
                     resp.detectedMistakeType = "NONE";
-                    resp.pedagogicalFeedback = "Thầy Minh khen ngợi: Bài giải của em rất xuất sắc! Em đã thực hiện phép chia số thập phân chuẩn xác và làm tròn đúng quy tắc đến hàng phần mười.";
-                    resp.remedialExercise = "Em đã làm chủ dạng toán số thập phân!";
+                    resp.pedagogicalFeedback = "Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em ráº¥t xuáº¥t sáº¯c! Em Ä‘Ã£ thá»±c hiá»‡n phÃ©p chia sá»‘ tháº­p phÃ¢n chuáº©n xÃ¡c vÃ  lÃ m trÃ²n Ä‘Ãºng quy táº¯c Ä‘áº¿n hÃ ng pháº§n mÆ°á»i.";
+                    resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n sá»‘ tháº­p phÃ¢n!";
                     for (int i = 0; i < rubrics.Count; i++)
                     {
                         resp.stepAnalysis.Add(new StepAnalysisItem
@@ -643,8 +731,8 @@ namespace Math6Companion.Core.Mock
                 bool hasStep1 = cleanText.Contains("15-5") || cleanText.Contains("5x2") || cleanText.Contains("3+2=5") || (cleanText.Contains("=5") && cleanText.Length < 8);
                 stepOk[0] = hasStep1;
                 stepComments[0] = hasStep1 
-                    ? "Tính trong ngoặc: (3 + 2) = 5 (Chính xác)" 
-                    : "Tính trong ngoặc: (3 + 2) = 5 (Chưa thực hiện hoặc tính nhầm phép tính trong ngoặc)";
+                    ? "TÃ­nh trong ngoáº·c: (3 + 2) = 5 (ChÃ­nh xÃ¡c)" 
+                    : "TÃ­nh trong ngoáº·c: (3 + 2) = 5 (ChÆ°a thá»±c hiá»‡n hoáº·c tÃ­nh nháº§m phÃ©p tÃ­nh trong ngoáº·c)";
 
                 // Kiem tra loi nham thu tu thuc hien phep tinh: 15 - 5 = 10 roi lay 10 x 2 = 20
                 orderError = cleanText.Contains("10x2") || cleanText.Contains("=20") || cleanText.Contains("15-5=10");
@@ -656,18 +744,18 @@ namespace Math6Companion.Core.Mock
                     if (hasStep2)
                     {
                         stepOk[1] = true;
-                        stepComments[1] = "Nhân trước: 5 × 2 = 10 (Chính xác)";
+                        stepComments[1] = "NhÃ¢n trÆ°á»›c: 5 Ã— 2 = 10 (ChÃ­nh xÃ¡c)";
                     }
                     else if (orderError)
                     {
                         stepOk[1] = false;
                         detectedMistake = "ORDER_OF_OPERATIONS";
-                        stepComments[1] = "Cần nhân trước: 5 × 2 = 10 (Em đã lấy 15 - 5 = 10 trước là sai thứ tự ưu tiên!)";
+                        stepComments[1] = "Cáº§n nhÃ¢n trÆ°á»›c: 5 Ã— 2 = 10 (Em Ä‘Ã£ láº¥y 15 - 5 = 10 trÆ°á»›c lÃ  sai thá»© tá»± Æ°u tiÃªn!)";
                     }
                     else
                     {
                         stepOk[1] = false;
-                        stepComments[1] = "Cần nhân trước: 5 × 2 = 10 (Chưa thực hiện phép nhân theo thứ tự ưu tiên)";
+                        stepComments[1] = "Cáº§n nhÃ¢n trÆ°á»›c: 5 Ã— 2 = 10 (ChÆ°a thá»±c hiá»‡n phÃ©p nhÃ¢n theo thá»© tá»± Æ°u tiÃªn)";
                     }
                 }
 
@@ -677,10 +765,10 @@ namespace Math6Companion.Core.Mock
                     bool hasStep3 = CheckStudentAnswer(cleanText, "5");
                     stepOk[2] = hasStep3;
                     stepComments[2] = hasStep3 
-                        ? "Trừ sau: 15 - 10 = 5 (Chính xác)" 
+                        ? "Trá»« sau: 15 - 10 = 5 (ChÃ­nh xÃ¡c)" 
                         : (orderError 
-                            ? "Trừ sau: 15 - 10 = 5 (Do bước trước tính nhầm thứ tự nên kết quả ra 20 thay vì 5)" 
-                            : "Trừ sau: 15 - 10 = 5 (Chưa đạt đáp số đúng 5)");
+                            ? "Trá»« sau: 15 - 10 = 5 (Do bÆ°á»›c trÆ°á»›c tÃ­nh nháº§m thá»© tá»± nÃªn káº¿t quáº£ ra 20 thay vÃ¬ 5)" 
+                            : "Trá»« sau: 15 - 10 = 5 (ChÆ°a Ä‘áº¡t Ä‘Ã¡p sá»‘ Ä‘Ãºng 5)");
                 }
 
                 if (stepOk[0] && stepOk[1] && stepOk[2])
@@ -688,8 +776,8 @@ namespace Math6Companion.Core.Mock
                     resp.score = 10;
                     resp.passed = true;
                     resp.detectedMistakeType = "NONE";
-                    resp.pedagogicalFeedback = $"Thầy Minh khen ngợi: Bài giải của em cho câu '{GetShortPrompt(promptLower)}' rất chuẩn xác và rõ ràng. Em đã thực hiện đúng quy tắc và đạt đáp số chính xác!";
-                    resp.remedialExercise = "Em đã làm chủ dạng toán này! Hãy tiếp tục rèn luyện thêm các câu tiếp theo nhé.";
+                    resp.pedagogicalFeedback = $"Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em cho cÃ¢u '{GetShortPrompt(promptLower)}' ráº¥t chuáº©n xÃ¡c vÃ  rÃµ rÃ ng. Em Ä‘Ã£ thá»±c hiá»‡n Ä‘Ãºng quy táº¯c vÃ  Ä‘áº¡t Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c!";
+                    resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n nÃ y! HÃ£y tiáº¿p tá»¥c rÃ¨n luyá»‡n thÃªm cÃ¡c cÃ¢u tiáº¿p theo nhÃ©.";
                     for (int i = 0; i < rubrics.Count; i++)
                     {
                         resp.stepAnalysis.Add(new StepAnalysisItem
@@ -705,8 +793,8 @@ namespace Math6Companion.Core.Mock
                 if (orderError && hasStep1)
                 {
                     detectedMistake = "ORDER_OF_OPERATIONS";
-                    specificFeedback = "Thầy Minh nhận xét: Em đã làm đúng Bước 1 (tính trong ngoặc: 3 + 2 = 5 để được biểu thức 15 - 5 × 2). Tuy nhiên ở bước tiếp theo, em đã nhầm thứ tự ưu tiên khi lấy 15 - 5 = 10 trước! Hãy nhớ quy tắc cốt lõi: 'Nhân chia trước, cộng trừ sau' nhé.";
-                    remedialAdvice = "Gợi ý của Thầy Minh: Ở biểu thức 15 - 5 × 2, em hãy thực hiện phép nhân 5 × 2 = 10 trước, sau đó mới lấy 15 - 10 nhé. Bấm 'GIẢI LẠI CÂU NÀY' để thử lại!";
+                    specificFeedback = "Tháº§y Minh nháº­n xÃ©t: Em Ä‘Ã£ lÃ m Ä‘Ãºng BÆ°á»›c 1 (tÃ­nh trong ngoáº·c: 3 + 2 = 5 Ä‘á»ƒ Ä‘Æ°á»£c biá»ƒu thá»©c 15 - 5 Ã— 2). Tuy nhiÃªn á»Ÿ bÆ°á»›c tiáº¿p theo, em Ä‘Ã£ nháº§m thá»© tá»± Æ°u tiÃªn khi láº¥y 15 - 5 = 10 trÆ°á»›c! HÃ£y nhá»› quy táº¯c cá»‘t lÃµi: 'NhÃ¢n chia trÆ°á»›c, cá»™ng trá»« sau' nhÃ©.";
+                    remedialAdvice = "Gá»£i Ã½ cá»§a Tháº§y Minh: á»ž biá»ƒu thá»©c 15 - 5 Ã— 2, em hÃ£y thá»±c hiá»‡n phÃ©p nhÃ¢n 5 Ã— 2 = 10 trÆ°á»›c, sau Ä‘Ã³ má»›i láº¥y 15 - 10 nhÃ©. Báº¥m 'GIáº¢I Láº I CÃ‚U NÃ€Y' Ä‘á»ƒ thá»­ láº¡i!";
                 }
             }
             // TRUONG HOP B: Bai toan so nguyen A = (-25) + 48 + (-75) + 52
@@ -729,7 +817,7 @@ namespace Math6Companion.Core.Mock
                 {
                     bool hasStep3 = CheckStudentAnswer(cleanText, "0");
                     stepOk[2] = hasStep3;
-                    stepComments[2] = hasStep3 ? $"{rubrics[2].description} (Chính xác)" : $"{rubrics[2].description} (Chưa đạt đáp số 0)";
+                    stepComments[2] = hasStep3 ? $"{rubrics[2].description} (ChÃ­nh xÃ¡c)" : $"{rubrics[2].description} (ChÆ°a Ä‘áº¡t Ä‘Ã¡p sá»‘ 0)";
                 }
 
                 if (stepOk[0] && (rubrics.Count < 2 || stepOk[1]) && (rubrics.Count < 3 || stepOk[2]))
@@ -737,8 +825,8 @@ namespace Math6Companion.Core.Mock
                     resp.score = 10;
                     resp.passed = true;
                     resp.detectedMistakeType = "NONE";
-                    resp.pedagogicalFeedback = $"Thầy Minh khen ngợi: Bài giải của em cho câu '{GetShortPrompt(promptLower)}' rất chuẩn xác và rõ ràng. Em đã thực hiện đúng quy tắc và đạt đáp số chính xác!";
-                    resp.remedialExercise = "Em đã làm chủ dạng toán này! Hãy tiếp tục rèn luyện thêm các câu tiếp theo nhé.";
+                    resp.pedagogicalFeedback = $"Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em cho cÃ¢u '{GetShortPrompt(promptLower)}' ráº¥t chuáº©n xÃ¡c vÃ  rÃµ rÃ ng. Em Ä‘Ã£ thá»±c hiá»‡n Ä‘Ãºng quy táº¯c vÃ  Ä‘áº¡t Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c!";
+                    resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n nÃ y! HÃ£y tiáº¿p tá»¥c rÃ¨n luyá»‡n thÃªm cÃ¡c cÃ¢u tiáº¿p theo nhÃ©.";
                     for (int i = 0; i < rubrics.Count; i++)
                     {
                         resp.stepAnalysis.Add(new StepAnalysisItem
@@ -753,8 +841,8 @@ namespace Math6Companion.Core.Mock
 
                 if (stepOk[0])
                 {
-                    specificFeedback = "Thầy Minh nhận xét: Em đã biết cách nhóm các số hạng một cách hợp lý. Hãy cẩn thận tính lại tổng hai số nguyên đối nhau (-100 + 100) nhé!";
-                    remedialAdvice = "Gợi ý của Thầy Minh: Hai số nguyên đối nhau có tổng bằng 0. Em hãy kiểm tra lại và bấm 'GIẢI LẠI CÂU NÀY' nhé.";
+                    specificFeedback = "Tháº§y Minh nháº­n xÃ©t: Em Ä‘Ã£ biáº¿t cÃ¡ch nhÃ³m cÃ¡c sá»‘ háº¡ng má»™t cÃ¡ch há»£p lÃ½. HÃ£y cáº©n tháº­n tÃ­nh láº¡i tá»•ng hai sá»‘ nguyÃªn Ä‘á»‘i nhau (-100 + 100) nhÃ©!";
+                    remedialAdvice = "Gá»£i Ã½ cá»§a Tháº§y Minh: Hai sá»‘ nguyÃªn Ä‘á»‘i nhau cÃ³ tá»•ng báº±ng 0. Em hÃ£y kiá»ƒm tra láº¡i vÃ  báº¥m 'GIáº¢I Láº I CÃ‚U NÃ€Y' nhÃ©.";
                 }
             }
             // TRUONG HOP C: Bai toan ti so phan tram / phieu bau (Tan nhan duoc 120 phieu bau...)
@@ -763,8 +851,8 @@ namespace Math6Companion.Core.Mock
                 bool hasStep1 = cleanText.Contains("120") && (cleanText.Contains("60") || cleanText.Contains("0.6") || cleanText.Contains("0,6"));
                 stepOk[0] = hasStep1;
                 stepComments[0] = hasStep1 
-                    ? $"{rubrics[0].description} (Chính xác: Nhận diện đúng bài toán tìm một số biết giá trị phân số)" 
-                    : $"{rubrics[0].description} (Chưa nhận diện đúng dạng toán)";
+                    ? $"{rubrics[0].description} (ChÃ­nh xÃ¡c: Nháº­n diá»‡n Ä‘Ãºng bÃ i toÃ¡n tÃ¬m má»™t sá»‘ biáº¿t giÃ¡ trá»‹ phÃ¢n sá»‘)" 
+                    : $"{rubrics[0].description} (ChÆ°a nháº­n diá»‡n Ä‘Ãºng dáº¡ng toÃ¡n)";
 
                 bool multiplied = cleanText.Contains("120x60") || cleanText.Contains("120*60") || cleanText.Contains("=72");
                 if (rubrics.Count > 1)
@@ -773,13 +861,13 @@ namespace Math6Companion.Core.Mock
                     {
                         stepOk[1] = false;
                         detectedMistake = "ORDER_OF_OPERATIONS";
-                        stepComments[1] = $"{rubrics[1].description} (Chưa chính xác: Đây là bài toán tìm một số khi biết 60% của nó, ta phải dùng phép CHIA '120 : 60%', không dùng phép nhân)";
+                        stepComments[1] = $"{rubrics[1].description} (ChÆ°a chÃ­nh xÃ¡c: ÄÃ¢y lÃ  bÃ i toÃ¡n tÃ¬m má»™t sá»‘ khi biáº¿t 60% cá»§a nÃ³, ta pháº£i dÃ¹ng phÃ©p CHIA '120 : 60%', khÃ´ng dÃ¹ng phÃ©p nhÃ¢n)";
                     }
                     else
                     {
                         bool hasDiv = cleanText.Contains("120/0.6") || cleanText.Contains("120/60") || cleanText.Contains("120/(60/100)");
                         stepOk[1] = hasDiv;
-                        stepComments[1] = hasDiv ? $"{rubrics[1].description} (Chính xác)" : $"{rubrics[1].description} (Chưa thiết lập đúng phép chia)";
+                        stepComments[1] = hasDiv ? $"{rubrics[1].description} (ChÃ­nh xÃ¡c)" : $"{rubrics[1].description} (ChÆ°a thiáº¿t láº­p Ä‘Ãºng phÃ©p chia)";
                     }
                 }
 
@@ -787,7 +875,7 @@ namespace Math6Companion.Core.Mock
                 {
                     bool hasStep3 = CheckStudentAnswer(cleanText, "200");
                     stepOk[2] = hasStep3;
-                    stepComments[2] = hasStep3 ? $"{rubrics[2].description} (Chính xác)" : $"{rubrics[2].description} (Chưa tính ra đáp số chính xác 200 người)";
+                    stepComments[2] = hasStep3 ? $"{rubrics[2].description} (ChÃ­nh xÃ¡c)" : $"{rubrics[2].description} (ChÆ°a tÃ­nh ra Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c 200 ngÆ°á»i)";
                 }
 
                 if (stepOk[0] && (rubrics.Count < 2 || stepOk[1]) && (rubrics.Count < 3 || stepOk[2]))
@@ -795,8 +883,8 @@ namespace Math6Companion.Core.Mock
                     resp.score = 10;
                     resp.passed = true;
                     resp.detectedMistakeType = "NONE";
-                    resp.pedagogicalFeedback = $"Thầy Minh khen ngợi: Bài giải của em cho câu '{GetShortPrompt(promptLower)}' rất chuẩn xác và rõ ràng. Em đã thực hiện đúng quy tắc và đạt đáp số chính xác!";
-                    resp.remedialExercise = "Em đã làm chủ dạng toán này! Hãy tiếp tục rèn luyện thêm các câu tiếp theo nhé.";
+                    resp.pedagogicalFeedback = $"Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em cho cÃ¢u '{GetShortPrompt(promptLower)}' ráº¥t chuáº©n xÃ¡c vÃ  rÃµ rÃ ng. Em Ä‘Ã£ thá»±c hiá»‡n Ä‘Ãºng quy táº¯c vÃ  Ä‘áº¡t Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c!";
+                    resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n nÃ y! HÃ£y tiáº¿p tá»¥c rÃ¨n luyá»‡n thÃªm cÃ¡c cÃ¢u tiáº¿p theo nhÃ©.";
                     for (int i = 0; i < rubrics.Count; i++)
                     {
                         resp.stepAnalysis.Add(new StepAnalysisItem
@@ -811,8 +899,8 @@ namespace Math6Companion.Core.Mock
 
                 if (multiplied)
                 {
-                    specificFeedback = "Thầy Minh nhận xét: Em đã nhầm lẫn giữa hai bài toán phân số: Để tìm tổng số phiếu khi biết 60% tổng số phiếu là 120, ta phải làm phép CHIA: 120 : 60% (tức 120 : 0,6), không phải phép nhân nhé!";
-                    remedialAdvice = "Gợi ý của Thầy Minh: Muốn tìm một số biết m/n của nó bằng a, ta tính a : (m/n). Em hãy lấy 120 : 0,6 và bấm 'GIẢI LẠI CÂU NÀY' nhé!";
+                    specificFeedback = "Tháº§y Minh nháº­n xÃ©t: Em Ä‘Ã£ nháº§m láº«n giá»¯a hai bÃ i toÃ¡n phÃ¢n sá»‘: Äá»ƒ tÃ¬m tá»•ng sá»‘ phiáº¿u khi biáº¿t 60% tá»•ng sá»‘ phiáº¿u lÃ  120, ta pháº£i lÃ m phÃ©p CHIA: 120 : 60% (tá»©c 120 : 0,6), khÃ´ng pháº£i phÃ©p nhÃ¢n nhÃ©!";
+                    remedialAdvice = "Gá»£i Ã½ cá»§a Tháº§y Minh: Muá»‘n tÃ¬m má»™t sá»‘ biáº¿t m/n cá»§a nÃ³ báº±ng a, ta tÃ­nh a : (m/n). Em hÃ£y láº¥y 120 : 0,6 vÃ  báº¥m 'GIáº¢I Láº I CÃ‚U NÃ€Y' nhÃ©!";
                 }
             }
             // TRUONG HOP D: TONG QUAT CHO CAC BAI TOAN KHAC CO RUBRIC
@@ -832,20 +920,20 @@ namespace Math6Companion.Core.Mock
                             matched = true;
                         }
                         stepOk[i] = matched;
-                        stepComments[i] = matched ? $"{r.description} (Chính xác)" : $"{r.description} (Chưa thực hiện đúng)";
+                        stepComments[i] = matched ? $"{r.description} (ChÃ­nh xÃ¡c)" : $"{r.description} (ChÆ°a thá»±c hiá»‡n Ä‘Ãºng)";
                     }
                     else if (i == rubrics.Count - 1)
                     {
                         bool matched = (!string.IsNullOrEmpty(expectedTarget) && CheckStudentAnswer(cleanText, expectedTarget)) ||
                                        (!string.IsNullOrEmpty(rAns) && CheckStudentAnswer(cleanText, rAns));
                         stepOk[i] = matched;
-                        stepComments[i] = matched ? $"{r.description} (Chính xác)" : $"{r.description} (Chưa đạt đáp số đúng)";
+                        stepComments[i] = matched ? $"{r.description} (ChÃ­nh xÃ¡c)" : $"{r.description} (ChÆ°a Ä‘áº¡t Ä‘Ã¡p sá»‘ Ä‘Ãºng)";
                     }
                     else
                     {
                         bool matched = !string.IsNullOrEmpty(rAns) && cleanText.Contains(rAns);
                         stepOk[i] = matched;
-                        stepComments[i] = matched ? $"{r.description} (Chính xác)" : $"{r.description} (Chưa chính xác)";
+                        stepComments[i] = matched ? $"{r.description} (ChÃ­nh xÃ¡c)" : $"{r.description} (ChÆ°a chÃ­nh xÃ¡c)";
                     }
                 }
 
@@ -860,8 +948,8 @@ namespace Math6Companion.Core.Mock
                     resp.score = 10;
                     resp.passed = true;
                     resp.detectedMistakeType = "NONE";
-                    resp.pedagogicalFeedback = $"Thầy Minh khen ngợi: Bài giải của em cho câu '{GetShortPrompt(promptLower)}' rất chuẩn xác và rõ ràng. Em đã thực hiện đúng quy tắc và đạt đáp số chính xác!";
-                    resp.remedialExercise = "Em đã làm chủ dạng toán này! Hãy tiếp tục rèn luyện thêm các câu tiếp theo nhé.";
+                    resp.pedagogicalFeedback = $"Tháº§y Minh khen ngá»£i: BÃ i giáº£i cá»§a em cho cÃ¢u '{GetShortPrompt(promptLower)}' ráº¥t chuáº©n xÃ¡c vÃ  rÃµ rÃ ng. Em Ä‘Ã£ thá»±c hiá»‡n Ä‘Ãºng quy táº¯c vÃ  Ä‘áº¡t Ä‘Ã¡p sá»‘ chÃ­nh xÃ¡c!";
+                    resp.remedialExercise = "Em Ä‘Ã£ lÃ m chá»§ dáº¡ng toÃ¡n nÃ y! HÃ£y tiáº¿p tá»¥c rÃ¨n luyá»‡n thÃªm cÃ¡c cÃ¢u tiáº¿p theo nhÃ©.";
                     for (int i = 0; i < rubrics.Count; i++)
                     {
                         resp.stepAnalysis.Add(new StepAnalysisItem
@@ -902,7 +990,7 @@ namespace Math6Companion.Core.Mock
             resp.passed = false;
             resp.detectedMistakeType = detectedMistake;
 
-            // Xác định dòng đầu tiên bị sai & lưu lại các dòng đúng phía trước để học sinh sửa tiếp
+            // XÃ¡c Ä‘á»‹nh dÃ²ng Ä‘áº§u tiÃªn bá»‹ sai & lÆ°u láº¡i cÃ¡c dÃ²ng Ä‘Ãºng phÃ­a trÆ°á»›c Ä‘á»ƒ há»c sinh sá»­a tiáº¿p
             string[] studentLines = (rawText ?? "").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int firstWrongIndex = -1;
             string correctPrefix = "";
@@ -951,7 +1039,7 @@ namespace Math6Companion.Core.Mock
             resp.correctStepsPrefix = correctPrefix;
             resp.penaltyRuleToCopy = CurriculumEssayKnowledgeBase.GetPenaltyRule(detectedMistake, promptLower, "");
 
-            // Nếu học sinh viết nhiều dòng, hiển thị phân tích từng dòng thực tế của học sinh (không giới hạn 3 bước)
+            // Náº¿u há»c sinh viáº¿t nhiá»u dÃ²ng, hiá»ƒn thá»‹ phÃ¢n tÃ­ch tá»«ng dÃ²ng thá»±c táº¿ cá»§a há»c sinh (khÃ´ng giá»›i háº¡n 3 bÆ°á»›c)
             if (studentLines.Length > 1)
             {
                 resp.stepAnalysis.Clear();
@@ -959,10 +1047,10 @@ namespace Math6Companion.Core.Mock
                 {
                     bool isLineOk = firstWrongIndex < 0 || i < firstWrongIndex;
                     string lineComment = isLineOk 
-                        ? $"Dòng {i + 1}: {studentLines[i].Trim()} (Chính xác)" 
+                        ? $"DÃ²ng {i + 1}: {studentLines[i].Trim()} (ChÃ­nh xÃ¡c)" 
                         : (i == firstWrongIndex 
-                            ? $"Dòng {i + 1}: {studentLines[i].Trim()} (Sai ở dòng này: {stepComments[Mathf.Clamp(i, 0, stepComments.Length - 1)]})" 
-                            : $"Dòng {i + 1}: {studentLines[i].Trim()} (Chưa chính xác: Do dòng trước tính nhầm)");
+                            ? $"DÃ²ng {i + 1}: {studentLines[i].Trim()} (Sai á»Ÿ dÃ²ng nÃ y: {stepComments[Mathf.Clamp(i, 0, stepComments.Length - 1)]})" 
+                            : $"DÃ²ng {i + 1}: {studentLines[i].Trim()} (ChÆ°a chÃ­nh xÃ¡c: Do dÃ²ng trÆ°á»›c tÃ­nh nháº§m)");
 
                     resp.stepAnalysis.Add(new StepAnalysisItem
                     {
@@ -1076,7 +1164,7 @@ namespace Math6Companion.Core.Mock
                 // 2. Kiem tra co bieu thuc ro rang: "= <expected>" hoac ": <expected>" hoac "dap so <expected>"
                 // Luu y dung Regex de kiem tra boundary khong bi nham "5" voi "50" hay "15-5"
                 string escapedExp = System.Text.RegularExpressions.Regex.Escape(normExpected);
-                var eqMatch = System.Text.RegularExpressions.Regex.Match(studentTextLower ?? "", @"(?:=|:\s*|đáp\s*số:?\s*|kq:?\s*)\s*" + escapedExp + @"(?!\d)");
+                var eqMatch = System.Text.RegularExpressions.Regex.Match(studentTextLower ?? "", @"(?:=|:\s*|Ä‘Ã¡p\s*sá»‘:?\s*|kq:?\s*)\s*" + escapedExp + @"(?!\d)");
                 if (eqMatch.Success)
                 {
                     return true;

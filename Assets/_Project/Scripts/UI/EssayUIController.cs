@@ -1721,12 +1721,95 @@ namespace Math6Companion.UI
             questionImageDownloadRoutine = StartCoroutine(DownloadQuestionImageRoutine(url));
         }
 
+        private class BypassCertificateHandler : UnityEngine.Networking.CertificateHandler
+        {
+            protected override bool ValidateCertificate(byte[] certificateData) => true;
+        }
+
+        private static string GetImageCacheDirectory()
+        {
+            string dir = System.IO.Path.Combine(Application.persistentDataPath, "QuestionImagesCache");
+            if (!System.IO.Directory.Exists(dir))
+            {
+                try { System.IO.Directory.CreateDirectory(dir); } catch {}
+            }
+            return dir;
+        }
+
+        private static string GetCacheFileNameForUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return "unknown.png";
+            string clean = url.Trim();
+            int qIdx = clean.IndexOf('?');
+            if (qIdx >= 0) clean = clean.Substring(0, qIdx);
+            string fn = System.IO.Path.GetFileName(clean);
+            if (!string.IsNullOrEmpty(fn) && (fn.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || 
+                                              fn.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
+                                              fn.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
+            {
+                return fn;
+            }
+
+            try
+            {
+                using (var md5 = System.Security.Cryptography.MD5.Create())
+                {
+                    byte[] hash = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(url));
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant() + ".png";
+                }
+            }
+            catch
+            {
+                return Mathf.Abs(url.GetHashCode()) + ".png";
+            }
+        }
+
+        private static void SaveBytesToDiskCache(string fileName, byte[] data)
+        {
+            if (data == null || data.Length == 0) return;
+            try
+            {
+                string dir = GetImageCacheDirectory();
+                string fullPath = System.IO.Path.Combine(dir, fileName);
+                System.IO.File.WriteAllBytes(fullPath, data);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[EssayUIController] Không thể lưu cache ảnh: {ex.Message}");
+            }
+        }
+
+        private static byte[] DownloadImageBytesViaHttpWebRequest(string url, int timeoutMs)
+        {
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+            var req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+            req.Method = "GET";
+            req.Proxy = null;
+            req.KeepAlive = false;
+            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+            req.Accept = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+            req.AllowAutoRedirect = true;
+            req.MaximumAutomaticRedirections = 10;
+            req.Timeout = timeoutMs;
+            req.ReadWriteTimeout = timeoutMs;
+
+            using (var resp = (System.Net.HttpWebResponse)req.GetResponse())
+            using (var stream = resp.GetResponseStream())
+            using (var ms = new System.IO.MemoryStream())
+            {
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
         private IEnumerator DownloadQuestionImageRoutine(string rawUrl)
         {
             string url = (rawUrl ?? "").Trim();
             if (string.IsNullOrEmpty(url)) yield break;
 
-            // 1. Kiem tra bo nho dem (Cache)
+            // 1. Kiem tra bo nho dem RAM (Cache)
             if (s_QuestionImageCache.TryGetValue(rawUrl, out Texture2D cachedTex) && cachedTex != null)
             {
                 ApplyQuestionTexture(cachedTex);
@@ -1738,26 +1821,46 @@ namespace Math6Companion.UI
                 yield break;
             }
 
-            // 2. Kiem tra tep cuc bo hoac duong dan project
-            string localCandidate = url.Replace("file://", "");
-            if (localCandidate.StartsWith("Assets/"))
+            string fileName = GetCacheFileNameForUrl(url);
+
+            // 2. Kiem tra o cung (Disk Cache & StreamingAssets & Assets Local)
+            string[] localLookupPaths = new string[]
             {
-                localCandidate = System.IO.Path.Combine(Application.dataPath, localCandidate.Substring(7));
-            }
-            if (System.IO.File.Exists(localCandidate))
+                // A. Disk Cache thu muc persistent
+                System.IO.Path.Combine(GetImageCacheDirectory(), fileName),
+                // B. StreamingAssets (dong goi truc tiep trong ban build)
+                System.IO.Path.Combine(Application.streamingAssetsPath, "QuestionImages", fileName),
+                // C. StreamingAssets trong Editor / Project
+                System.IO.Path.Combine(Application.dataPath, "StreamingAssets/QuestionImages", fileName),
+                // D. Thu muc Textures cua du an
+                System.IO.Path.Combine(Application.dataPath, "_Project/Textures/QuestionImages", fileName),
+                // E. Duong dan truc tiep neu la file:// hoac Assets/
+                url.Replace("file://", "").StartsWith("Assets/") 
+                    ? System.IO.Path.Combine(Application.dataPath, url.Replace("file://", "").Substring(7)) 
+                    : url.Replace("file://", "")
+            };
+
+            foreach (var lp in localLookupPaths)
             {
-                try
+                if (!string.IsNullOrEmpty(lp) && System.IO.File.Exists(lp))
                 {
-                    byte[] bytes = System.IO.File.ReadAllBytes(localCandidate);
-                    Texture2D localTex = new Texture2D(2, 2);
-                    if (localTex.LoadImage(bytes))
+                    try
                     {
-                        s_QuestionImageCache[rawUrl] = localTex;
-                        ApplyQuestionTexture(localTex);
-                        yield break;
+                        byte[] localBytes = System.IO.File.ReadAllBytes(lp);
+                        if (localBytes != null && localBytes.Length > 0)
+                        {
+                            Texture2D localTex = new Texture2D(2, 2);
+                            if (localTex.LoadImage(localBytes))
+                            {
+                                s_QuestionImageCache[rawUrl] = localTex;
+                                s_QuestionImageCache[url] = localTex;
+                                ApplyQuestionTexture(localTex);
+                                yield break;
+                            }
+                        }
                     }
+                    catch {}
                 }
-                catch {}
             }
 
             // 3. Chuan hoa Google Drive share link & Dropbox
@@ -1796,6 +1899,8 @@ namespace Math6Companion.UI
                     if (b64Tex.LoadImage(bytes))
                     {
                         s_QuestionImageCache[rawUrl] = b64Tex;
+                        s_QuestionImageCache[url] = b64Tex;
+                        SaveBytesToDiskCache(fileName, bytes);
                         ApplyQuestionTexture(b64Tex);
                         yield break;
                     }
@@ -1803,41 +1908,96 @@ namespace Math6Companion.UI
                 catch {}
             }
 
-            // 5. Tai qua mang voi UnityWebRequestTexture (Direct texture decoder)
+            // 5. Tai qua mang
             if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
-                using (UnityEngine.Networking.UnityWebRequest req = UnityEngine.Networking.UnityWebRequestTexture.GetTexture(url))
+                Texture2D downloadedTex = null;
+
+                // Kenh 1: UnityWebRequest Buffer + CertificateHandler bypass
+                using (UnityEngine.Networking.UnityWebRequest req = new UnityEngine.Networking.UnityWebRequest(url, "GET"))
                 {
-                    req.timeout = 5;
-                    req.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)");
+                    req.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
+                    req.certificateHandler = new BypassCertificateHandler();
+                    req.timeout = 10;
+                    req.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    req.SetRequestHeader("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8");
                     yield return req.SendWebRequest();
 
-                    Texture2D downloadedTex = null;
-                    if (req.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                    if (req.result == UnityEngine.Networking.UnityWebRequest.Result.Success && req.downloadHandler.data != null && req.downloadHandler.data.Length > 0)
                     {
-                        downloadedTex = UnityEngine.Networking.DownloadHandlerTexture.GetContent(req);
+                        byte[] bytes = req.downloadHandler.data;
+                        Texture2D webTex = new Texture2D(2, 2);
+                        if (webTex.LoadImage(bytes))
+                        {
+                            downloadedTex = webTex;
+                            SaveBytesToDiskCache(fileName, bytes);
+                        }
                     }
                     else
                     {
-                        Debug.LogWarning($"[EssayUIController] Không thể tải ảnh trực tiếp từ URL ({url}): {req.error}");
+                        Debug.LogWarning($"[EssayUIController] UnityWebRequest không tải được ảnh ({url}): {req.error}. Kích hoạt kênh dự phòng .NET HttpWebRequest...");
+                    }
+                }
+
+                // Kenh 2: Kenh du phong bang .NET HttpWebRequest (Bypass hoan toan libcurl & proxy)
+                if (downloadedTex == null)
+                {
+                    byte[] fallbackBytes = null;
+                    bool fallbackDone = false;
+                    string fallbackError = null;
+
+                    System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+                    {
+                        try
+                        {
+                            fallbackBytes = DownloadImageBytesViaHttpWebRequest(url, 15000);
+                        }
+                        catch (Exception ex)
+                        {
+                            fallbackError = ex.Message;
+                        }
+                        finally
+                        {
+                            fallbackDone = true;
+                        }
+                    });
+
+                    while (!fallbackDone)
+                    {
+                        yield return null;
                     }
 
-                    // Neu tai online that bai, dung anh minh hoa cuc bo du phong
-                    if (downloadedTex == null)
+                    if (fallbackBytes != null && fallbackBytes.Length > 0)
                     {
-                        downloadedTex = LoadLocalFallbackTexture();
+                        Texture2D fbTex = new Texture2D(2, 2);
+                        if (fbTex.LoadImage(fallbackBytes))
+                        {
+                            downloadedTex = fbTex;
+                            SaveBytesToDiskCache(fileName, fallbackBytes);
+                            Debug.Log($"[EssayUIController] Đã tải thành công ảnh qua kênh .NET HttpWebRequest ({fallbackBytes.Length} bytes)");
+                        }
                     }
+                    else if (!string.IsNullOrEmpty(fallbackError))
+                    {
+                        Debug.LogWarning($"[EssayUIController] Kênh .NET HttpWebRequest cũng thất bại: {fallbackError}");
+                    }
+                }
 
-                    if (downloadedTex != null)
-                    {
-                        s_QuestionImageCache[rawUrl] = downloadedTex;
-                        s_QuestionImageCache[url] = downloadedTex;
-                        ApplyQuestionTexture(downloadedTex);
-                    }
-                    else
-                    {
-                        HideQuestionIllustration();
-                    }
+                // Kenh 3: Neu tai online that bai, dung anh minh hoa cuc bo du phong
+                if (downloadedTex == null)
+                {
+                    downloadedTex = LoadLocalFallbackTexture();
+                }
+
+                if (downloadedTex != null)
+                {
+                    s_QuestionImageCache[rawUrl] = downloadedTex;
+                    s_QuestionImageCache[url] = downloadedTex;
+                    ApplyQuestionTexture(downloadedTex);
+                }
+                else
+                {
+                    HideQuestionIllustration();
                 }
             }
             else
