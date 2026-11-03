@@ -109,6 +109,20 @@ namespace Math6Companion.UI
 
         private void Update()
         {
+            // Đảm bảo placeholder không bao giờ bị đè chữ lên input khi người dùng gõ hoặc load dữ liệu
+            if (usernameInput != null && usernameInput.placeholder != null)
+            {
+                bool show = string.IsNullOrEmpty(usernameInput.text);
+                if (usernameInput.placeholder.gameObject.activeSelf != show)
+                    usernameInput.placeholder.gameObject.SetActive(show);
+            }
+            if (passwordInput != null && passwordInput.placeholder != null)
+            {
+                bool show = string.IsNullOrEmpty(passwordInput.text);
+                if (passwordInput.placeholder.gameObject.activeSelf != show)
+                    passwordInput.placeholder.gameObject.SetActive(show);
+            }
+
             // Cho phép bấm Enter để đăng nhập nhanh
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {

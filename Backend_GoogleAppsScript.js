@@ -314,7 +314,7 @@ function handleGetLessons(topic) {
       objectives: idx.obj >= 0 ? row[idx.obj] : "",
       videoUrl: idx.video >= 0 ? row[idx.video] : "",
       description: idx.content >= 0 ? row[idx.content] : (idx.summary >= 0 ? row[idx.summary] : ""),
-      topStudentNickname: "Tráº¡ng TÃ­",
+      topStudentNickname: "Trạng Tí",
       topStudentAttempts: 1,
       userHighestScore: 0
     });
@@ -634,44 +634,52 @@ function handleJoinVersusQueue(userId, nickname, mode) {
     const now = Date.now();
     const qData = qSheet.getDataRange().getValues();
 
-    // 1. Kiểm tra xem người chơi này đã có phòng MATCHED chưa
+    // 1. Dọn dẹp trạng thái cũ: Khi người chơi ấn Bắt đầu ghép cặp mới,
+    // xóa bỏ phòng cũ đã kết thúc hoặc quá hạn để tránh bị kẹt với đối thủ cũ.
     for (let i = 1; i < qData.length; i++) {
       if (String(qData[i][0]) === String(userId)) {
         if (qData[i][3] === "MATCHED" && qData[i][4]) {
-          const roomId = String(qData[i][4]);
-          const roomInfo = getRoomDetails(rSheet, roomId, userId);
-          if (roomInfo) {
+          const oldRoomId = String(qData[i][4]);
+          const oldRoom = getRoomDetails(rSheet, oldRoomId, userId);
+          // Chỉ tái sử dụng phòng nếu phòng VỪA MỚI TẠO trong vòng 20s và chưa ai nộp bài
+          if (oldRoom && oldRoom.status === "PLAYING" && (now - oldRoom.createdAtMs < 20000) && oldRoom.player1Score === -1 && oldRoom.player2Score === -1) {
             lock.releaseLock();
             return createJsonResponse({
               success: true,
               status: "MATCHED",
-              roomId: roomId,
-              opponentId: roomInfo.opponentId,
-              opponentNickname: roomInfo.opponentNickname,
-              mode: roomInfo.mode,
-              questionIds: roomInfo.questionIds
+              roomId: oldRoomId,
+              opponentId: oldRoom.opponentId,
+              opponentNickname: oldRoom.opponentNickname,
+              mode: oldRoom.mode,
+              questionIds: oldRoom.questionIds
             });
+          } else {
+            // Phòng cũ đã xong hoặc hết hạn -> reset hàng đợi của người chơi này
+            qSheet.getRange(i + 1, 4).setValue("WAITING");
+            qSheet.getRange(i + 1, 5).setValue("");
+            qSheet.getRange(i + 1, 6).setValue(now);
           }
         }
       }
     }
 
-    // 2. Tìm người chơi khác đang WAITING cùng thể thức (ping trong vòng 60s)
+    // 2. Tìm người chơi khác đang WAITING cùng thể thức (ping trong vòng 35s)
     let matchedRowIndex = -1;
     let opponent = null;
 
-    for (let i = 1; i < qData.length; i++) {
-      const uId = String(qData[i][0]);
-      const uMode = String(qData[i][2]);
-      const uStatus = String(qData[i][3]);
-      const lastPing = Number(qData[i][5]) || 0;
+    const currentQData = qSheet.getDataRange().getValues();
+    for (let i = 1; i < currentQData.length; i++) {
+      const uId = String(currentQData[i][0]);
+      const uMode = String(currentQData[i][2]);
+      const uStatus = String(currentQData[i][3]);
+      const lastPing = Number(currentQData[i][5]) || 0;
 
       if (uId !== String(userId) && uMode === mode && uStatus === "WAITING") {
-        if (now - lastPing < 60000) {
+        if (now - lastPing < 35000) {
           matchedRowIndex = i + 1;
           opponent = {
             userId: uId,
-            nickname: String(qData[i][1])
+            nickname: String(currentQData[i][1])
           };
           break;
         } else {
@@ -704,7 +712,7 @@ function handleJoinVersusQueue(userId, nickname, mode) {
       qSheet.getRange(matchedRowIndex, 5).setValue(roomId);
       qSheet.getRange(matchedRowIndex, 6).setValue(now);
 
-      // Cập nhật người hiện tại thành MATCHED
+      // Cập nhật người thách đấu thành MATCHED
       upsertQueueUser(qSheet, userId, nickname, mode, "MATCHED", roomId, now);
 
       lock.releaseLock();
@@ -784,7 +792,27 @@ function handleCancelVersusQueue(userId) {
   const qData = qSheet.getDataRange().getValues();
   for (let i = 1; i < qData.length; i++) {
     if (String(qData[i][0]) === String(userId)) {
+      const oldRoomId = String(qData[i][4] || "");
       qSheet.getRange(i + 1, 4).setValue("CANCELLED");
+      qSheet.getRange(i + 1, 5).setValue("");
+      qSheet.getRange(i + 1, 6).setValue(Date.now());
+
+      if (oldRoomId) {
+        const rSheet = ss.getSheetByName("Match_Rooms");
+        if (rSheet) {
+          const rData = rSheet.getDataRange().getValues();
+          for (let r = 1; r < rData.length; r++) {
+            if (String(rData[r][0]) === oldRoomId && rData[r][12] === "PLAYING") {
+              const p1Done = String(rData[r][9]).toLowerCase() === "true" || rData[r][9] === true;
+              const p2Done = String(rData[r][10]).toLowerCase() === "true" || rData[r][10] === true;
+              if (!p1Done && !p2Done) {
+                rSheet.getRange(r + 1, 13).setValue("CANCELLED");
+              }
+              break;
+            }
+          }
+        }
+      }
       break;
     }
   }
@@ -794,6 +822,7 @@ function handleCancelVersusQueue(userId) {
 function handleSubmitVersusScore(roomId, userId, score) {
   if (!roomId || !userId) return createJsonResponse({ success: false, message: "Thiếu tham số" });
   score = parseInt(score) || 0;
+  if (score <= 10 && score > 0) score = score * 10;
 
   const lock = LockService.getScriptLock();
   try {
@@ -893,16 +922,24 @@ function handlePollVersusRoomResult(roomId, userId) {
       const row = rData[i];
       const p1Id = String(row[1]);
       const p1Name = String(row[2]);
-      const p1Score = parseInt(row[7]);
+      let p1Score = parseInt(row[7]);
       const p1Done = String(row[9]).toLowerCase() === "true" || row[9] === true;
 
       const p2Id = String(row[3]);
       const p2Name = String(row[4]);
-      const p2Score = parseInt(row[8]);
+      let p2Score = parseInt(row[8]);
       const p2Done = String(row[10]).toLowerCase() === "true" || row[10] === true;
 
+      if (p1Score <= 10 && p1Score > 0) p1Score = p1Score * 10;
+      if (p2Score <= 10 && p2Score > 0) p2Score = p2Score * 10;
+
       const isFinished = p1Done && p2Done;
-      const winnerId = String(row[11]);
+      let winnerId = String(row[11] || "");
+      if (isFinished && !winnerId) {
+        if (p1Score > p2Score) winnerId = p1Id;
+        else if (p2Score > p1Score) winnerId = p2Id;
+        else winnerId = "DRAW";
+      }
 
       return createJsonResponse({
         success: true,
@@ -921,7 +958,7 @@ function handlePollVersusRoomResult(roomId, userId) {
     }
   }
 
-  return createJsonResponse({ success: false, message: "Không tìm thấy phòng" });
+  return createJsonResponse({ success: false, message: "Phòng không tồn tại: " + roomId });
 }
 
 function upsertQueueUser(qSheet, userId, nickname, mode, status, roomId, pingTime) {
@@ -951,6 +988,19 @@ function getRoomDetails(rSheet, roomId, currentUserId) {
       const mode = String(data[i][5]);
       const qIdsStr = String(data[i][6] || "");
       const questionIds = qIdsStr ? qIdsStr.split(",") : [];
+      const p1Score = parseInt(data[i][7]);
+      const p2Score = parseInt(data[i][8]);
+      const p1Done = String(data[i][9]).toLowerCase() === "true" || data[i][9] === true;
+      const p2Done = String(data[i][10]).toLowerCase() === "true" || data[i][10] === true;
+      const winnerId = String(data[i][11] || "");
+      const status = String(data[i][12] || "PLAYING");
+      const createdAtRaw = data[i][13];
+      let createdAtMs = 0;
+      try {
+        createdAtMs = new Date(createdAtRaw).getTime() || 0;
+      } catch (e) {
+        createdAtMs = 0;
+      }
 
       const isP1 = String(currentUserId) === p1Id;
       return {
@@ -958,7 +1008,18 @@ function getRoomDetails(rSheet, roomId, currentUserId) {
         opponentId: isP1 ? p2Id : p1Id,
         opponentNickname: isP1 ? p2Name : p1Name,
         mode: mode,
-        questionIds: questionIds
+        questionIds: questionIds,
+        player1Id: p1Id,
+        player1Name: p1Name,
+        player1Score: p1Score,
+        player1Done: p1Done,
+        player2Id: p2Id,
+        player2Name: p2Name,
+        player2Score: p2Score,
+        player2Done: p2Done,
+        winnerId: winnerId,
+        status: status,
+        createdAtMs: createdAtMs
       };
     }
   }

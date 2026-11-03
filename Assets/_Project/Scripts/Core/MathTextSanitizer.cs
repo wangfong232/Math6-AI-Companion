@@ -15,20 +15,69 @@ namespace Math6Companion.Core
         /// Làm sạch và chuyển đổi ký hiệu toán học an toàn để hiển thị trên UI.
         /// Chuyển các ký hiệu không có trong font TMP tiêu chuẩn sang dạng tiếng Việt thân thiện, rõ ràng.
         /// </summary>
-                /// <summary>
+        /// <summary>
         /// Khắc phục chuỗi Tiếng Việt bị lỗi bảng mã Mojibake do UTF-8 đọc nhầm Windows-1252/Latin1.
         /// </summary>
         public static string HealVietnameseMojibake(string s)
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
 
-            s = s.Replace("AnTháº§nĂ□á»“ng", "An Thần Đồng")
+            // 1. Phục hồi byte-level nếu chuỗi chứa các byte UTF-8 bị đọc nhầm thành Windows-1252 / Latin-1
+            if (s.Contains("áº") || s.Contains("á»") || s.Contains("Ã") || s.Contains("Ä") || s.Contains("Æ"))
+            {
+                try
+                {
+                    var bytes = new System.Collections.Generic.List<byte>();
+                    for (int i = 0; i < s.Length; i++)
+                    {
+                        char c = s[i];
+                        if (c <= 0xFF)
+                        {
+                            bytes.Add((byte)c);
+                        }
+                        else if (c == '\u201C') bytes.Add(0x93); // Left double quote
+                        else if (c == '\u201D') bytes.Add(0x94); // Right double quote
+                        else if (c == '\u2018') bytes.Add(0x91); // Left single quote
+                        else if (c == '\u2019') bytes.Add(0x92); // Right single quote
+                        else if (c == '\u2022') bytes.Add(0x95); // Bullet
+                        else if (c == '\u2013') bytes.Add(0x96); // En dash
+                        else if (c == '\u2014') bytes.Add(0x97); // Em dash
+                        else if (c == '\u02DC') bytes.Add(0x98); // Small tilde
+                        else if (c == '\u2122') bytes.Add(0x99); // Trademark
+                        else if (c == '\u20AC') bytes.Add(0x80); // Euro
+                        else if (c == '\u2026') bytes.Add(0x85); // Ellipsis
+                        else
+                        {
+                            byte[] uBytes = System.Text.Encoding.UTF8.GetBytes(c.ToString());
+                            bytes.AddRange(uBytes);
+                        }
+                    }
+
+                    if (bytes.Count > 0)
+                    {
+                        string decoded = System.Text.Encoding.UTF8.GetString(bytes.ToArray());
+                        if (!string.IsNullOrEmpty(decoded) && !decoded.Contains("\uFFFD"))
+                        {
+                            s = decoded;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // 2. Dự phòng tra cứu từ khóa và ký tự nếu chuỗi bị trộn lẫn
+            s = s.Replace("AnTháº§nÄ\u0090á»“ng", "An Thần Đồng")
+                 .Replace("AnTháº§nĂ□á»“ng", "An Thần Đồng")
                  .Replace("AnTháº§nÄ á»“ng", "An Thần Đồng")
                  .Replace("AnThầnĐồng", "An Thần Đồng")
                  .Replace("ChiTháº§nÄ á»“ng", "Chi Thần Đồng")
-                 .Replace("Khá»Ÿi Ä áº§u Nan", "Khởi Đầu Nan");
+                 .Replace("ChiThầnĐồng", "Chi Thần Đồng")
+                 .Replace("Khá»Ÿi Ä áº§u Nan", "Khởi Đầu Nan")
+                 .Replace("Tráº¡ng TÃ­", "Trạng Tí")
+                 .Replace("TrạngTí", "Trạng Tí");
 
             s = s.Replace("Ä‘", "đ")
+                 .Replace("Ä\u0090", "Đ")
                  .Replace("Ä ", "Đ")
                  .Replace("Ä", "Đ")
                  .Replace("áº§", "ầ")

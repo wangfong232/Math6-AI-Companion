@@ -275,14 +275,40 @@ namespace Math6Companion.UI
                     {
                         bool isP1 = (result.player1Id == myUserId);
                         bool oppDone = isP1 ? result.player2Done : result.player1Done;
-                        int oppScore = isP1 ? result.player2Score : result.player1Score;
+                        int rawOppScore = isP1 ? result.player2Score : result.player1Score;
+                        string oppName = isP1 ? result.player2Name : result.player1Name;
+
+                        if (!string.IsNullOrEmpty(oppName))
+                        {
+                            ScoreSessionContext.OpponentNickname = MathTextSanitizer.SanitizeForDisplay(oppName);
+                        }
 
                         if (oppDone || result.isFinished)
                         {
                             isResolved = true;
+
+                            // Chuẩn hóa điểm đối thủ về thang 0..100
+                            int oppScore = rawOppScore;
+                            if (oppScore <= 10 && oppScore > 0 && ScoreSessionContext.MaxScore == 100)
+                            {
+                                oppScore *= 10;
+                            }
+                            else if (oppScore < 0)
+                            {
+                                oppScore = 0;
+                            }
+
+                            int myScore = ScoreSessionContext.Score;
+                            if (myScore <= 10 && myScore > 0 && ScoreSessionContext.MaxScore == 100)
+                            {
+                                myScore *= 10;
+                            }
+
                             ScoreSessionContext.OpponentScore = oppScore;
 
-                            if (result.winnerId == "DRAW" || ScoreSessionContext.Score == oppScore)
+                            // Xác định kết quả thắng/thua/hòa chặt chẽ:
+                            bool isDraw = (result.winnerId == "DRAW") || (myScore == oppScore);
+                            if (isDraw)
                             {
                                 ScoreSessionContext.IsWinner = false;
                                 if (versusResultText != null)
@@ -293,7 +319,16 @@ namespace Math6Companion.UI
                             }
                             else
                             {
-                                bool iWon = (result.winnerId == myUserId) || (ScoreSessionContext.Score > oppScore);
+                                bool iWon = false;
+                                if (!string.IsNullOrEmpty(result.winnerId))
+                                {
+                                    iWon = (result.winnerId == myUserId);
+                                }
+                                else
+                                {
+                                    iWon = (myScore > oppScore);
+                                }
+
                                 ScoreSessionContext.IsWinner = iWon;
                                 if (versusResultText != null)
                                 {
@@ -310,7 +345,7 @@ namespace Math6Companion.UI
 
                             if (versusCompareText != null)
                             {
-                                versusCompareText.text = $"Bạn: {ScoreSessionContext.Score} điểm  VS  {ScoreSessionContext.OpponentNickname}: {oppScore} điểm";
+                                versusCompareText.text = $"Bạn: {myScore} điểm  VS  {ScoreSessionContext.OpponentNickname}: {oppScore} điểm";
                             }
                         }
                     }

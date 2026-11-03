@@ -258,7 +258,7 @@ namespace Math6Companion.Core.Mock
         {
             StartCoroutine(SimulateDelay(() =>
             {
-                int botScore = UnityEngine.Random.Range(6, 10);
+                int botScore = UnityEngine.Random.Range(6, 10) * 10;
                 callback?.Invoke(true, new VersusRoomResultResponse
                 {
                     success = true,
@@ -271,7 +271,7 @@ namespace Math6Companion.Core.Mock
                     player2Score = botScore,
                     player2Done = true,
                     isFinished = true,
-                    winnerId = score >= botScore ? userId : "STU_BOT_01",
+                    winnerId = score > botScore ? userId : (botScore > score ? "STU_BOT_01" : "DRAW"),
                     message = "Mock Score Submitted"
                 }, "Success");
             }));

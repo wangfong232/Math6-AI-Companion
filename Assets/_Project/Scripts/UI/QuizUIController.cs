@@ -1037,7 +1037,7 @@ namespace Math6Companion.UI
                 {
                     try
                     {
-                        networkService.SubmitVersusScore(ScoreSessionContext.VersusRoomId, submission.userId, final10Scale, (ok, r, m) =>
+                        networkService.SubmitVersusScore(ScoreSessionContext.VersusRoomId, submission.userId, ScoreSessionContext.Score, (ok, r, m) =>
                         {
                             Debug.Log($"[QuizUIController] SubmitVersusScore: {ok} -> {m}");
                         });

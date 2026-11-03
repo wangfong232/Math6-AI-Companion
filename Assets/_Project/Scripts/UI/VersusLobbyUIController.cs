@@ -288,7 +288,18 @@ namespace Math6Companion.UI
             PlayClick();
             if (acceptTimerCoroutine != null) StopCoroutine(acceptTimerCoroutine);
             if (matchModal != null) matchModal.SetActive(false);
-            CancelQueueIfSearching();
+
+            // Luôn gửi CancelVersusQueue lên server để gỡ trạng thái MATCHED/WAITING
+            if (networkService != null && !string.IsNullOrEmpty(currentUserId))
+            {
+                networkService.CancelVersusQueue(currentUserId, (ok, msg) =>
+                {
+                    Debug.Log($"[VersusLobby] CancelVersusQueue: ok={ok}, msg={msg}");
+                });
+            }
+
+            currentMatchInfo = null;
+            isRealMatch = false;
             ResetSearchUI("Đã từ chối trận đấu.");
         }
 
