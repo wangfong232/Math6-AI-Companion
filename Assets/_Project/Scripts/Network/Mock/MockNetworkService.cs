@@ -54,24 +54,26 @@ namespace Math6Companion.Core.Mock
                     {
                         userId = "TEA_001",
                         username = username,
-                        fullName = "CÃ´ Mai ToÃ¡n",
+                        fullName = "Cô Mai Toán",
                         role = "TEACHER",
                         grade = 6,
                         classId = "6A1",
-                        nickname = "CÃ´ Mai"
+                        nickname = "Cô Mai"
                     }, "Success");
                 }
                 else
                 {
+                    string cleanUser = string.IsNullOrEmpty(username) ? "student_01" : username.Trim();
+                    string uId = cleanUser.ToUpper().StartsWith("STU_") ? cleanUser.ToUpper() : "STU_" + cleanUser;
                     callback(true, new UserData
                     {
-                        userId = "STU_001",
-                        username = username,
-                        fullName = "Em An",
+                        userId = uId,
+                        username = cleanUser,
+                        fullName = cleanUser,
                         role = "STUDENT",
                         grade = 6,
                         classId = "6A1",
-                        nickname = "AnTháº§nÄá»“ng"
+                        nickname = cleanUser
                     }, "Success");
                 }
             }));

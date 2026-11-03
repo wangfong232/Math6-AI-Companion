@@ -832,7 +832,7 @@ namespace Math6Companion.UI
                 remainingTime -= Time.deltaTime;
                 if (timerText != null)
                 {
-                    timerText.text = $"Thá»i gian: {Mathf.CeilToInt(remainingTime)}s";
+                    timerText.text = $"{Mathf.CeilToInt(remainingTime)}s";
                 }
                 yield return null;
             }

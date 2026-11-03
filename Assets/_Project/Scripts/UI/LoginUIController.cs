@@ -126,7 +126,7 @@ namespace Math6Companion.UI
         private void OnLoginButtonClicked()
         {
             string username = usernameInput != null ? usernameInput.text.Trim() : string.Empty;
-            string password = passwordInput != null ? passwordInput.text : string.Empty;
+            string password = passwordInput != null ? passwordInput.text.Trim() : string.Empty;
 
             // Kiểm tra tính hợp lệ cơ bản
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))

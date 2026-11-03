@@ -185,6 +185,12 @@ namespace Math6Companion.Core.Services
                 {
                     callback?.Invoke(true, resp.data, resp.message ?? "ÄÄƒng nháº­p thÃ nh cÃ´ng!");
                 }
+                else if (resp != null && !resp.success && !string.IsNullOrEmpty(resp.message))
+                {
+                    // Lỗi xác thực từ máy chủ Google Sheets (ví dụ: Mật khẩu không chính xác!)
+                    // Phải trả lỗi trực tiếp về UI, TUYỆT ĐỐI KHÔNG fallback sang Mock!
+                    callback?.Invoke(false, null, resp.message);
+                }
                 else
                 {
                     if (fallbackToMockOnError)

@@ -19,6 +19,10 @@ namespace Math6Companion.Core
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
 
+            // Loại bỏ hoàn toàn các ký tự điều khiển tàng hình C1 control codes (U+0080 - U+009F)
+            // như \u0090, \u009D gây lỗi ô vuông [□] trên font TextMeshPro
+            text = Regex.Replace(text, @"[\u0080-\u009F]", "");
+
             string s = text;
 
             // 1. Xử lý chuỗi Unicode escape nếu có từ JSON hoặc Google Sheets

@@ -97,7 +97,7 @@ namespace Math6Companion.UI
                 statusText.text = "Sảnh trực tuyến sẵn sàng. Bấm [BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN] để tìm bạn thi đấu!";
 
             if (scanningIndicatorText != null)
-                scanningIndicatorText.text = "🔍 Sẵn sàng tìm đối thủ...";
+                scanningIndicatorText.text = "Sẵn sàng tìm đối thủ...";
         }
 
         private void OnDestroy()
@@ -142,7 +142,7 @@ namespace Math6Companion.UI
         private IEnumerator MatchmakingRoutine()
         {
             if (statusText != null) statusText.text = "Đang kết nối đến máy chủ Google Sheets để tìm bạn học...";
-            if (scanningIndicatorText != null) scanningIndicatorText.text = "🔍 Đang gửi yêu cầu vào hàng đợi...";
+            if (scanningIndicatorText != null) scanningIndicatorText.text = "Đang gửi yêu cầu vào hàng đợi...";
 
             bool joinCompleted = false;
             VersusQueueResponse joinResult = null;
@@ -176,7 +176,7 @@ namespace Math6Companion.UI
                 if (statusText != null)
                     statusText.text = $"Đang tìm bạn học trên máy chủ Google Sheets... ({waitSeconds}s)";
                 if (scanningIndicatorText != null)
-                    scanningIndicatorText.text = $"⏳ Đang chờ học sinh khác bấm ghép trận... ({waitSeconds}s)";
+                    scanningIndicatorText.text = $"Đang chờ học sinh khác bấm ghép trận... ({waitSeconds}s)";
 
                 bool pollCompleted = false;
                 VersusQueueResponse pollResult = null;
@@ -220,7 +220,7 @@ namespace Math6Companion.UI
                 statusText.text = $"<color=#2ecc71>ĐÃ GHÉP CẶP VỚI: {matchedOpponentNickname}!</color>";
 
             if (scanningIndicatorText != null)
-                scanningIndicatorText.text = $"⚔️ Sẵn sàng: {matchedOpponentNickname}";
+                scanningIndicatorText.text = $"Sẵn sàng: {matchedOpponentNickname}";
 
             ShowMatchFoundModal(true);
         }
@@ -238,7 +238,7 @@ namespace Math6Companion.UI
                 statusText.text = $"Ghép cặp với Bạn Học Ảo: {matchedOpponentNickname}";
 
             if (scanningIndicatorText != null)
-                scanningIndicatorText.text = $"⚔️ Đối thủ: {matchedOpponentNickname}";
+                scanningIndicatorText.text = $"Đối thủ: {matchedOpponentNickname}";
 
             ShowMatchFoundModal(false);
         }
@@ -300,7 +300,7 @@ namespace Math6Companion.UI
                 if (btnTxt != null) btnTxt.text = "  BẮT ĐẦU GHÉP CẶP NGẪU NHIÊN  >";
             }
             if (statusText != null) statusText.text = msg;
-            if (scanningIndicatorText != null) scanningIndicatorText.text = "🔍 Sẵn sàng tìm đối thủ...";
+            if (scanningIndicatorText != null) scanningIndicatorText.text = "Sẵn sàng tìm đối thủ...";
         }
 
         private void StartMatch(string mode)
