@@ -56,12 +56,12 @@ namespace Math6Companion.UI
             if (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null)
             {
                 currentUserId = SessionManager.Instance.CurrentUser.userId ?? "STU_001";
-                currentNickname = SessionManager.Instance.CurrentNickname;
+                currentNickname = MathTextSanitizer.SanitizeForDisplay(SessionManager.Instance.CurrentNickname);
             }
             else
             {
                 currentUserId = PlayerPrefs.GetString("User_ID", "STU_001");
-                currentNickname = PlayerPrefs.GetString("User_Nickname", "Học sinh");
+                currentNickname = MathTextSanitizer.SanitizeForDisplay(PlayerPrefs.GetString("User_Nickname", "Học sinh"));
             }
 
             // Cập nhật tên học sinh lên thẻ người chơi (PlayerCard)
@@ -213,7 +213,7 @@ namespace Math6Companion.UI
             isRealMatch = true;
             currentMatchInfo = matchResp;
 
-            matchedOpponentNickname = !string.IsNullOrEmpty(matchResp.opponentNickname) ? matchResp.opponentNickname : "Học sinh đối thủ";
+            matchedOpponentNickname = MathTextSanitizer.SanitizeForDisplay(!string.IsNullOrEmpty(matchResp.opponentNickname) ? matchResp.opponentNickname : "Học sinh đối thủ");
             matchedOpponentScore = 8; // Sẽ được cập nhật sau trận khi đối thủ nộp bài
 
             if (statusText != null)

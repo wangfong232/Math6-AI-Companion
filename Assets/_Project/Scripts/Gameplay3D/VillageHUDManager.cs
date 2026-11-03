@@ -157,7 +157,7 @@ namespace Math6Companion.Gameplay3D
                 nick = PlayerPrefs.GetString("User_Nickname", "Trạng Tí");
 
             if (txtPlayerNick != null)
-                txtPlayerNick.text = $"<b>{nick}</b>  <color=#ecf0f1><size=80%>(Lớp 6A)</size></color>";
+                txtPlayerNick.text = $"<b>{MathTextSanitizer.SanitizeForDisplay(nick)}</b>  <color=#ecf0f1><size=80%>(Lớp 6A)</size></color>";
 
             RefreshEconomyUI();
             CloseAllPanels();

@@ -538,20 +538,45 @@ function handleLogAITutor(payload) {
 function handleGetStudentAnalytics(userId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const progSheet = ss.getSheetByName("Progress");
+  const userSheet = ss.getSheetByName("Users");
+  let fullName = "Học sinh";
+  if (userSheet && userId) {
+    const uData = userSheet.getDataRange().getDisplayValues();
+    for (let u = 1; u < uData.length; u++) {
+      if (uData[u][0] === userId || uData[u][1] === userId) {
+        fullName = uData[u][4] || uData[u][1];
+        break;
+      }
+    }
+  }
+
   let completed = 0;
   let totalScore = 0;
   let scoreCount = 0;
+  const progressList = [];
 
-  if (progSheet) {
+  if (progSheet && userId) {
     const pData = progSheet.getDataRange().getDisplayValues();
     for (let i = 1; i < pData.length; i++) {
-      if (!userId || pData[i][1] === userId) {
-        if (String(pData[i][6]).toUpperCase() === "TRUE") completed++;
-        const s = parseInt(pData[i][4]);
-        if (!isNaN(s)) {
-          totalScore += s;
+      if (pData[i][1] === userId) {
+        const attempts = parseInt(pData[i][3]) || 0;
+        const highest = parseInt(pData[i][4]) || 0;
+        const last = parseInt(pData[i][5]) || 0;
+        const isComp = String(pData[i][6]).toUpperCase() === "TRUE";
+
+        if (isComp) completed++;
+        if (!isNaN(highest) && highest > 0) {
+          totalScore += highest;
           scoreCount++;
         }
+
+        progressList.push({
+          lessonId: pData[i][2],
+          attempts: attempts,
+          highestScore: highest,
+          lastScore: last,
+          isCompleted: isComp
+        });
       }
     }
   }
@@ -561,11 +586,12 @@ function handleGetStudentAnalytics(userId) {
   return createJsonResponse({
     success: true,
     analytics: {
-      userId: userId || "STU_001",
+      userId: userId || "",
+      fullName: fullName,
       completedLessons: completed,
       averageScore: parseFloat(avg),
       badges: [],
-      progressList: []
+      progressList: progressList
     }
   });
 }

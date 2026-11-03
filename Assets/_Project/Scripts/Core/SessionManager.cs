@@ -143,7 +143,8 @@ namespace Math6Companion.Core
                 PlayerPrefs.SetString("User_Role", user.role ?? "");
                 PlayerPrefs.SetInt("User_Grade", user.grade);
                 PlayerPrefs.SetString("User_ClassId", user.classId ?? "");
-                PlayerPrefs.SetString("User_Nickname", user.nickname ?? user.fullName ?? "Học sinh");
+                string cleanNick = MathTextSanitizer.SanitizeForDisplay(user.nickname ?? user.fullName ?? "Học sinh");
+                PlayerPrefs.SetString("User_Nickname", cleanNick);
                 PlayerPrefs.Save();
 
                 OnUserLoggedIn?.Invoke(user);
@@ -234,6 +235,7 @@ namespace Math6Companion.Core
             PlayerPrefs.DeleteKey("User_Role");
             PlayerPrefs.DeleteKey("User_Grade");
             PlayerPrefs.DeleteKey("User_ClassId");
+            PlayerPrefs.DeleteKey("User_Nickname");
             PlayerPrefs.Save();
 
             ResetVillagePosition();

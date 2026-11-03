@@ -15,13 +15,60 @@ namespace Math6Companion.Core
         /// Làm sạch và chuyển đổi ký hiệu toán học an toàn để hiển thị trên UI.
         /// Chuyển các ký hiệu không có trong font TMP tiêu chuẩn sang dạng tiếng Việt thân thiện, rõ ràng.
         /// </summary>
+                /// <summary>
+        /// Khắc phục chuỗi Tiếng Việt bị lỗi bảng mã Mojibake do UTF-8 đọc nhầm Windows-1252/Latin1.
+        /// </summary>
+        public static string HealVietnameseMojibake(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+
+            s = s.Replace("AnTháº§nĂ□á»“ng", "An Thần Đồng")
+                 .Replace("AnTháº§nÄ á»“ng", "An Thần Đồng")
+                 .Replace("AnThầnĐồng", "An Thần Đồng")
+                 .Replace("ChiTháº§nÄ á»“ng", "Chi Thần Đồng")
+                 .Replace("Khá»Ÿi Ä áº§u Nan", "Khởi Đầu Nan");
+
+            s = s.Replace("Ä‘", "đ")
+                 .Replace("Ä ", "Đ")
+                 .Replace("Ä", "Đ")
+                 .Replace("áº§", "ầ")
+                 .Replace("á»“", "ồ")
+                 .Replace("áº­", "ậ")
+                 .Replace("áº£", "ả")
+                 .Replace("áº¡", "ạ")
+                 .Replace("áº¿", "ế")
+                 .Replace("á»‘", "ố")
+                 .Replace("á»ƒ", "ể")
+                 .Replace("á»‡", "ệ")
+                 .Replace("á»¥", "ụ")
+                 .Replace("á»‰", "ỉ")
+                 .Replace("á»‹", "ị")
+                 .Replace("á» ", "ờ")
+                 .Replace("á»›", "ớ")
+                 .Replace("Ã¡", "á")
+                 .Replace("Ã ", "à")
+                 .Replace("Ã¢", "â")
+                 .Replace("Ãª", "ê")
+                 .Replace("Ã´", "ô")
+                 .Replace("Ãº", "ú")
+                 .Replace("Ã¹", "ù")
+                 .Replace("Ã½", "ý")
+                 .Replace("Ã­", "í")
+                 .Replace("Æ°", "ư")
+                 .Replace("Æ¡", "ơ")
+                 .Replace("Ä©", "ĩ");
+
+            return s;
+        }
+
         public static string SanitizeForDisplay(string text)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
 
             // Loại bỏ hoàn toàn các ký tự điều khiển tàng hình C1 control codes (U+0080 - U+009F)
             // như \u0090, \u009D gây lỗi ô vuông [□] trên font TextMeshPro
-            text = Regex.Replace(text, @"[\u0080-\u009F]", "");
+            text = HealVietnameseMojibake(text);
+            text = Regex.Replace(text, @"[\u007F-\u009F]", "");
 
             string s = text;
 

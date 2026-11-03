@@ -168,8 +168,8 @@ namespace Math6Companion.UI
                 name = PlayerPrefs.GetString("User_FullName", "Nguyễn Văn An");
             }
 
-            if (nicknameText != null) nicknameText.text = nick;
-            if (userSubInfoText != null) userSubInfoText.text = $"Lớp: {cls} | {name}";
+            if (nicknameText != null) nicknameText.text = MathTextSanitizer.SanitizeForDisplay(nick);
+            if (userSubInfoText != null) userSubInfoText.text = MathTextSanitizer.SanitizeForDisplay($"Lớp: {cls} | {name}");
 
             // Chỉ hiển thị nút Giáo Viên nếu đăng nhập bằng tài khoản Giáo Viên
             bool isTeacher = SessionManager.Instance != null && SessionManager.Instance.IsTeacher;

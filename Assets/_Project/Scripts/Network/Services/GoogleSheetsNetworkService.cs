@@ -504,46 +504,45 @@ namespace Math6Companion.Core.Services
 
         public void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback)
         {
-            string url = $"{appsScriptUrl}?action=joinVersusQueue&userId={Uri.EscapeDataString(userId ?? "")}&nickname={Uri.EscapeDataString(nickname ?? "")}&mode={Uri.EscapeDataString(mode ?? "MCQ")}";
+            string cleanNick = MathTextSanitizer.SanitizeForDisplay(nickname ?? "Học sinh");
+            string cleanUser = (userId ?? "").Trim();
+            string cleanMode = string.IsNullOrEmpty(mode) ? "MCQ" : mode.ToUpper();
+
+            Debug.Log($"[GoogleSheetsNetworkService] >>> JoinVersusQueue: user={cleanUser}, nick={cleanNick}, mode={cleanMode}");
+
+            string url = $"{appsScriptUrl}?action=joinVersusQueue&userId={Uri.EscapeDataString(cleanUser)}&nickname={Uri.EscapeDataString(cleanNick)}&mode={Uri.EscapeDataString(cleanMode)}";
             StartCoroutine(RunGetRequest<VersusQueueResponse>(url, (success, resp, raw) =>
             {
                 if (success && resp != null && resp.success)
                 {
+                    Debug.Log($"[GoogleSheetsNetworkService] <<< JoinVersusQueue THÀNH CÔNG: status={resp.status}, roomId={resp.roomId}, opponent={resp.opponentNickname}");
                     callback?.Invoke(true, resp, resp.message ?? "OK");
                 }
                 else
                 {
-                    if (fallbackToMockOnError)
-                    {
-                        MockNetworkService.Instance.JoinVersusQueue(userId, nickname, mode, callback);
-                    }
-                    else
-                    {
-                        callback?.Invoke(false, null, raw ?? "Lỗi ghép trận!");
-                    }
+                    Debug.LogWarning($"[GoogleSheetsNetworkService] <<< JoinVersusQueue LỖI: raw={raw}");
+                    callback?.Invoke(false, resp, raw ?? "Lỗi ghép trận Google Sheets!");
                 }
             }));
         }
 
         public void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback)
         {
-            string url = $"{appsScriptUrl}?action=pollVersusQueue&userId={Uri.EscapeDataString(userId ?? "")}";
+            string cleanUser = (userId ?? "").Trim();
+            string url = $"{appsScriptUrl}?action=pollVersusQueue&userId={Uri.EscapeDataString(cleanUser)}";
             StartCoroutine(RunGetRequest<VersusQueueResponse>(url, (success, resp, raw) =>
             {
                 if (success && resp != null && resp.success)
                 {
+                    if (resp.status == "MATCHED")
+                    {
+                        Debug.Log($"[GoogleSheetsNetworkService] <<< PollVersusQueue ĐÃ GHÉP CẶP: roomId={resp.roomId}, opponent={resp.opponentNickname}");
+                    }
                     callback?.Invoke(true, resp, resp.message ?? "OK");
                 }
                 else
                 {
-                    if (fallbackToMockOnError)
-                    {
-                        MockNetworkService.Instance.PollVersusQueue(userId, callback);
-                    }
-                    else
-                    {
-                        callback?.Invoke(false, null, raw ?? "Lỗi poll queue!");
-                    }
+                    callback?.Invoke(false, resp, raw ?? "Lỗi poll queue!");
                 }
             }));
         }
@@ -559,23 +558,22 @@ namespace Math6Companion.Core.Services
 
         public void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback)
         {
-            string url = $"{appsScriptUrl}?action=submitVersusScore&roomId={Uri.EscapeDataString(roomId ?? "")}&userId={Uri.EscapeDataString(userId ?? "")}&score={score}";
+            string cleanRoom = (roomId ?? "").Trim();
+            string cleanUser = (userId ?? "").Trim();
+            Debug.Log($"[GoogleSheetsNetworkService] >>> SubmitVersusScore: room={cleanRoom}, user={cleanUser}, score={score}");
+
+            string url = $"{appsScriptUrl}?action=submitVersusScore&roomId={Uri.EscapeDataString(cleanRoom)}&userId={Uri.EscapeDataString(cleanUser)}&score={score}";
             StartCoroutine(RunGetRequest<VersusRoomResultResponse>(url, (success, resp, raw) =>
             {
                 if (success && resp != null && resp.success)
                 {
+                    Debug.Log($"[GoogleSheetsNetworkService] <<< SubmitVersusScore THÀNH CÔNG: {resp.message}");
                     callback?.Invoke(true, resp, resp.message ?? "OK");
                 }
                 else
                 {
-                    if (fallbackToMockOnError)
-                    {
-                        MockNetworkService.Instance.SubmitVersusScore(roomId, userId, score, callback);
-                    }
-                    else
-                    {
-                        callback?.Invoke(false, null, raw ?? "Lỗi nộp điểm!");
-                    }
+                    Debug.LogWarning($"[GoogleSheetsNetworkService] <<< SubmitVersusScore LỖI: raw={raw}");
+                    callback?.Invoke(false, null, raw ?? "Lỗi nộp điểm đối kháng!");
                 }
             }));
         }

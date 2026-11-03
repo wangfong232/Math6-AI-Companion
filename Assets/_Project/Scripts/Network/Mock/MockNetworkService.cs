@@ -200,7 +200,7 @@ namespace Math6Companion.Core.Mock
                 callback(true, new StudentAnalyticsData
                 {
                     userId = studentId,
-                    fullName = "Em An",
+                    fullName = "Học sinh",
                     completedLessons = 4,
                     averageScore = 9.5f,
                     badges = new List<BadgeData>

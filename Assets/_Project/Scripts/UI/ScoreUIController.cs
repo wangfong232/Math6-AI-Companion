@@ -242,7 +242,9 @@ namespace Math6Companion.UI
         private System.Collections.IEnumerator WaitForOpponentResultRoutine()
         {
             string roomId = ScoreSessionContext.VersusRoomId;
-            string myUserId = PlayerPrefs.GetString("User_ID", "STU_001");
+            string myUserId = (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null && !string.IsNullOrEmpty(SessionManager.Instance.CurrentUser.userId))
+                ? SessionManager.Instance.CurrentUser.userId
+                : PlayerPrefs.GetString("User_ID", "STU_001");
 
             if (versusResultText != null)
             {

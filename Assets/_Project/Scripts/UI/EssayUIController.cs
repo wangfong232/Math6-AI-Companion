@@ -2755,17 +2755,21 @@ namespace Math6Companion.UI
 
                     string essayLesId = !string.IsNullOrEmpty(currentQuestion?.lessonId) ? currentQuestion.lessonId : PlayerPrefs.GetString("Current_Lesson_ID", "LES_ESSAY");
                     int calculatedScore = Mathf.RoundToInt((float)response.score / Mathf.Max(1, response.maxScore) * 10f);
+                    string curUserId = (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null && !string.IsNullOrEmpty(SessionManager.Instance.CurrentUser.userId))
+                        ? SessionManager.Instance.CurrentUser.userId
+                        : PlayerPrefs.GetString("User_ID", "STU_001");
+
                     if (!string.IsNullOrEmpty(essayLesId))
                     {
-                        int currentHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{essayLesId}", 0);
+                        int currentHigh = PlayerPrefs.GetInt($"Lesson_{curUserId}_HighestScore_{essayLesId}", 0);
                         if (calculatedScore > currentHigh)
                         {
-                            PlayerPrefs.SetInt($"Lesson_HighestScore_{essayLesId}", calculatedScore);
+                            PlayerPrefs.SetInt($"Lesson_{curUserId}_HighestScore_{essayLesId}", calculatedScore);
                         }
-                        int att = PlayerPrefs.GetInt($"Lesson_Attempts_{essayLesId}", 0);
-                        PlayerPrefs.SetInt($"Lesson_Attempts_{essayLesId}", att + 1);
-                        PlayerPrefs.SetInt($"Lesson_LastScore_{essayLesId}", calculatedScore);
-                        PlayerPrefs.SetString($"Lesson_LastDate_{essayLesId}", System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+                        int att = PlayerPrefs.GetInt($"Lesson_{curUserId}_Attempts_{essayLesId}", 0);
+                        PlayerPrefs.SetInt($"Lesson_{curUserId}_Attempts_{essayLesId}", att + 1);
+                        PlayerPrefs.SetInt($"Lesson_{curUserId}_LastScore_{essayLesId}", calculatedScore);
+                        PlayerPrefs.SetString($"Lesson_{curUserId}_LastDate_{essayLesId}", System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
                         PlayerPrefs.Save();
                     }
 
@@ -2774,7 +2778,7 @@ namespace Math6Companion.UI
                     {
                         var submission = new ResultSubmission
                         {
-                            userId = PlayerPrefs.GetString("User_ID", "STU_001"),
+                            userId = curUserId,
                             lessonId = essayLesId,
                             activityType = "ESSAY",
                             score = response.score,

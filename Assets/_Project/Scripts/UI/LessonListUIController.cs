@@ -559,12 +559,23 @@ namespace Math6Companion.UI
                     }
                     else
                     {
-                        int localHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{lesson.lessonId}", -1);
-                        int localAtt = PlayerPrefs.GetInt($"Lesson_Attempts_{lesson.lessonId}", 0);
-                        int normalizedScore = localHigh >= 0 ? localHigh : GetNormalizedScore(lesson.userHighestScore);
-                        int attCount = localAtt > 0 ? localAtt : lesson.topStudentAttempts;
-                        statsTmp.text = $"Điểm bạn: <color=#f1c40f><b>{normalizedScore}/10</b></color>\n<size=15><color=#95a5a6>Đã làm: {attCount} lần</color></size>";
-                        statsTmp.color = new Color(0.18f, 0.75f, 0.45f);
+                        string curUserId = (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null && !string.IsNullOrEmpty(SessionManager.Instance.CurrentUser.userId))
+                            ? SessionManager.Instance.CurrentUser.userId
+                            : PlayerPrefs.GetString("User_ID", "STU_001");
+
+                        int localHigh = PlayerPrefs.GetInt($"Lesson_{curUserId}_HighestScore_{lesson.lessonId}", -1);
+                        int localAtt = PlayerPrefs.GetInt($"Lesson_{curUserId}_Attempts_{lesson.lessonId}", 0);
+
+                        if (localHigh >= 0)
+                        {
+                            statsTmp.text = $"Điểm bạn: <color=#f1c40f><b>{localHigh}/10</b></color>\n<size=15><color=#95a5a6>Đã làm: {localAtt} lần</color></size>";
+                            statsTmp.color = new Color(0.18f, 0.75f, 0.45f);
+                        }
+                        else
+                        {
+                            statsTmp.text = $"Điểm bạn: <color=#94A3B8>--/10</color>\n<size=15><color=#95a5a6>Chưa làm bài</color></size>";
+                            statsTmp.color = new Color(0.6f, 0.65f, 0.7f);
+                        }
                     }
                     statsTmp.fontSize = 18;
                     statsTmp.fontStyle = FontStyles.Bold;
@@ -922,13 +933,17 @@ namespace Math6Companion.UI
                 if (modalLessonTitle != null) modalLessonTitle.text = lesson.title;
                 if (modalStatsText != null)
                 {
-                    int localHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{lesson.lessonId}", -1);
-                    int localAtt = PlayerPrefs.GetInt($"Lesson_Attempts_{lesson.lessonId}", 0);
-                    int normalizedScore = localHigh >= 0 ? localHigh : GetNormalizedScore(lesson.userHighestScore);
-                    int attCount = localAtt > 0 ? localAtt : lesson.topStudentAttempts;
-                    string lastDate = PlayerPrefs.GetString($"Lesson_LastDate_{lesson.lessonId}", "");
+                    string curUserId = (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null && !string.IsNullOrEmpty(SessionManager.Instance.CurrentUser.userId))
+                        ? SessionManager.Instance.CurrentUser.userId
+                        : PlayerPrefs.GetString("User_ID", "STU_001");
 
-                    string stats = $"<b>Điểm cao nhất của bạn:</b> <color=#f1c40f><b>{normalizedScore}/10</b></color> (Đã luyện tập: <b>{attCount}</b> lần)";
+                    int localHigh = PlayerPrefs.GetInt($"Lesson_{curUserId}_HighestScore_{lesson.lessonId}", -1);
+                    int localAtt = PlayerPrefs.GetInt($"Lesson_{curUserId}_Attempts_{lesson.lessonId}", 0);
+                    string lastDate = PlayerPrefs.GetString($"Lesson_{curUserId}_LastDate_{lesson.lessonId}", "");
+
+                    string stats = localHigh >= 0
+                        ? $"<b>Điểm cao nhất của bạn:</b> <color=#f1c40f><b>{localHigh}/10</b></color> (Đã luyện tập: <b>{localAtt}</b> lần)"
+                        : "<b>Điểm cao nhất của bạn:</b> <color=#94A3B8><b>Chưa có bài nộp</b></color>";
                     if (!string.IsNullOrEmpty(lastDate))
                     {
                         stats += $"\n<size=15><color=#bdc3c7>Lần luyện gần nhất: {lastDate}</color></size>";

@@ -752,34 +752,34 @@ namespace Math6Companion.UI
                 bool isWrongReviewMode = PlayerPrefs.GetInt("Quiz_IsWrongReviewMode", 0) == 1;
                 if (isWrongReviewMode)
                 {
-                    topicTitleText.text = "<b>[Sá»” TAY CÃ‚U SAI] ANKI SPACED REPETITION</b>";
+                    topicTitleText.text = "<b>[SỔ TAY CÂU SAI] ANKI SPACED REPETITION</b>";
                 }
                 else
                 {
-                    string topicDisplay = "ToÃ¡n Há»c Lá»›p 6";
+                    string topicDisplay = "Toán Học Lớp 6";
                     if (!string.IsNullOrEmpty(q.topic))
                     {
-                        if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "HinhHoc")) topicDisplay = "HÃ¬nh há»c trá»±c quan & TÃ­nh Ä‘á»‘i xá»©ng";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "PhanSo")) topicDisplay = "PhÃ¢n sá»‘ & Sá»‘ tháº­p phÃ¢n";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "SoNguyen")) topicDisplay = "Sá»‘ nguyÃªn & Trá»¥c sá»‘";
-                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "TapHop")) topicDisplay = "Táº­p há»£p & Sá»‘ tá»± nhiÃªn";
+                        if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "HinhHoc")) topicDisplay = "Hình học trực quan & Tính đối xứng";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "PhanSo")) topicDisplay = "Phân số & Số thập phân";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "SoNguyen")) topicDisplay = "Số nguyên & Trục số";
+                        else if (GoogleSheetsNetworkService.IsTopicMatch(q.topic, "TapHop")) topicDisplay = "Tập hợp & Số tự nhiên";
                         else topicDisplay = q.topic;
                     }
 
                     string lessonTitle = PlayerPrefs.GetString("Current_Lesson_Title", "");
                     if (!string.IsNullOrEmpty(lessonTitle))
                     {
-                        topicTitleText.text = $"Tráº¯c nghiá»‡m: {lessonTitle}";
+                        topicTitleText.text = MathTextSanitizer.SanitizeForDisplay($"Trắc nghiệm: {lessonTitle}");
                     }
                     else
                     {
-                        topicTitleText.text = $"Chá»§ Ä‘á»: {topicDisplay}";
+                        topicTitleText.text = MathTextSanitizer.SanitizeForDisplay($"Chủ đề: {topicDisplay}");
                     }
                 }
             }
 
             if (progressText != null)
-                progressText.text = $"CÃ¢u {index + 1} / {questionList.Count}";
+                progressText.text = $"Câu {index + 1} / {questionList.Count}";
 
             if (promptText != null)
                 promptText.text = FormatMathString(q.prompt);
@@ -987,25 +987,29 @@ namespace Math6Companion.UI
                 ScoreSessionContext.IsWinner = (ScoreSessionContext.Score >= ScoreSessionContext.OpponentScore);
             }
 
-            // Gá»­i káº¿t quáº£ lÃªn Google Sheets (chuáº©n hÃ³a thang Ä‘iá»ƒm 10 & MÃºi giá» Viá»‡t Nam GMT+7)
+            // Gửi kết quả lên Google Sheets (chuẩn hóa thang điểm 10 & Múi giờ Việt Nam GMT+7)
+            string curUserId = (SessionManager.Instance != null && SessionManager.Instance.CurrentUser != null && !string.IsNullOrEmpty(SessionManager.Instance.CurrentUser.userId))
+                ? SessionManager.Instance.CurrentUser.userId
+                : PlayerPrefs.GetString("User_ID", "STU_001");
+
             string curLesId = PlayerPrefs.GetString("Current_Lesson_ID", "");
             if (!string.IsNullOrEmpty(curLesId))
             {
-                int currentHigh = PlayerPrefs.GetInt($"Lesson_HighestScore_{curLesId}", 0);
+                int currentHigh = PlayerPrefs.GetInt($"Lesson_{curUserId}_HighestScore_{curLesId}", 0);
                 if (final10Scale > currentHigh)
                 {
-                    PlayerPrefs.SetInt($"Lesson_HighestScore_{curLesId}", final10Scale);
+                    PlayerPrefs.SetInt($"Lesson_{curUserId}_HighestScore_{curLesId}", final10Scale);
                 }
-                int att = PlayerPrefs.GetInt($"Lesson_Attempts_{curLesId}", 0);
-                PlayerPrefs.SetInt($"Lesson_Attempts_{curLesId}", att + 1);
-                PlayerPrefs.SetInt($"Lesson_LastScore_{curLesId}", final10Scale);
-                PlayerPrefs.SetString($"Lesson_LastDate_{curLesId}", System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+                int att = PlayerPrefs.GetInt($"Lesson_{curUserId}_Attempts_{curLesId}", 0);
+                PlayerPrefs.SetInt($"Lesson_{curUserId}_Attempts_{curLesId}", att + 1);
+                PlayerPrefs.SetInt($"Lesson_{curUserId}_LastScore_{curLesId}", final10Scale);
+                PlayerPrefs.SetString($"Lesson_{curUserId}_LastDate_{curLesId}", System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
                 PlayerPrefs.Save();
             }
 
             ResultSubmission submission = new ResultSubmission
             {
-                userId = PlayerPrefs.GetString("User_ID", "STU_001"),
+                userId = curUserId,
                 lessonId = !string.IsNullOrEmpty(curLesId) ? curLesId : "LES_INT_01",
                 activityType = ScoreSessionContext.IsVersusMode ? "VERSUS" : "MCQ",
                 score = final10Scale,
