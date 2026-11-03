@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Math6Companion.Core.Contracts;
+using Math6Companion.Core;
 using Math6Companion.Core.Services;
 
 namespace Math6Companion.Gameplay3D

@@ -15,7 +15,7 @@ namespace Math6Companion.Core
     public static class AppConfig
     {
         // >>>>> [ĐỔI LINK WEB APP TẠI ĐÂY] <<<<<
-        public const string APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxK9-iJxZgy2qd3_8gfmh7umxxhXdQ4Z_65hcdpxmVLS6qaGNt1tX4d8NCJ4Evl4Xpk/exec";
+        public const string APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZhPOeP_FBLiT-Gx3CneILKm-38GWU2P5aKkH_kCcfx7IRq8g95Red5t8H2xibxVoe/exec";
 
         // Khóa lưu tạm nếu muốn ghi đè qua Editor/Runtime
         private const string PREFS_BACKEND_URL_KEY = "Math6_Custom_Backend_URL";
@@ -26,9 +26,15 @@ namespace Math6Companion.Core
         public static string GetActiveBackendUrl()
         {
             string custom = PlayerPrefs.GetString(PREFS_BACKEND_URL_KEY, "");
-            if (!string.IsNullOrEmpty(custom) && custom.StartsWith("https://script.google.com/macros/s/"))
+            if (!string.IsNullOrEmpty(custom) && custom.StartsWith("https://script.google.com/macros/s/") && custom.Trim() == APPS_SCRIPT_URL.Trim())
             {
                 return custom.Trim();
+            }
+            // Tự động đồng bộ theo link mới nhất trong code
+            if (!string.IsNullOrEmpty(custom) && custom.Trim() != APPS_SCRIPT_URL.Trim())
+            {
+                PlayerPrefs.SetString(PREFS_BACKEND_URL_KEY, APPS_SCRIPT_URL.Trim());
+                PlayerPrefs.Save();
             }
             return APPS_SCRIPT_URL.Trim();
         }
