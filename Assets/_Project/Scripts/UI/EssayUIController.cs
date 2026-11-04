@@ -1034,7 +1034,6 @@ namespace Math6Companion.UI
                 list.Add(new QuestionData
                 {
                     questionId = "ESSAY_SET_01",
-                    imageUrl = "Assets/_Project/Textures/set_math6_illustration.png",
                     topic = "Tập hợp & Phần tử của tập hợp",
                     prompt = "Cho tập hợp A các số tự nhiên lớn hơn 3 và không vượt quá 8:\n a) Viết tập hợp A bằng 2 cách (Liệt kê phần tử & Chỉ ra tính chất đặc trưng).\n b) Điền ký hiệu thích hợp (∈ hoặc ∉) vào chỗ trống: 4 ... A ; 9 ... A ; 8 ... A.",
                     maxScore = 10,
@@ -1123,7 +1122,6 @@ namespace Math6Companion.UI
                 {
                     questionId = "ESSAY_GEOM_01",
                     topic = "Hình học trực quan & Diện tích",
-                    imageUrl = "https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=800&q=80",
                     prompt = "Một mảnh vườn hình chữ nhật ABCD có chiều dài AB = 12 m và chiều rộng BC = 8 m.\n a) Tính chu vi và diện tích mảnh vườn.\n b) Người ta làm một lối đi xung quanh rộng 1 m. Tính diện tích phần đất trồng hoa còn lại.",
                     maxScore = 10,
                     rubric = new List<RubricItem>
@@ -1986,12 +1984,6 @@ namespace Math6Companion.UI
                     }
                 }
 
-                // Kenh 3: Neu tai online that bai, dung anh minh hoa cuc bo du phong
-                if (downloadedTex == null)
-                {
-                    downloadedTex = LoadLocalFallbackTexture();
-                }
-
                 if (downloadedTex != null)
                 {
                     s_QuestionImageCache[rawUrl] = downloadedTex;
@@ -2005,43 +1997,8 @@ namespace Math6Companion.UI
             }
             else
             {
-                Texture2D localFallback = LoadLocalFallbackTexture();
-                if (localFallback != null)
-                {
-                    ApplyQuestionTexture(localFallback);
-                }
-                else
-                {
-                    HideQuestionIllustration();
-                }
+                HideQuestionIllustration();
             }
-        }
-
-        private Texture2D LoadLocalFallbackTexture()
-        {
-            string[] candidatePaths = new string[]
-            {
-                System.IO.Path.Combine(Application.dataPath, "_Project/Textures/set_math6_illustration.png"),
-                System.IO.Path.Combine(Application.dataPath, "_Project/Textures/sample_math_essay.png")
-            };
-
-            foreach (var p in candidatePaths)
-            {
-                if (System.IO.File.Exists(p))
-                {
-                    try
-                    {
-                        byte[] bytes = System.IO.File.ReadAllBytes(p);
-                        Texture2D tex = new Texture2D(2, 2);
-                        if (tex.LoadImage(bytes))
-                        {
-                            return tex;
-                        }
-                    }
-                    catch {}
-                }
-            }
-            return null;
         }
 
         private void ApplyQuestionTexture(Texture2D tex)
@@ -2135,10 +2092,6 @@ namespace Math6Companion.UI
                 {
                     activeQuestionTexture = questionIllustrationImage.texture as Texture2D;
                 }
-                else
-                {
-                    activeQuestionTexture = LoadLocalFallbackTexture();
-                }
             }
 
             if (activeQuestionTexture == null)
@@ -2182,10 +2135,6 @@ namespace Math6Companion.UI
 
         public void OnViewQuestionImageInWorkspaceClicked()
         {
-            if (activeQuestionTexture == null)
-            {
-                activeQuestionTexture = LoadLocalFallbackTexture();
-            }
             if (activeQuestionTexture == null) return;
             PlayClick();
             HideSampleNotebookOverlay();
@@ -2209,8 +2158,7 @@ namespace Math6Companion.UI
                 if (WebCamTexture.devices == null || WebCamTexture.devices.Length == 0)
                 {
                     if (photoStatusText != null) 
-                        photoStatusText.text = "<color=#f39c12>Không tìm thấy webcam phần cứng. Đã chuyển sang Vở bài tập mẫu Toán 6!</color>";
-                    OnLoadSamplePhotoClicked();
+                        photoStatusText.text = "<color=#f39c12>Không tìm thấy camera trên máy. Em hãy chọn ảnh từ máy tính hoặc trực tiếp gõ lời giải vào ô bên phải!</color>";
                     return;
                 }
 
@@ -2230,8 +2178,7 @@ namespace Math6Companion.UI
                     Debug.LogWarning("Không thể khởi động WebCam: " + ex.Message);
                     StopAndReleaseCamera();
                     if (photoStatusText != null) 
-                        photoStatusText.text = "<color=#f39c12>Camera không phản hồi (đang bận/bị chặn). Đã chuyển sang Vở bài tập mẫu Toán 6!</color>";
-                    OnLoadSamplePhotoClicked();
+                        photoStatusText.text = "<color=#f39c12>Camera không phản hồi (đang bận hoặc bị chặn). Em hãy chọn ảnh từ máy tính hoặc trực tiếp gõ lời giải vào ô bên phải!</color>";
                 }
             }
             else
@@ -2373,19 +2320,7 @@ namespace Math6Companion.UI
             StopAndReleaseCamera();
             if (AudioManager.Instance != null) AudioManager.Instance.PlayButtonClick();
 
-            // Nếu câu hỏi hiện tại là bài luỹ thừa có ảnh vở chụp 2.3^2 + 5.(2+3) thì nạp ảnh chụp
-            string p = currentQuestion != null ? currentQuestion.prompt : "";
-            bool isPowSampleQuestion = p.Contains("3^2") || p.Contains("3²") || currentQuestion?.questionId == "Q_CH1_029";
-            if (isPowSampleQuestion)
-            {
-                string samplePath = System.IO.Path.Combine(Application.dataPath, "_Project/Textures/sample_math_essay.png");
-                if (System.IO.File.Exists(samplePath))
-                {
-                    HideSampleNotebookOverlay();
-                    LoadImageFromFile(samplePath);
-                    return;
-                }
-            }
+
 
             // Với mọi câu hỏi khác: Nạp trang vở kẻ ô ly với đúng lời giải mẫu của câu hỏi hiện tại!
             Texture2D sampleTex = CreateSampleNotebookTexture();

@@ -1,289 +1,306 @@
-// Assets/_Project/Scripts/Network/Contracts/NetworkContracts.cs
-using System;
-using System.Collections.Generic;
-
-namespace Math6Companion.Core.Contracts
-{
-    #region Data Models
-    [Serializable]
-    public class UserData
-    {
-        public string userId;
-        public string username;
-        public string fullName;
-        public string role; // "STUDENT" or "TEACHER"
-        public int grade;
-        public string classId;
-        public string nickname; // Bí danh của học sinh
-    }
-
-    [Serializable]
-    public class QuestionOptionMap
-    {
-        public string A;
-        public string B;
-        public string C;
-        public string D;
-
-        public int Count => 4;
-
-        public string this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0: return A;
-                    case 1: return B;
-                    case 2: return C;
-                    case 3: return D;
-                    default: return string.Empty;
-                }
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0: A = value; break;
-                    case 1: B = value; break;
-                    case 2: C = value; break;
-                    case 3: D = value; break;
-                }
-            }
-        }
-    }
-
-    [Serializable]
-    public class RubricItem
-    {
-        public int step;
-        public string description;
-        public int points;
-    }
-
-    [Serializable]
-    public class QuestionData
-    {
-        public string questionId;
-        public string lessonId;
-        public string topic;
-        public string type; // "MCQ" or "ESSAY"
-        public string difficulty; // "EASY", "MEDIUM", "HARD"
-        public string prompt;
-        public QuestionOptionMap options;
-        public string correctAnswer;
-        public List<RubricItem> rubric;
-        public string rubricRaw; // Cỗi thô từ server để tránh parse JSON trên Google server
-        public string explanation;
-        public int maxScore;
-        public string imageUrl;
-        public string imgUrl;
-
-        public string EffectiveImageUrl => !string.IsNullOrEmpty(imageUrl) ? imageUrl : (!string.IsNullOrEmpty(imgUrl) ? imgUrl : "");
-    }
-
-    [Serializable]
-    public class LessonData
-    {
-        public string lessonId;
-        public string topic;
-        public string title;
-        public string description;
-        public int grade;
-        public int orderIndex;
-        public string summaryText;
-        public string objectives;
-        public string videoUrl;
-        public int userHighestScore;
-        public string topStudentNickname;
-        public int topStudentAttempts;
-    }
-
-    [Serializable]
-    public class ResultSubmission
-    {
-        public string action = "saveResult";
-        public string userId;
-        public string lessonId;
-        public string activityType;
-        public int score;
-        public int maxScore;
-        public int timeSpentSeconds;
-        public int mistakesCount;
-        public string timestamp;
-    }
-
-    [Serializable]
-    public class AITutorLogSubmission
-    {
-        public string action = "logAITutor";
-        public string userId;
-        public string lessonId;
-        public string questionId;
-        public string sessionType; // "SOCRATIC_HINT", "ESSAY_GRADING", "MINIGAME_HELP"
-        public string studentPrompt;
-        public string studentAnswer;
-        public string aiFeedback;
-        public string detectedMistake;
-        public int score;
-        public int maxScore;
-        public string timestamp;
-    }
-
-    [Serializable]
-    public class BadgeData
-    {
-        public string badgeId;
-        public string badgeCode;
-        public string name;
-        public string description;
-        public string iconUrl;
-    }
-
-    [Serializable]
-    public class StudentProgressData
-    {
-        public string lessonId;
-        public int attempts;
-        public int highestScore;
-        public int lastScore;
-        public bool isCompleted;
-    }
-
-    [Serializable]
-    public class StudentAnalyticsData
-    {
-        public string userId;
-        public string fullName;
-        public int completedLessons;
-        public float averageScore;
-        public List<BadgeData> badges;
-        public List<StudentProgressData> progressList;
-    }
-    #endregion
-
-    #region AI Tutor Models
-    [Serializable]
-    public class TutorHistoryItem
-    {
-        public string role; // "tutor" or "student"
-        public string text;
-    }
-
-    [Serializable]
-    public class TutorTurnPayload
-    {
-        public string problemStatement;
-        public int totalSteps;
-        public int currentStepIndex;
-        public string studentInput;
-        public List<TutorHistoryItem> conversationHistory = new List<TutorHistoryItem>();
-    }
-
-    [Serializable]
-    public class AITutorStepResponse
-    {
-        public bool isCorrect;
-        public int scoreDelta;
-        public string state; // "WAITING_INPUT", "STEP_PASSED", "TUTOR_COMPLETED"
-        public string tutorDialogue;
-        public string hint;
-        public string highlightFormula;
-        public int nextStepIndex;
-        public bool shouldWaitForStudent;
-        public bool isLessonCompleted;
-    }
-
-    [Serializable]
-    public class EssaySubmissionPayload
-    {
-        public string questionId;
-        public string prompt;
-        public string studentSteps;
-        public string imageBase64;
-        public List<RubricItem> rubric;
-        public string correctAnswer;
-        public string explanation;
-    }
-
-    [Serializable]
-    public class StepAnalysisItem
-    {
-        public int step;
-        public bool isCorrect;
-        public string comment;
-    }
-
-    [Serializable]
-    public class AIGradingResponse
-    {
-        public int score;
-        public int maxScore;
-        public bool passed;
-        public string detectedMistakeType;
-        public List<StepAnalysisItem> stepAnalysis;
-        public string pedagogicalFeedback;
-        public string remedialExercise;
-        public string penaltyRuleToCopy;
-        public int firstWrongStepIndex = -1;
-        public string correctStepsPrefix;
-    }
-
-    [Serializable]
-    public class VersusQueueResponse
-    {
-        public bool success;
-        public string status; // "WAITING", "MATCHED", "CANCELLED", "ERROR"
-        public string message;
-        public string roomId;
-        public string opponentId;
-        public string opponentNickname;
-        public string mode; // "MCQ" or "ESSAY"
-        public List<string> questionIds = new List<string>();
-    }
-
-    [Serializable]
-    public class VersusRoomResultResponse
-    {
-        public bool success;
-        public string roomId;
-        public string player1Id;
-        public string player1Name;
-        public int player1Score;
-        public bool player1Done;
-        public string player2Id;
-        public string player2Name;
-        public int player2Score;
-        public bool player2Done;
-        public bool isFinished;
-        public string winnerId; // "DRAW", or specific userId
-        public string message;
-    }
-    #endregion
-
-    #region Service Interfaces
-    public interface INetworkService
-    {
-        void Login(string username, string passwordHash, Action<bool, UserData, string> callback);
-        void GetLessons(string topic, Action<bool, List<LessonData>, string> callback);
-        void GetQuestions(string topic, string grade, Action<bool, List<QuestionData>, string> callback);
-        void SaveResult(ResultSubmission submission, Action<bool, List<BadgeData>, string> callback);
-        void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback);
-        void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback);
-
-        // Hệ thống Đấu kháng 1v1 Realtime qua Google Sheets
-        void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback);
-        void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback);
-        void CancelVersusQueue(string userId, Action<bool, string> callback);
-        void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback);
-        void PollVersusRoomResult(string roomId, string userId, Action<bool, VersusRoomResultResponse, string> callback);
-    }
-
-    public interface IAITutorService
-    {
-        void SendTutorTurn(TutorTurnPayload payload, Action<bool, AITutorStepResponse, string> callback);
-        void GradeEssay(EssaySubmissionPayload payload, Action<bool, AIGradingResponse, string> callback);
-        void ExtractTextFromImage(string imageBase64, Action<bool, string, string> callback);
-    }
-    #endregion
-}
+// Assets/_Project/Scripts/Network/Contracts/NetworkContracts.cs
+using System;
+using System.Collections.Generic;
+
+namespace Math6Companion.Core.Contracts
+{
+    #region Data Models
+    [Serializable]
+    public class UserData
+    {
+        public string userId;
+        public string username;
+        public string fullName;
+        public string role; // "STUDENT" or "TEACHER"
+        public int grade;
+        public string classId;
+        public string nickname; // Bí danh của học sinh
+    }
+
+    [Serializable]
+    public class QuestionOptionMap
+    {
+        public string A;
+        public string B;
+        public string C;
+        public string D;
+
+        public int Count => 4;
+
+        public string this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return A;
+                    case 1: return B;
+                    case 2: return C;
+                    case 3: return D;
+                    default: return string.Empty;
+                }
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: A = value; break;
+                    case 1: B = value; break;
+                    case 2: C = value; break;
+                    case 3: D = value; break;
+                }
+            }
+        }
+    }
+
+    [Serializable]
+    public class RubricItem
+    {
+        public int step;
+        public string description;
+        public int points;
+    }
+
+    [Serializable]
+    public class QuestionData
+    {
+        public string questionId;
+        public string lessonId;
+        public string topic;
+        public string type; // "MCQ" or "ESSAY"
+        public string difficulty; // "EASY", "MEDIUM", "HARD"
+        public string prompt;
+        public QuestionOptionMap options;
+        public string correctAnswer;
+        public List<RubricItem> rubric;
+        public string rubricRaw; // Cỗi thô từ server để tránh parse JSON trên Google server
+        public string explanation;
+        public int maxScore;
+        public string imageUrl;
+        public string imgUrl;
+
+        public string EffectiveImageUrl
+        {
+            get
+            {
+                string u = !string.IsNullOrEmpty(imageUrl) ? imageUrl : (!string.IsNullOrEmpty(imgUrl) ? imgUrl : "");
+                if (string.IsNullOrEmpty(u)) return string.Empty;
+                u = u.Trim();
+                if (!u.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                    !u.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
+                    !u.StartsWith("data:image", StringComparison.OrdinalIgnoreCase) &&
+                    !u.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase) &&
+                    !u.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+                {
+                    return string.Empty;
+                }
+                return u;
+            }
+        }
+    }
+
+    [Serializable]
+    public class LessonData
+    {
+        public string lessonId;
+        public string topic;
+        public string title;
+        public string description;
+        public int grade;
+        public int orderIndex;
+        public string summaryText;
+        public string objectives;
+        public string videoUrl;
+        public int userHighestScore;
+        public string topStudentNickname;
+        public int topStudentAttempts;
+    }
+
+    [Serializable]
+    public class ResultSubmission
+    {
+        public string action = "saveResult";
+        public string userId;
+        public string lessonId;
+        public string activityType;
+        public int score;
+        public int maxScore;
+        public int timeSpentSeconds;
+        public int mistakesCount;
+        public string timestamp;
+    }
+
+    [Serializable]
+    public class AITutorLogSubmission
+    {
+        public string action = "logAITutor";
+        public string userId;
+        public string lessonId;
+        public string questionId;
+        public string sessionType; // "SOCRATIC_HINT", "ESSAY_GRADING", "MINIGAME_HELP"
+        public string studentPrompt;
+        public string studentAnswer;
+        public string aiFeedback;
+        public string detectedMistake;
+        public int score;
+        public int maxScore;
+        public string timestamp;
+    }
+
+    [Serializable]
+    public class BadgeData
+    {
+        public string badgeId;
+        public string badgeCode;
+        public string name;
+        public string description;
+        public string iconUrl;
+    }
+
+    [Serializable]
+    public class StudentProgressData
+    {
+        public string lessonId;
+        public int attempts;
+        public int highestScore;
+        public int lastScore;
+        public bool isCompleted;
+    }
+
+    [Serializable]
+    public class StudentAnalyticsData
+    {
+        public string userId;
+        public string fullName;
+        public int completedLessons;
+        public float averageScore;
+        public List<BadgeData> badges;
+        public List<StudentProgressData> progressList;
+    }
+    #endregion
+
+    #region AI Tutor Models
+    [Serializable]
+    public class TutorHistoryItem
+    {
+        public string role; // "tutor" or "student"
+        public string text;
+    }
+
+    [Serializable]
+    public class TutorTurnPayload
+    {
+        public string problemStatement;
+        public int totalSteps;
+        public int currentStepIndex;
+        public string studentInput;
+        public List<TutorHistoryItem> conversationHistory = new List<TutorHistoryItem>();
+    }
+
+    [Serializable]
+    public class AITutorStepResponse
+    {
+        public bool isCorrect;
+        public int scoreDelta;
+        public string state; // "WAITING_INPUT", "STEP_PASSED", "TUTOR_COMPLETED"
+        public string tutorDialogue;
+        public string hint;
+        public string highlightFormula;
+        public int nextStepIndex;
+        public bool shouldWaitForStudent;
+        public bool isLessonCompleted;
+    }
+
+    [Serializable]
+    public class EssaySubmissionPayload
+    {
+        public string questionId;
+        public string prompt;
+        public string studentSteps;
+        public string imageBase64;
+        public List<RubricItem> rubric;
+        public string correctAnswer;
+        public string explanation;
+    }
+
+    [Serializable]
+    public class StepAnalysisItem
+    {
+        public int step;
+        public bool isCorrect;
+        public string comment;
+    }
+
+    [Serializable]
+    public class AIGradingResponse
+    {
+        public int score;
+        public int maxScore;
+        public bool passed;
+        public string detectedMistakeType;
+        public List<StepAnalysisItem> stepAnalysis;
+        public string pedagogicalFeedback;
+        public string remedialExercise;
+        public string penaltyRuleToCopy;
+        public int firstWrongStepIndex = -1;
+        public string correctStepsPrefix;
+    }
+
+    [Serializable]
+    public class VersusQueueResponse
+    {
+        public bool success;
+        public string status; // "WAITING", "MATCHED", "CANCELLED", "ERROR"
+        public string message;
+        public string roomId;
+        public string opponentId;
+        public string opponentNickname;
+        public string mode; // "MCQ" or "ESSAY"
+        public List<string> questionIds = new List<string>();
+    }
+
+    [Serializable]
+    public class VersusRoomResultResponse
+    {
+        public bool success;
+        public string roomId;
+        public string player1Id;
+        public string player1Name;
+        public int player1Score;
+        public bool player1Done;
+        public string player2Id;
+        public string player2Name;
+        public int player2Score;
+        public bool player2Done;
+        public bool isFinished;
+        public string winnerId; // "DRAW", or specific userId
+        public string message;
+    }
+    #endregion
+
+    #region Service Interfaces
+    public interface INetworkService
+    {
+        void Login(string username, string passwordHash, Action<bool, UserData, string> callback);
+        void GetLessons(string topic, Action<bool, List<LessonData>, string> callback);
+        void GetQuestions(string topic, string grade, Action<bool, List<QuestionData>, string> callback);
+        void SaveResult(ResultSubmission submission, Action<bool, List<BadgeData>, string> callback);
+        void LogAITutor(AITutorLogSubmission logSubmission, Action<bool, string> callback);
+        void GetStudentAnalytics(string studentId, Action<bool, StudentAnalyticsData, string> callback);
+
+        // Hệ thống Đấu kháng 1v1 Realtime qua Google Sheets
+        void JoinVersusQueue(string userId, string nickname, string mode, Action<bool, VersusQueueResponse, string> callback);
+        void PollVersusQueue(string userId, Action<bool, VersusQueueResponse, string> callback);
+        void CancelVersusQueue(string userId, Action<bool, string> callback);
+        void SubmitVersusScore(string roomId, string userId, int score, Action<bool, VersusRoomResultResponse, string> callback);
+        void PollVersusRoomResult(string roomId, string userId, Action<bool, VersusRoomResultResponse, string> callback);
+    }
+
+    public interface IAITutorService
+    {
+        void SendTutorTurn(TutorTurnPayload payload, Action<bool, AITutorStepResponse, string> callback);
+        void GradeEssay(EssaySubmissionPayload payload, Action<bool, AIGradingResponse, string> callback);
+        void ExtractTextFromImage(string imageBase64, Action<bool, string, string> callback);
+    }
+    #endregion
+}
